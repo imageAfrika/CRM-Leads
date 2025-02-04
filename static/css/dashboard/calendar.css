@@ -1,0 +1,62 @@
+/* Calendar Card Layout */
+.calendar-card {
+    grid-column: span 2;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.calendar-container {
+    min-height: 500px; /* Increased height */
+    margin-bottom: 20px;
+    width: 100%;
+    position: relative; /* Added position */
+}
+
+#calendar {
+    height: 100%;
+    width: 100%;
+    position: absolute; /* Make calendar fill container */
+    top: 0;
+    left: 0;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+/* Make sure calendar header and events are visible */
+.fc {
+    height: 100%;
+    width: 100%;
+}
+
+.fc .fc-toolbar {
+    margin-bottom: 1.5em;
+}
+
+.fc .fc-view-harness {
+    height: calc(100% - 50px) !important; /* Ensure view area is visible */
+}
+
+.upcoming-events {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+/* Event Styling */
+.urgent-badge {
+    background: #ff4444;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    margin-left: 8px;
+}
+
+.urgent-event {
+    background-color: #ff4444 !important;
+    border-color: #cc0000 !important;
+    color: white !important;
+} 

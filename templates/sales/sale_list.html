@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Sales</h1>
+<div class="sale-list">
+    {% if sales %}
+        <ul>
+        {% for sale in sales %}
+            <li>
+                <h2><a href="{% url 'sales:sale_detail' sale.pk %}">{{ sale.client.name }} - {{ sale.sale_date }}</a></h2>
+                <p>Amount: ${{ sale.amount }}</p>
+                <p>{{ sale.description }}</p>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No sales found.</p>
+    {% endif %}
+</div>
+<a href="{% url 'sales:sale_create' %}" class="btn">Add New Sale</a>
+{% endblock %} 

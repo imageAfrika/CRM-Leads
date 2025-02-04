@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/clients/client_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Clients Profiles</h1>
+    <div class="client-list">
+        {% if clients %}
+            <table class="client-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in clients %}
+                        <tr>
+                            <td><a href="{% url 'clients:client_detail' client.pk %}" class="client-name">{{ client.name }}</a></td>
+                            <td>{{ client.email }}</td>
+                            <td>{{ client.phone }}</td>
+                            <td class="actions">
+                                <a href="{% url 'clients:client_update' client.pk %}" class="btn-edit">Edit</a>
+                                <a href="{% url 'clients:client_delete' client.pk %}" class="btn-delete">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="no-clients">No clients found.</p>
+        {% endif %}
+    </div>
+    <a href="{% url 'clients:client_create' %}" class="btn-add">Add New Client</a>
+</div>
+{% endblock %}

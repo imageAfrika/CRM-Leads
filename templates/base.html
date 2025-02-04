@@ -1,0 +1,50 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en"
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Leads</title>
+    <!-- External CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- FullCalendar CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
+
+
+    <!-- Base CSS -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}"> 
+    <!-- Page-specific CSS -->
+    {% block extra_css %}
+    {% endblock %}
+</head>
+<body>
+    <nav>
+        <div class="nav-brand">
+            <a href="{% url 'dashboard:dashboard' %}">
+                <i class="fas fa-bolt"></i> CRM Leads
+            </a>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'dashboard:dashboard' %}">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="{% url 'clients:client_list' %}">
+                <i class="fas fa-users"></i> Clients
+            </a>
+            <a href="{% url 'sales:sale_list' %}">
+                <i class="fas fa-chart-line"></i> Sales
+            </a>
+            <a href="{% url 'documents:document_list' %}">
+                <i class="fas fa-file-invoice"></i> Documents
+            </a>
+        </div>
+    </nav>  
+    <main>
+        {% block content %}
+        {% endblock %}
+        <!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    </main>
+</body>
+</html> 

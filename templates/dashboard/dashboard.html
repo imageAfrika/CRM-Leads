@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/dashboard/dashboard.css' %}">
+<!-- Add FullCalendar CSS -->
+<link href='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.css' rel='stylesheet' />
+<link href='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.css' rel='stylesheet' />
+<link rel="stylesheet" href="{% static 'css/dashboard/calendar.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1>Dashboard</h1>
+        <div class="quick-actions">
+            <a href="{% url 'clients:client_create' %}" class="action-button">
+                <i class="fas fa-plus"></i> New Client
+            </a>
+            <a href="{% url 'sales:sale_create' %}" class="action-button">
+                <i class="fas fa-dollar-sign"></i> New Sale
+            </a>
+            <a href="{% url 'documents:document_list' %}" class="action-button">
+                <i class="fas fa-file-invoice"></i> Documents
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total Clients</h3>
+            <div class="stat-number">{{ total_clients }}</div>
+            <div class="stat-trend"><i class="fas fa-arrow-up"></i> 12% from last month</div>
+        </div>
+        <div class="stat-card">
+            <h3>Monthly Sales</h3>
+            <div class="stat-number">{{ total_sales }}</div>
+            <div class="stat-trend"><i class="fas fa-arrow-up"></i> 8% from last month</div>
+        </div>
+        <div class="stat-card">
+            <h3>Pending Invoices</h3>
+            <div class="stat-number">{{ total_documents }}</div>
+            <div class="stat-trend"><i class="fas fa-arrow-up"></i> 5% from last month</div>
+        </div>
+        <div class="stat-card">
+            <h3>Pending Quotes</h3>
+            <div class="stat-number">{{ total_documents }}</div>
+            <div class="stat-trend"><i class="fas fa-arrow-up"></i> 5% from last month</div>
+        </div>
+        <div class="stat-card">
+            <h3>Reports</h3>
+            <div class="stat-number">{{ total_documents }}</div>
+            <div class="stat-trend"><i class="fas fa-arrow-up"></i> 5% from last month</div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="activities-grid">
+        <div class="activity-card">
+            <h2>Recent Sales</h2>
+            <ul class="activity-list">
+                {% for sale in recent_sales %}
+                <li class="activity-item">
+                    <div class="activity-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="activity-content">
+                        <a href="{% url 'sales:sale_detail' sale.pk %}" class="activity-title">
+                            {{ sale.client.name }} - ${{ sale.amount }}
+                        </a>
+                        <div class="activity-meta">
+                            <i class="far fa-calendar"></i> {{ sale.sale_date }}
+                        </div>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="activity-item">No recent sales</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="activity-card">
+            <h2>Recent Clients</h2>
+            <ul class="activity-list">
+                {% for client in recent_clients %}
+                <li class="activity-item">
+                    <div class="activity-icon"><i class="fas fa-user"></i></div>
+                    <div class="activity-content">
+                        <a href="{% url 'clients:client_detail' client.pk %}" class="activity-title">
+                            {{ client.name }}
+                        </a>
+                        <div class="activity-meta">
+                            <i class="far fa-clock"></i> Added: {{ client.created_at|date }}
+                        </div>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="activity-item">No recent clients</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="activity-card">
+            <h2>Recent Documents</h2>
+            <ul class="activity-list">
+                {% for document in recent_documents %}
+                <li class="activity-item">
+                    <div class="activity-icon"><i class="fas fa-file"></i></div>
+                    <div class="activity-content">
+                        <a href="{% url 'documents:document_detail' document.pk %}" class="activity-title">
+                            {{ document.title }}
+                        </a>
+                        <div class="activity-meta">
+                            <i class="far fa-clock"></i> Created: {{ document.created_at|date }}
+                        </div>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="activity-item">No recent documents</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="activity-card">
+            <h2>Pending Quotes</h2>
+            <ul class="activity-list">
+                {% for quote in recent_quotes %}
+                <li class="activity-item">
+                    <div class="activity-icon"><i class="fas fa-file-invoice"></i></div>
+                    <div class="activity-content">
+                        <a href="{% url 'documents:quote_detail' quote.pk %}" class="activity-title">
+                            {{ quote.title }}
+                        </a>
+                        <div class="activity-meta">
+                            <i class="far fa-clock"></i> Due: {{ quote.valid_until|date }}
+                        </div>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="activity-item">No pending quotes</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="activity-card">
+            <h2>Overdue Invoices</h2>
+            <ul class="activity-list">
+                {% for invoice in overdue_invoices %}
+                <li class="activity-item">
+                    <div class="activity-icon"><i class="fas fa-exclamation-circle"></i></div>
+                    <div class="activity-content">
+                        <a href="#" class="activity-title">{{ invoice.title }}</a>
+                        <div class="activity-meta">
+                            <i class="far fa-clock"></i> Overdue: {{ invoice.due_date|date }}
+                        </div>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="activity-item">No overdue invoices</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="activity-card">
+            <h2>Recent Payments</h2>
+            <ul class="activity-list">
+                {% for payment in recent_payments %}
+                <li class="activity-item">
+                    <div class="activity-icon"><i class="fas fa-money-bill"></i></div>
+                    <div class="activity-content">
+                        <a href="#" class="activity-title">${{ payment.amount }}</a>
+                        <div class="activity-meta">
+                            <i class="far fa-calendar"></i> {{ payment.date|date }}
+                        </div>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="activity-item">No recent payments</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="activity-card">
+            <h2>Tasks Due Today</h2>
+            <ul class="activity-list">
+                {% for task in today_tasks %}
+                <li class="activity-item">
+                    <div class="activity-icon"><i class="fas fa-tasks"></i></div>
+                    <div class="activity-content">
+                        <a href="#" class="activity-title">{{ task.title }}</a>
+                        <div class="activity-meta">
+                            <i class="far fa-clock"></i> Due: {{ task.due_time|time }}
+                        </div>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="activity-item">No tasks due today</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="activity-card">
+            <h2>Recent Activity</h2>
+            <ul class="activity-list">
+                {% for activity in recent_activity %}
+                <li class="activity-item">
+                    <div class="activity-icon"><i class="fas fa-history"></i></div>
+                    <div class="activity-content">
+                        <a href="#" class="activity-title">{{ activity.description }}</a>
+                        <div class="activity-meta">
+                            <i class="far fa-clock"></i> {{ activity.timestamp|date }}
+                        </div>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="activity-item">No recent activity</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Tall card spanning both rows -->
+        <div class="activity-card">
+            <h2>Upcoming Projects</h2>
+            <ul class="activity-list">
+                {% for event in upcoming_events %}
+                <li class="activity-item">
+                    <div class="activity-icon"><i class="fas fa-calendar"></i></div>
+                    <div class="activity-content">
+                        <a href="#" class="activity-title">{{ event.title }}</a>
+                        <div class="activity-meta">
+                            <i class="far fa-clock"></i> {{ event.start_time|date }}
+                        </div>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="activity-item">No upcoming events</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Make sure these are loaded in the correct order -->
+<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.js'></script>
+
+<!-- Add this before calendar.js to check if the data is available -->
+<script>
+    console.log('Setting up calendar events');
+    window.calendarEvents = [
+        {% for event in recent_events %}
+        {
+            title: '{{ event.title }}',
+            start: '{{ event.start_time|date:"Y-m-d H:i:s" }}',
+            {% if event.end_time %}end: '{{ event.end_time|date:"Y-m-d H:i:s" }}',{% endif %}
+            {% if event.is_urgent %}className: 'urgent-event',{% endif %}
+            url: '{% url "events:event_detail" event.pk %}'
+        },
+        {% endfor %}
+    ];
+</script>
+<script src="{% static 'js/dashboard/calendar.js' %}"></script>
+{% endblock %}

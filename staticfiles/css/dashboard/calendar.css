@@ -1,0 +1,38 @@
+/* Calendar Card Layout */
+.calendar-card {
+    grid-column: span 2;
+}
+
+.calendar-container {
+    height: 400px;
+    margin-bottom: 20px;
+}
+
+#calendar {
+    height: 100%;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.upcoming-events {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+/* Event Styling */
+.urgent-badge {
+    background: #ff4444;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    margin-left: 8px;
+}
+
+.urgent-event {
+    background-color: #ff4444 !important;
+    border-color: #cc0000 !important;
+    color: white !important;
+} 

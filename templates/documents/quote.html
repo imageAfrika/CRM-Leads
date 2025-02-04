@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quotation</title>
+    <link rel="stylesheet" href="{% static 'css/documents/quote.css' %}">
+</head>
+<body>
+    <div class="quote-wrapper">
+        <div class="quote-card">
+            <!-- <header class="quote-header">
+                <h1>Quotation</h1>
+                <div class="quote-number">#QT-2024-001</div>
+            </header> -->
+            <hr>
+            <header class="quote-header">
+                <div class="logo-container">
+                    <div class="logo-img">
+                        <img src="OIP.jpg" alt="Logo" class="logo">
+                    </div>
+                    <p>Revision:</p>
+                    <p>Modified:</p>
+                    <p>To:</p><p>{{client.name}}</p>
+                    <p>C/o:</p>
+                    <p>Quote Type:</p>
+                    <p>Quote Title:</p>
+                    <p>Prepared by:</p>
+                    <!-- <p>Validity:</p> -->
+                </div>
+
+                <div class="logo-container-2">
+                    <p class="quote-title">QUOTATION</p>
+                    <p>Quote No: </p>
+                </div>
+            </header>
+
+            <div class="quote-content">
+                <table class="quote-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Discount</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Service A</td>
+                            <td>2</td>
+                            <td>$100.00</td>
+                            <td>10%</td>
+                            <td>$180.00</td>
+                        </tr>
+                        <tr>
+                            <td>Service B</td>
+                            <td>1</td>
+                            <td>$150.00</td>
+                            <td>0%</td>
+                            <td>$150.00</td>
+                        </tr>
+                        <tr>
+                            <td>Service C</td>
+                            <td>3</td>
+                            <td>$50.00</td>
+                            <td>5%</td>
+                            <td>$142.50</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4">Subtotal</td>
+                            <td>$472.50</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4">Tax (16%)</td>
+                            <td>$37.80</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="4">Total Amount Due</td>
+                            <td>$510.30</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- <div class="info-grid">
+                <section class="company-info info-block">
+                    <h2>From</h2>
+                    <div class="company-name">ABC Services</div>
+                    <address>
+                        123 Business Rd<br>
+                        Business City, BC 12345<br>
+                        <a href="tel:+11234567890">(123) 456-7890</a><br>
+                        <a href="mailto:info@abcservices.com">info@abcservices.com</a>
+                    </address>
+                </section>
+
+                <section class="client-info info-block">
+                    <h2>To</h2>
+                    <div class="client-name">John Doe</div>
+                    <address>
+                        456 Client St<br>
+                        Client City, CC 67890<br>
+                        <a href="tel:+19876543210">(987) 654-3210</a><br>
+                        <a href="mailto:john.doe@example.com">john.doe@example.com</a>
+                    </address>
+                </section>
+            </div> -->
+
+            <footer class="quote-footer">
+                <div class="terms">
+                    <h3>Terms & Conditions</h3>
+                    <p>Quote is valid for 30 days from the date of issue.</p>
+                </div>
+                <div class="thank-you">Thank you for your business!</div>
+            </footer>
+        </div>
+    </div>
+</body>
+</html>
