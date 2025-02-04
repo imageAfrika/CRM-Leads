@@ -1,22 +1,18 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="en"
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRM Leads</title>
     <!-- External CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- FullCalendar CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
-
-
+    
     <!-- Base CSS -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}"> 
     <!-- Page-specific CSS -->
-    {% block extra_css %}
-    {% endblock %}
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
     <nav>
@@ -38,13 +34,15 @@
             <a href="{% url 'documents:document_list' %}">
                 <i class="fas fa-file-invoice"></i> Documents
             </a>
+            <a href="{% url 'dashboard:calendar' %}">
+                <i class="fas fa-calendar"></i> Calendar
+            </a>
         </div>
     </nav>  
     <main>
         {% block content %}
         {% endblock %}
-        <!-- FullCalendar JS -->
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
     </main>
+    {% block extra_js %}{% endblock %}
 </body>
 </html> 

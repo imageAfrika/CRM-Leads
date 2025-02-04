@@ -1,62 +1,179 @@
-/* Calendar Card Layout */
-.calendar-card {
-    grid-column: span 2;
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.calendar-container {
-    min-height: 500px; /* Increased height */
-    margin-bottom: 20px;
-    width: 100%;
-    position: relative; /* Added position */
-}
-
-#calendar {
-    height: 100%;
-    width: 100%;
-    position: absolute; /* Make calendar fill container */
-    top: 0;
-    left: 0;
-    background: white;
+/* Calendar Page Container */
+.calendar-page {
+    min-height: calc(100vh - 60px);
     padding: 15px;
-    border-radius: 8px;
+    background-color: #f8f9fa;
+    position: relative;
+    display: flex;
+    gap: 15px;
 }
 
-/* Make sure calendar header and events are visible */
+/* Calendar Container */
+.calendar-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    height: calc(100vh - 90px);
+    display: flex;
+    flex-direction: column;
+    flex: 2; /* Takes up 2/3 of the space */
+}
+
+/* Modal Container - Always visible */
+.calendar-modal {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    height: calc(100vh - 90px);
+    flex: 1; /* Takes up 1/3 of the space */
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-modal h2 {
+    color: #2c3e50;
+    font-size: 20px;
+    margin: 0 0 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Form Styles */
+#event-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-group {
+    margin: 0;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 4px;
+    color: #2c3e50;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #f8f9fa;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    background-color: white;
+}
+
+.form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+/* Calendar Customization */
 .fc {
     height: 100%;
-    width: 100%;
+    font-size: 0.9em;
 }
 
-.fc .fc-toolbar {
-    margin-bottom: 1.5em;
+.fc .fc-toolbar.fc-header-toolbar {
+    margin-bottom: 0.8em;
+    padding: 0 10px;
 }
 
-.fc .fc-view-harness {
-    height: calc(100% - 50px) !important; /* Ensure view area is visible */
+.fc .fc-toolbar-title {
+    font-size: 1.2em;
 }
 
-.upcoming-events {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
+.fc .fc-button {
+    padding: 6px 10px;
+    font-size: 0.9em;
 }
 
-/* Event Styling */
-.urgent-badge {
-    background: #ff4444;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.8em;
-    margin-left: 8px;
+.fc .fc-daygrid-day {
+    min-height: 80px !important;
 }
 
-.urgent-event {
-    background-color: #ff4444 !important;
-    border-color: #cc0000 !important;
-    color: white !important;
+.fc .fc-daygrid-day-frame {
+    padding: 4px !important;
+}
+
+.fc .fc-daygrid-day-number {
+    font-size: 0.9em;
+}
+
+.fc .fc-daygrid-event {
+    padding: 2px 4px;
+    font-size: 0.85em;
+    margin: 1px 0;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+    .calendar-page {
+        flex-direction: column;
+    }
+
+    .calendar-container,
+    .calendar-modal {
+        height: auto;
+        min-height: 0;
+    }
+
+    .calendar-container {
+        height: 600px; /* Fixed height for calendar on smaller screens */
+    }
+
+    .calendar-modal {
+        height: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .calendar-page {
+        padding: 8px;
+    }
+
+    .calendar-container,
+    .calendar-modal {
+        padding: 10px;
+    }
+
+    .fc .fc-toolbar.fc-header-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .fc .fc-toolbar-title {
+        font-size: 1.1em;
+    }
 } 

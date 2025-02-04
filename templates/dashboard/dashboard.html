@@ -6,8 +6,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="{% static 'css/dashboard/dashboard.css' %}">
 <!-- Add FullCalendar CSS -->
-<link href='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.css' rel='stylesheet' />
-<link href='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.css' rel='stylesheet' />
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet'>
 <link rel="stylesheet" href="{% static 'css/dashboard/calendar.css' %}">
 {% endblock %}
 
@@ -221,47 +220,40 @@
         </div>
 
         <!-- Tall card spanning both rows -->
-        <div class="activity-card">
-            <h2>Upcoming Projects</h2>
-            <ul class="activity-list">
-                {% for event in upcoming_events %}
-                <li class="activity-item">
-                    <div class="activity-icon"><i class="fas fa-calendar"></i></div>
-                    <div class="activity-content">
-                        <a href="#" class="activity-title">{{ event.title }}</a>
-                        <div class="activity-meta">
-                            <i class="far fa-clock"></i> {{ event.start_time|date }}
-                        </div>
+        <div class="activity-card calendar-widget">
+            <div class="widget-header">
+                <h2>Calendar</h2>
+                <a href="{% url 'dashboard:calendar' %}" class="view-all">
+                    <i class="fas fa-external-link-alt"></i> Full Calendar
+                </a>
+            </div>
+            
+            <!-- Mini Calendar Container -->
+            <div class="mini-calendar-container">
+                <div id="miniCalendar"></div>
+            </div>
+
+            <!-- Quick Add Event Form -->
+            <div class="quick-add-event">
+                <h3>Quick Add Event</h3>
+                <form id="quickEventForm">
+                    <div class="form-group">
+                        <input type="text" id="quickEventTitle" placeholder="Event Title" required>
                     </div>
-                </li>
-                {% empty %}
-                <li class="activity-item">No upcoming events</li>
-                {% endfor %}
-            </ul>
+                    <div class="form-group">
+                        <input type="datetime-local" id="quickEventStart" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Add Event
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<!-- Make sure these are loaded in the correct order -->
-<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.js'></script>
-<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.js'></script>
-
-<!-- Add this before calendar.js to check if the data is available -->
-<script>
-    console.log('Setting up calendar events');
-    window.calendarEvents = [
-        {% for event in recent_events %}
-        {
-            title: '{{ event.title }}',
-            start: '{{ event.start_time|date:"Y-m-d H:i:s" }}',
-            {% if event.end_time %}end: '{{ event.end_time|date:"Y-m-d H:i:s" }}',{% endif %}
-            {% if event.is_urgent %}className: 'urgent-event',{% endif %}
-            url: '{% url "events:event_detail" event.pk %}'
-        },
-        {% endfor %}
-    ];
-</script>
-<script src="{% static 'js/dashboard/calendar.js' %}"></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+<script src="{% static 'js/dashboard/dashboard.js' %}"></script>
 {% endblock %}

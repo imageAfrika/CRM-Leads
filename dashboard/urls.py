@@ -5,6 +5,7 @@ from .views import DashboardView
 app_name = 'dashboard'
 
 urlpatterns = [
-    path('', DashboardView.as_view(), name='dashboard'),
-
+    path('', views.DashboardView.as_view(), name='dashboard'),
+    path('calendar/', views.CalendarView.as_view(), name='calendar'),
+    path('schedule/', views.ScheduleView.as_view(), name='schedule'),
 ]
