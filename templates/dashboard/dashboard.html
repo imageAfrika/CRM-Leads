@@ -161,94 +161,26 @@
                 {% endfor %}
             </ul>
         </div>
-
+        
         <div class="activity-card">
-            <h2>Recent Payments</h2>
+            <h2>Overdue Invoices</h2>
             <ul class="activity-list">
-                {% for payment in recent_payments %}
+                {% for invoice in overdue_invoices %}
                 <li class="activity-item">
-                    <div class="activity-icon"><i class="fas fa-money-bill"></i></div>
+                    <div class="activity-icon"><i class="fas fa-exclamation-circle"></i></div>
                     <div class="activity-content">
-                        <a href="#" class="activity-title">${{ payment.amount }}</a>
+                        <a href="#" class="activity-title">{{ invoice.title }}</a>
                         <div class="activity-meta">
-                            <i class="far fa-calendar"></i> {{ payment.date|date }}
+                            <i class="far fa-clock"></i> Overdue: {{ invoice.due_date|date }}
                         </div>
                     </div>
                 </li>
                 {% empty %}
-                <li class="activity-item">No recent payments</li>
+                <li class="activity-item">No overdue invoices</li>
                 {% endfor %}
             </ul>
         </div>
 
-        <div class="activity-card">
-            <h2>Tasks Due Today</h2>
-            <ul class="activity-list">
-                {% for task in today_tasks %}
-                <li class="activity-item">
-                    <div class="activity-icon"><i class="fas fa-tasks"></i></div>
-                    <div class="activity-content">
-                        <a href="#" class="activity-title">{{ task.title }}</a>
-                        <div class="activity-meta">
-                            <i class="far fa-clock"></i> Due: {{ task.due_time|time }}
-                        </div>
-                    </div>
-                </li>
-                {% empty %}
-                <li class="activity-item">No tasks due today</li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <div class="activity-card">
-            <h2>Recent Activity</h2>
-            <ul class="activity-list">
-                {% for activity in recent_activity %}
-                <li class="activity-item">
-                    <div class="activity-icon"><i class="fas fa-history"></i></div>
-                    <div class="activity-content">
-                        <a href="#" class="activity-title">{{ activity.description }}</a>
-                        <div class="activity-meta">
-                            <i class="far fa-clock"></i> {{ activity.timestamp|date }}
-                        </div>
-                    </div>
-                </li>
-                {% empty %}
-                <li class="activity-item">No recent activity</li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <!-- Tall card spanning both rows -->
-        <div class="activity-card calendar-widget">
-            <div class="widget-header">
-                <h2>Calendar</h2>
-                <a href="{% url 'dashboard:calendar' %}" class="view-all">
-                    <i class="fas fa-external-link-alt"></i> Full Calendar
-                </a>
-            </div>
-            
-            <!-- Mini Calendar Container -->
-            <div class="mini-calendar-container">
-                <div id="miniCalendar"></div>
-            </div>
-
-            <!-- Quick Add Event Form -->
-            <div class="quick-add-event">
-                <h3>Quick Add Event</h3>
-                <form id="quickEventForm">
-                    <div class="form-group">
-                        <input type="text" id="quickEventTitle" placeholder="Event Title" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="datetime-local" id="quickEventStart" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus"></i> Add Event
-                    </button>
-                </form>
-            </div>
-        </div>
     </div>
 </div>
 {% endblock %}

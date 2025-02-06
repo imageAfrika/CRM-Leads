@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from clients.models import Client
+from .utils import generate_quote_pdf
 
 class Document(models.Model):
     """
@@ -60,9 +61,6 @@ class Document(models.Model):
         return reverse('documents:document_detail', kwargs={'pk': self.pk})
 
 class Quote(models.Model):
-    """
-    Model representing quotes for clients
-    """
     # Client relationship
     client = models.ForeignKey(
         Client,
@@ -119,6 +117,12 @@ class Quote(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # PDF handling
+    pdf_file = models.FileField(upload_to='quotes/', blank=True, null=True)
+
+    # Terms and conditions
+    terms = models.TextField(blank=True, help_text="Terms and conditions for the quote")
+
     class Meta:
         ordering = ['-created_at']
         verbose_name = 'Quote'
@@ -136,3 +140,23 @@ class Quote(models.Model):
             self.tax_amount = self.subtotal * (self.tax_rate / 100)
             self.total_amount = self.subtotal + self.tax_amount
         super().save(*args, **kwargs)
+
+    def generate_pdf(self):
+        if not self.pdf_file:
+            pdf_path = generate_quote_pdf(self)
+            self.pdf_file = pdf_path
+            self.save()
+        return self.pdf_file
+
+class QuoteItem(models.Model):
+    quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='items')
+    description = models.CharField(max_length=200)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    @property
+    def total(self):
+        return self.quantity * self.unit_price
+
+    def __str__(self):
+        return f"{self.description} - {self.quantity} x ${self.unit_price}"

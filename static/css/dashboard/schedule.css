@@ -5,6 +5,7 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    overflow: hidden;
 }
 
 /* Header Styles */
@@ -12,6 +13,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding-bottom: 10px;
 }
 
 .schedule-header h1 {
@@ -33,6 +35,7 @@
     gap: 20px;
     flex: 1;
     min-height: 0;
+    height: calc(100vh - 180px);
 }
 
 /* Events List Styles */
@@ -42,11 +45,14 @@
     border: 2px solid #e9ecef;
     display: flex;
     flex-direction: column;
+    height: 100%;
+    overflow: hidden;
 }
 
 .list-header {
-    padding: 20px;
+    padding: 15px;
     border-bottom: 2px solid #e9ecef;
+    flex-shrink: 0;
 }
 
 .list-header h2 {
@@ -67,6 +73,8 @@
     flex: 1;
     overflow-y: auto;
     padding: 15px;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e0 #f8f9fa;
 }
 
 /* Event Card Styles */
@@ -160,11 +168,27 @@
     background: white;
     border-radius: 12px;
     border: 2px solid #e9ecef;
-    padding: 20px;
+    padding: 15px;
+    height: 100%;
+    overflow: hidden;
 }
 
 #schedule-calendar {
     height: 100%;
+}
+
+/* Scrollbar Styling */
+.events-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.events-scroll::-webkit-scrollbar-track {
+    background: #f8f9fa;
+}
+
+.events-scroll::-webkit-scrollbar-thumb {
+    background-color: #cbd5e0;
+    border-radius: 3px;
 }
 
 /* Event Types */
@@ -205,6 +229,7 @@
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
     z-index: 1000;
+    backdrop-filter: blur(4px);
 }
 
 .modal-content {
@@ -214,6 +239,8 @@
     max-width: 500px;
     margin: 50px auto;
     position: relative;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border: 2px solid #e9ecef;
 }
 
 .modal-header {
@@ -222,12 +249,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: #f8f9fa;
+    border-radius: 10px 10px 0 0;
 }
 
 .modal-header h2 {
     margin: 0;
     font-size: 20px;
     color: #2c3e50;
+    font-weight: 600;
 }
 
 .close-modal {
@@ -236,18 +266,30 @@
     font-size: 20px;
     cursor: pointer;
     color: #95a5a6;
-    transition: color 0.2s ease;
+    transition: all 0.2s ease;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
 }
 
 .close-modal:hover {
+    background: #e9ecef;
     color: #e74c3c;
 }
 
 /* Form Styles */
+#event-form {
+    padding: 20px;
+}
+
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
+    margin-bottom: 15px;
 }
 
 .form-group {
@@ -256,24 +298,40 @@
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     color: #2c3e50;
     font-weight: 500;
+    font-size: 14px;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
     width: 100%;
-    padding: 8px 12px;
+    padding: 10px 12px;
     border: 1px solid #e9ecef;
     border-radius: 6px;
     font-size: 14px;
+    background: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .form-group textarea {
     height: 100px;
     resize: vertical;
+}
+
+.form-group input[type="datetime-local"] {
+    padding: 8px 12px;
 }
 
 .form-actions {
@@ -282,17 +340,23 @@
     display: flex;
     justify-content: flex-end;
     gap: 10px;
+    background: #f8f9fa;
+    border-radius: 0 0 10px 10px;
+    margin: 0 -20px -20px;
 }
 
 /* Button Styles */
 .btn {
-    padding: 8px 16px;
+    padding: 10px 20px;
     border: none;
     border-radius: 6px;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .btn-primary {
@@ -302,6 +366,11 @@
 
 .btn-primary:hover {
     background: #2980b9;
+    transform: translateY(-1px);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
 }
 
 .btn-secondary {
@@ -314,22 +383,46 @@
     background: #e9ecef;
 }
 
-/* Responsive Design */
+/* Animation */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-content {
+    animation: modalFadeIn 0.3s ease;
+}
+
+/* Responsive Adjustments */
 @media (max-width: 1024px) {
     .schedule-container {
         grid-template-columns: 1fr;
+        height: calc(100vh - 160px);
     }
 
     .events-list {
-        height: 400px;
+        height: 300px;
+    }
+
+    .calendar-section {
+        height: calc(100vh - 500px);
     }
 }
 
 @media (max-width: 768px) {
+    .schedule-page {
+        padding: 15px;
+        height: calc(100vh - 70px);
+    }
+
     .schedule-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 15px;
+        padding-bottom: 5px;
     }
 
     .schedule-actions {

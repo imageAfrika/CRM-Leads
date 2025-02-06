@@ -8,10 +8,33 @@
 {% block content %}
 <div class="document-container">
     <div class="document-header">
-        <h1>Documents</h1>
+        <div class="header-left">
+            <h1>Documents</h1>
+            <div class="document-filters">
+                <select class="filter-select">
+                    <option value="all">All Types</option>
+                    <option value="quote">Quotes</option>
+                    <option value="invoice">Invoices</option>
+                    <option value="contract">Contracts</option>
+                </select>
+                <select class="filter-select">
+                    <option value="all">All Status</option>
+                    <option value="draft">Draft</option>
+                    <option value="sent">Sent</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+        </div>
         <div class="document-actions">
-            <a href="{% url 'documents:quote_create' %}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> New Quote
+            <button class="btn btn-secondary">
+                <i class="fas fa-filter"></i> Filter
+            </button>
+            <button class="btn btn-secondary">
+                <i class="fas fa-download"></i> Export
+            </button>
+            <a href="#" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Document
             </a>
         </div>
     </div>
@@ -21,43 +44,157 @@
             <table class="document-table">
                 <thead>
                     <tr>
-                        <th>Title</th>
-                        <th>Client</th>
-                        <th>Type</th>
-                        <th>Date</th>
-                        <th>Amount</th>
+                        <th class="sortable">
+                            <span>Document #</span>
+                            <i class="fas fa-sort"></i>
+                        </th>
+                        <th class="sortable">
+                            <span>Title</span>
+                            <i class="fas fa-sort"></i>
+                        </th>
+                        <th class="sortable">
+                            <span>Client</span>
+                            <i class="fas fa-sort"></i>
+                        </th>
+                        <th class="sortable">
+                            <span>Type</span>
+                            <i class="fas fa-sort"></i>
+                        </th>
+                        <th class="sortable">
+                            <span>Date</span>
+                            <i class="fas fa-sort"></i>
+                        </th>
+                        <th class="sortable">
+                            <span>Amount</span>
+                            <i class="fas fa-sort"></i>
+                        </th>
+                        <th class="sortable">
+                            <span>Status</span>
+                            <i class="fas fa-sort"></i>
+                        </th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for document in documents %}
                     <tr>
+                        <td>{{ document.document_number }}</td>
                         <td>{{ document.title }}</td>
-                        <td>{{ document.client.name }}</td>
-                        <td>{{ document.get_document_type_display }}</td>
-                        <td>{{ document.document_date }}</td>
-                        <td>${{ document.total_amount }}</td>
+                        <td>
+                            <div class="client-info">
+                                {% if document.client.logo %}
+                                    <img src="{{ document.client.logo.url }}" alt="{{ document.client.name }}" class="client-logo">
+                                {% endif %}
+                                <span>{{ document.client.name }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="document-type {{ document.document_type|lower }}">
+                                {{ document.get_document_type_display }}
+                            </span>
+                        </td>
+                        <td>{{ document.created_at|date:"M d, Y" }}</td>
+                        <td class="amount">${{ document.total_amount|floatformat:2 }}</td>
+                        <td>
+                            <span class="status-badge {{ document.status|lower }}">
+                                {{ document.get_status_display }}
+                            </span>
+                        </td>
                         <td class="actions">
-                            <a href="{% url 'documents:document_detail' document.pk %}" class="btn btn-view">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <a href="#" class="btn btn-edit">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="#" class="btn btn-delete">
-                                <i class="fas fa-trash"></i>
-                            </a>
+                            <div class="action-buttons">
+                                <a href="{% url 'documents:document_detail' document.pk %}" class="btn btn-icon" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'documents:document_edit' document.pk %}" class="btn btn-icon" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-icon dropdown-toggle" title="More">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a href="{% url 'documents:document_duplicate' document.pk %}" class="dropdown-item">
+                                        <i class="fas fa-copy"></i> Duplicate
+                                    </a>
+                                    <a href="{% url 'documents:document_download' document.pk %}" class="dropdown-item">
+                                        <i class="fas fa-download"></i> Download PDF
+                                    </a>
+                                    <a href="{% url 'documents:document_email' document.pk %}" class="dropdown-item">
+                                        <i class="fas fa-envelope"></i> Send Email
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                    <a href="#" class="dropdown-item text-danger" data-toggle="modal" data-target="#deleteModal{{ document.pk }}">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+
+            {% if is_paginated %}
+            <div class="pagination">
+                <span class="page-info">
+                    Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ paginator.count }} documents
+                </span>
+                <div class="page-controls">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1" class="btn btn-icon"><i class="fas fa-angle-double-left"></i></a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-icon"><i class="fas fa-angle-left"></i></a>
+                    {% endif %}
+                    
+                    <span class="current-page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-icon"><i class="fas fa-angle-right"></i></a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-icon"><i class="fas fa-angle-double-right"></i></a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
         {% else %}
             <div class="no-documents">
-                <p>No documents found.</p>
-                <a href="{% url 'documents:quote_create' %}" class="btn btn-primary">Create your first document</a>
+                <div class="empty-state">
+                    <i class="fas fa-file-alt"></i>
+                    <h2>No Documents Found</h2>
+                    <p>Get started by creating your first document</p>
+                    <a href="#" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Document
+                    </a>
+                </div>
             </div>
         {% endif %}
     </div>
 </div>
+
+<!-- Delete Confirmation Modals -->
+{% for document in documents %}
+<div class="modal fade" id="deleteModal{{ document.pk }}" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Document</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete "{{ document.title }}"? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <form action="{% url 'documents:document_delete' document.pk %}" method="POST" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/documents/document_list.js' %}"></script>
 {% endblock %} 

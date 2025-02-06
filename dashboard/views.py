@@ -2,6 +2,7 @@ from django.views.generic import TemplateView
 from clients.models import Client
 from sales.models import Sale
 from documents.models import Document, Quote
+from django.urls import reverse
 
 class DashboardView(TemplateView):
     template_name = 'dashboard/dashboard.html'
@@ -22,8 +23,7 @@ class CalendarView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Add any events data you want to display
-        context['events'] = []  # You can populate this with your event data
+        context['documents_url'] = reverse('documents:document_list')
         return context 
 
 class ScheduleView(TemplateView):

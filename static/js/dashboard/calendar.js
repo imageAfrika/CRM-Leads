@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Handle form submission
-    eventForm.onsubmit = function(e) {
+    eventForm.onsubmit = async function(e) {
         e.preventDefault();
         
         const title = document.getElementById('event-title').value;
@@ -69,13 +69,67 @@ document.addEventListener('DOMContentLoaded', function() {
         const end = document.getElementById('event-end').value;
         const description = document.getElementById('event-description').value;
 
-        // Here you would typically send this data to your backend
-        console.log({title, start, end, description});
+        try {
+            // Send data to backend
+            const response = await fetch('/api/events/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    title,
+                    start,
+                    end,
+                    description
+                })
+            });
 
-        // Close modal
+            if (response.ok) {
+                // Get documents URL from form data attribute
+                const documentsUrl = eventForm.dataset.documentsUrl;
+                window.location.href = documentsUrl;
+            } else {
+                throw new Error('Failed to save event');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to save event. Please try again.');
+        }
+
+        // Close modal and reset form
         modal.style.display = "none";
-        
-        // Reset form
         eventForm.reset();
+    }
+
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Form toggle functionality
+    const toggleBtn = document.getElementById('toggleForm');
+    const form = document.querySelector('.add-event-form');
+    const container = document.querySelector('.calendar-container');
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+            form.classList.toggle('active');
+            container.classList.toggle('form-visible');
+            toggleBtn.innerHTML = form.classList.contains('active') ? 
+                '<i class="fas fa-times"></i> Close Form' : 
+                '<i class="fas fa-plus"></i> Add Event';
+        });
     }
 });

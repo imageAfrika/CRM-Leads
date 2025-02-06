@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        /* Add your PDF styling here */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 2cm;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2em;
+        }
+        .quote-details {
+            margin-bottom: 2em;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2em;
+        }
+        .items-table th, .items-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .total {
+            text-align: right;
+            margin-top: 2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ company_name }}</h1>
+        <p>{{ company_address }}</p>
+    </div>
+
+    <div class="quote-details">
+        <h2>Quote #{{ quote.quote_number }}</h2>
+        <p><strong>Date:</strong> {{ quote.created_at|date:"F j, Y" }}</p>
+        <p><strong>Client:</strong> {{ quote.client.name }}</p>
+        <p><strong>Valid Until:</strong> {{ quote.valid_until|date:"F j, Y" }}</p>
+    </div>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in quote.items.all %}
+            <tr>
+                <td>{{ item.description }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>${{ item.unit_price }}</td>
+                <td>${{ item.total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="total">
+        <p><strong>Subtotal:</strong> ${{ quote.subtotal }}</p>
+        <p><strong>Tax ({{ quote.tax_rate }}%):</strong> ${{ quote.tax_amount }}</p>
+        <h3>Total: ${{ quote.total }}</h3>
+    </div>
+
+    <div class="terms">
+        <h3>Terms and Conditions</h3>
+        {{ quote.terms|linebreaks }}
+    </div>
+</body>
+</html> 

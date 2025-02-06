@@ -13,29 +13,37 @@
             <h1>Calendar</h1>
         </div>
         <div id="calendar"></div>
-    </div>
-
-    <div class="calendar-modal">
-        <h2>Add Event</h2>
-        <form id="event-form">
-            <div class="form-group">
-                <label for="event-title">Title</label>
-                <input type="text" id="event-title" required>
-            </div>
-            <div class="form-group">
-                <label for="event-start">Start Date</label>
-                <input type="datetime-local" id="event-start" required>
-            </div>
-            <div class="form-group">
-                <label for="event-end">End Date</label>
-                <input type="datetime-local" id="event-end">
-            </div>
-            <div class="form-group">
-                <label for="event-description">Description</label>
-                <textarea id="event-description"></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">Save Event</button>
-        </form>
+        
+        <!-- Toggle Button -->
+        <button class="toggle-form-btn" id="toggleForm">
+            <i class="fas fa-plus"></i> Add Event
+        </button>
+        
+        <!-- Add Event Form -->
+        <div class="add-event-form">
+            <h2>Add Event</h2>
+            <form id="event-form" data-documents-url="{% url 'documents:document_list' %}">
+                <div class="form-group">
+                    <label for="event-title">Title</label>
+                    <input type="text" id="event-title" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="event-start">Start Date</label>
+                        <input type="datetime-local" id="event-start" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-end">End Date</label>
+                        <input type="datetime-local" id="event-end">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="event-description">Description</label>
+                    <textarea id="event-description"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Event</button>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}
