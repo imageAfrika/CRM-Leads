@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from documents.views import quote_create, quote_detail
 from dashboard.views import DashboardView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('', include('dashboard.urls')),
@@ -26,4 +28,4 @@ urlpatterns = [
     path('sales/', include('sales.urls')),
     path('documents/', include('documents.urls')),  
     # path('documents/quote/', include('documents.urls')),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,141 @@
+.quote-container {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 20px;
+    padding: 20px;
+    height: calc(100vh - 80px);
+    overflow: hidden;
+}
+
+/* Form Section */
+.form-section {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+}
+
+.form-section h2 {
+    font-size: 1rem;
+    margin: 0 0 1rem 0;
+    color: #2c3e50;
+}
+
+.form-section h3 {
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+
+.form-group {
+    margin-bottom: 0.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.8rem;
+    margin-bottom: 0.2rem;
+    color: #34495e;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.3rem 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.form-group textarea {
+    height: 60px;
+    resize: vertical;
+}
+
+/* Quote items styling */
+.quote-item {
+    display: grid;
+    grid-template-columns: 2fr 0.8fr 0.8fr 0.8fr auto;
+    gap: 5px;
+    margin-bottom: 5px;
+    align-items: start;
+}
+
+.quote-item input {
+    padding: 0.3rem 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.remove-item {
+    padding: 0.3rem 0.5rem;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+#add-item {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 5px 0;
+    font-size: 0.8rem;
+}
+
+.form-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.form-actions button,
+.form-actions a {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+    border: none;
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: white;
+    text-decoration: none;
+    border: none;
+}
+
+/* Preview section */
+.preview-section {
+    background: var(--background-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+.preview-section .quote-wrapper {
+    height: 100%;
+    margin: 0;
+    min-height: unset;
+}
+
+.preview-section .quote-card {
+    margin: 0;
+    height: 100%;
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+} 

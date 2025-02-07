@@ -19,8 +19,8 @@
             <a href="{% url 'clients:client_create' %}" class="action-button">
                 <i class="fas fa-plus"></i> New Client
             </a>
-            <a href="{% url 'sales:sale_create' %}" class="action-button">
-                <i class="fas fa-dollar-sign"></i> New Sale
+            <a href="{% url 'documents:quote_create' %}" class="action-button">
+                <i class="fas fa-plus"></i> New Sale
             </a>
             <a href="{% url 'documents:document_list' %}" class="action-button">
                 <i class="fas fa-file-invoice"></i> Documents
@@ -28,32 +28,78 @@
         </div>
     </div>
 
-    <!-- Stats Overview -->
-    <div class="stats-grid">
+    <!-- Stats Section -->
+    <div class="stats-section">
         <div class="stat-card">
-            <h3>Total Clients</h3>
-            <div class="stat-number">{{ total_clients }}</div>
-            <div class="stat-trend"><i class="fas fa-arrow-up"></i> 12% from last month</div>
+            <div class="stat-icon">
+                <i class="fas fa-file-invoice-dollar"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Quotes</h3>
+                <div class="stat-number">{{ stats.total_quotes }}</div>
+                <div class="stat-trend {% if stats.quote_trend >= 0 %}positive{% else %}negative{% endif %}">
+                    <i class="fas fa-{% if stats.quote_trend >= 0 %}arrow-up{% else %}arrow-down{% endif %}"></i>
+                    {{ stats.quote_trend }}%
+                </div>
+            </div>
         </div>
+
         <div class="stat-card">
-            <h3>Monthly Sales</h3>
-            <div class="stat-number">{{ total_sales }}</div>
-            <div class="stat-trend"><i class="fas fa-arrow-up"></i> 8% from last month</div>
+            <div class="stat-icon">
+                <i class="fas fa-file-invoice"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Invoices</h3>
+                <div class="stat-number">{{ stats.total_invoices }}</div>
+                <div class="stat-trend {% if stats.invoice_trend >= 0 %}positive{% else %}negative{% endif %}">
+                    <i class="fas fa-{% if stats.invoice_trend >= 0 %}arrow-up{% else %}arrow-down{% endif %}"></i>
+                    {{ stats.invoice_trend }}%
+                </div>
+            </div>
         </div>
+
         <div class="stat-card">
-            <h3>Pending Invoices</h3>
-            <div class="stat-number">{{ total_documents }}</div>
-            <div class="stat-trend"><i class="fas fa-arrow-up"></i> 5% from last month</div>
+            <div class="stat-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Revenue</h3>
+                <div class="stat-number">${{ stats.total_revenue|floatformat:0 }}</div>
+                <div class="stat-trend {% if stats.revenue_trend >= 0 %}positive{% else %}negative{% endif %}">
+                    <i class="fas fa-{% if stats.revenue_trend >= 0 %}arrow-up{% else %}arrow-down{% endif %}"></i>
+                    {{ stats.revenue_trend }}%
+                </div>
+            </div>
         </div>
+
         <div class="stat-card">
-            <h3>Pending Quotes</h3>
-            <div class="stat-number">{{ total_documents }}</div>
-            <div class="stat-trend"><i class="fas fa-arrow-up"></i> 5% from last month</div>
+            <div class="stat-icon">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Expenditure</h3>
+                <div class="stat-number">${{ stats.total_expenditure|floatformat:0 }}</div>
+                <div class="stat-trend {% if stats.expenditure_trend >= 0 %}positive{% else %}negative{% endif %}">
+                    <i class="fas fa-{% if stats.expenditure_trend >= 0 %}arrow-up{% else %}arrow-down{% endif %}"></i>
+                    {{ stats.expenditure_trend }}%
+                </div>
+            </div>
         </div>
+
         <div class="stat-card">
-            <h3>Reports</h3>
-            <div class="stat-number">{{ total_documents }}</div>
-            <div class="stat-trend"><i class="fas fa-arrow-up"></i> 5% from last month</div>
+            <div class="stat-icon">
+                <i class="fas fa-chart-pie"></i>
+            </div>
+            <div class="stat-content">
+                <a href="{% url 'dashboard:statistics' %}" class="stat-link">
+                    <h3>Statistics</h3>
+                    <div class="stat-number">{{ stats.conversion_rate }}%</div>
+                    <div class="stat-trend {% if stats.conversion_trend >= 0 %}positive{% else %}negative{% endif %}">
+                        <i class="fas fa-{% if stats.conversion_trend >= 0 %}arrow-up{% else %}arrow-down{% endif %}"></i>
+                        {{ stats.conversion_trend }}%
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
 

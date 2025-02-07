@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/documents/quote.css' %}">
+<link rel="stylesheet" href="{% static 'css/documents/quote_create.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="quote-container">
+    <!-- Left side - Quote Form -->
+    <div class="form-section">
+        <h2>Create New Quote</h2>
+        <form id="quote-form" method="post" action="{% url 'documents:quote_create_function' %}" data-quote-number-url="{% url 'documents:get_quote_number' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="client">Client</label>
+                <select name="client" id="client" required>
+                    {% for client in clients %}
+                        <option value="{{ client.id }}">{{ client.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group quote-title-field">
+                <label for="quote_title">Quote Title</label>
+                <input type="text" name="quote_title" id="quote_title" required>
+            </div>
+            
+            <div class="form-group quote-number-field">
+                <label for="quote_number">Quote Number</label>
+                <input type="text" name="quote_number" id="quote_number" readonly>
+            </div>
+            
+            <!-- Quote items section -->
+            <div id="quote-items">
+                <h3>Items</h3>
+                <div class="quote-item">
+                    <label>Description</label>
+                    <input type="text" name="items[][description]" placeholder="Description" required>
+                    
+                    <div class="numeric-fields">
+                        <div>
+                            <label>Quantity</label>
+                            <input type="number" name="items[][quantity]" placeholder="Quantity" required>
+                        </div>
+                        
+                        <div>
+                            <label>Unit Price</label>
+                            <input type="number" name="items[][unit_price]" placeholder="Unit Price" required>
+                        </div>
+                        
+                        <div>
+                            <label>Discount %</label>
+                            <input type="number" name="items[][discount]" placeholder="Discount %" required>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="remove-item">Remove</button>
+                </div>
+            </div>
+            <button type="button" id="add-item">Add Item</button>
+            
+            <div class="form-group">
+                <label for="valid_until">Valid Until</label>
+                <input type="date" name="valid_until" id="valid_until" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="terms">Terms and Conditions</label>
+                <textarea name="terms" id="terms"></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Generate Quote</button>
+                <a href="{% url 'dashboard:dashboard' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Right side - Quote Preview -->
+    <div class="preview-section">
+        <div class="quote-wrapper">
+            <div class="quote-card">
+                <hr>
+                <header class="quote-header">
+                    <div class="logo-container">
+                        <div class="logo-img">
+                            <img src="{% static 'img/logo.jpg' %}" alt="Logo" class="logo">
+                        </div>
+                        <p>Revision: <span id="preview-revision">-</span></p>
+                        <p>Modified: <span id="preview-modified">-</span></p>
+                        <p>To: <span id="preview-client">-</span></p>
+                        <p>C/o: <span id="preview-co">-</span></p>
+                        <p>Quote Type: <span id="preview-type">-</span></p>
+                        <p>Quote Title: <span id="preview-title">-</span></p>
+                        <p>Prepared by: <span id="preview-preparer">-</span></p>
+                    </div>
+
+                    <div class="logo-container-2">
+                        <p class="quote-title">QUOTATION</p>
+                        <p>Quote No: <span id="preview-quote-number">-</span></p>
+                    </div>
+                </header>
+
+                <div class="quote-content">
+                    <table class="quote-table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Discount</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="preview-items">
+                            <!-- Items will be dynamically added here -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4">Subtotal</td>
+                                <td id="preview-subtotal">$0.00</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">Tax (16%)</td>
+                                <td id="preview-tax">$0.00</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="4">Total Amount Due</td>
+                                <td id="preview-total">$0.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <footer class="quote-footer">
+                    <div class="terms">
+                        <h3>Terms & Conditions</h3>
+                        <p id="preview-terms">-</p>
+                    </div>
+                    <div class="thank-you">Thank you for your business!</div>
+                </footer>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/documents/quote_create.js' %}"></script>
+{% endblock %} 

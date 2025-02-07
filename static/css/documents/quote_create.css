@@ -1,0 +1,184 @@
+.quote-container {
+    display: grid;
+    grid-template-columns: 500px 1fr;
+    gap: 20px;
+    padding: 20px;
+    height: calc(100vh - 80px);
+    overflow: hidden;
+}
+
+/* Form Section */
+.form-section {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+}
+
+.form-section h2 {
+    font-size: 1rem;
+    margin: 0 0 1rem 0;
+    color: #2c3e50;
+}
+
+.form-section h3 {
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+
+.form-group {
+    margin-bottom: 0.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.8rem;
+    margin-bottom: 0.2rem;
+    color: #34495e;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.3rem 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.form-group textarea {
+    height: 60px;
+    resize: vertical;
+}
+
+/* Specific field widths */
+.form-group.quote-number-field,
+.form-group.quote-title-field {
+    width: 150px;  /* Adjust this value as needed */
+}
+
+.form-group.quote-number-field input,
+.form-group.quote-title-field input {
+    width: 100%;
+    text-align: left;
+}
+
+/* Quote items styling */
+#quote-items {
+    width: 480px;  /* Increased from 450px to 480px */
+    margin: 0 auto;
+}
+
+.quote-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 15px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: #f8f9fa;
+}
+
+/* Add specific widths for different input types */
+.quote-item input[name*="description"] {
+    width: 100%;  /* Description field takes full width */
+}
+
+.quote-item input[name*="quantity"],
+.quote-item input[name*="unit_price"],
+.quote-item input[name*="discount"] {
+    width: 120px;  /* Reduced width for numeric fields */
+}
+
+.quote-item label {
+    font-size: 0.7rem;
+    color: #666;
+    margin-bottom: 2px;
+}
+
+/* Add horizontal alignment for numeric fields */
+.quote-item .numeric-fields {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.quote-item .remove-item {
+    align-self: flex-end;
+    margin-top: 5px;
+}
+
+#add-item {
+    width: 480px;  /* Increased from 450px to 480px */
+    margin: 10px auto;
+    display: block;
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.form-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.form-actions button,
+.form-actions a {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+    border: none;
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: white;
+    text-decoration: none;
+    border: none;
+}
+
+/* Preview section */
+.preview-section {
+    background: var(--background-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+.preview-section .quote-wrapper {
+    height: 100%;
+    margin: 0;
+    min-height: unset;
+}
+
+.preview-section .quote-card {
+    margin: 0;
+    height: 100%;
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+}
+
+.form-group input[type="date"] {
+    width: 150px;  /* Match other compact fields */
+}
+
+.form-group input[readonly] {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+} 

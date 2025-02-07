@@ -2,11 +2,15 @@ from django.db import models
 from django.urls import reverse
 from clients.models import Client
 from .utils import generate_quote_pdf
+from django.core.files import File
+from django.conf import settings
+import os
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from io import BytesIO
 
 class Document(models.Model):
-    """
-    Model representing various types of business documents like quotes, invoices, etc.
-    """
+
     DOCUMENT_TYPES = [
         ('QUOTE', 'Quote'),
         ('INVOICE', 'Invoice'),
@@ -45,9 +49,10 @@ class Document(models.Model):
     )
 
     # Dates
-    document_date = models.DateField()
+    document_date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    quote = models.OneToOneField('Quote', on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -142,21 +147,80 @@ class Quote(models.Model):
         super().save(*args, **kwargs)
 
     def generate_pdf(self):
-        if not self.pdf_file:
-            pdf_path = generate_quote_pdf(self)
-            self.pdf_file = pdf_path
-            self.save()
+        # Create a file-like buffer to receive PDF data
+        buffer = BytesIO()
+
+        # Create the PDF object, using the buffer as its "file."
+        p = canvas.Canvas(buffer, pagesize=letter)
+
+        # Draw things on the PDF
+        # Header
+        p.setFont("Helvetica-Bold", 16)
+        p.drawString(50, 750, f"Quote #{self.quote_number}")
+        
+        p.setFont("Helvetica", 12)
+        p.drawString(50, 720, f"Date: {self.created_at.strftime('%Y-%m-%d')}")
+        p.drawString(50, 700, f"Valid Until: {self.valid_until.strftime('%Y-%m-%d')}")
+        
+        # Client Information
+        p.drawString(50, 670, "Client Information:")
+        p.drawString(70, 650, f"Name: {self.client.name}")
+        p.drawString(70, 630, f"Email: {self.client.email}")
+        
+        # Items
+        p.drawString(50, 590, "Items:")
+        y = 570
+        for item in self.items.all():
+            p.drawString(70, y, f"{item.description}")
+            p.drawString(300, y, f"Qty: {item.quantity}")
+            p.drawString(400, y, f"Price: ${item.unit_price}")
+            p.drawString(500, y, f"Total: ${item.get_total()}")
+            y -= 20
+        
+        # Totals
+        p.drawString(400, 200, f"Subtotal: ${self.subtotal}")
+        p.drawString(400, 180, f"Tax: ${self.tax_amount}")
+        p.drawString(400, 160, f"Total: ${self.total_amount}")
+        
+        # Terms
+        if self.terms:
+            p.drawString(50, 120, "Terms and Conditions:")
+            p.drawString(70, 100, self.terms)
+
+        # Close the PDF object cleanly
+        p.showPage()
+        p.save()
+
+        # Get the value of the BytesIO buffer and write it to the response
+        pdf = buffer.getvalue()
+        buffer.close()
+
+        # Save the PDF to the model's file field
+        filename = f'quote_{self.quote_number}.pdf'
+        filepath = os.path.join('quotes', filename)
+        full_path = os.path.join(settings.MEDIA_ROOT, 'quotes', filename)
+        
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        
+        with open(full_path, 'wb') as f:
+            f.write(pdf)
+        
+        # Update the pdf_file field
+        self.pdf_file.name = filepath
+        self.save()
+        
         return self.pdf_file
 
 class QuoteItem(models.Model):
-    quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='items')
-    description = models.CharField(max_length=200)
+    quote = models.ForeignKey(Quote, related_name='items', on_delete=models.CASCADE)
+    description = models.CharField(max_length=255)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
-    
-    @property
-    def total(self):
-        return self.quantity * self.unit_price
+    discount = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+
+    def get_total(self):
+        return self.quantity * self.unit_price * (1 - self.discount/100)
 
     def __str__(self):
         return f"{self.description} - {self.quantity} x ${self.unit_price}"
