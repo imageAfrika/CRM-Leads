@@ -129,52 +129,36 @@ document.addEventListener('DOMContentLoaded', async function() {
     quoteForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // Gather all items data
-        const items = [];
-        document.querySelectorAll('.quote-item').forEach(item => {
-            items.push({
-                description: item.querySelector('[name="items[][description]"]').value,
-                quantity: item.querySelector('[name="items[][quantity]"]').value,
-                unit_price: item.querySelector('[name="items[][unit_price]"]').value,
-                discount: item.querySelector('[name="items[][discount]"]').value
-            });
-        });
-
-        // Calculate totals
-        const subtotal = parseFloat(document.getElementById('preview-subtotal').textContent.replace('$', ''));
-        const tax = parseFloat(document.getElementById('preview-tax').textContent.replace('$', ''));
-        const total = parseFloat(document.getElementById('preview-total').textContent.replace('$', ''));
-
-        // Set default valid_until to 30 days from now if not specified
-        const validUntilInput = document.getElementById('valid_until');
-        if (!validUntilInput.value) {
-            const date = new Date();
-            date.setDate(date.getDate() + 30);
-            validUntilInput.value = date.toISOString().split('T')[0];
-        }
-
-        // Create FormData object
-        const formData = new FormData(quoteForm);
-        formData.append('subtotal', subtotal);
-        formData.append('tax_amount', tax);
-        formData.append('total_amount', total);
-        formData.append('items', JSON.stringify(items));
+        // Collect form data
+        const formData = {
+            client_id: document.getElementById('client').value,
+            quote_number: document.getElementById('quote_number').value,
+            title: document.getElementById('title').value,
+            description: document.getElementById('description').value,
+            subtotal: document.getElementById('subtotal').value,
+            tax_rate: document.getElementById('tax_rate').value,
+            tax_amount: document.getElementById('tax_amount').value,
+            total_amount: document.getElementById('total_amount').value,
+            valid_until: document.getElementById('valid_until').value,
+            terms: document.getElementById('terms').value
+        };
 
         try {
-            const response = await fetch(quoteForm.action, {
+            const response = await fetch('/documents/quote/create/', {
                 method: 'POST',
-                body: formData,
                 headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                }
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+                body: JSON.stringify(formData)
             });
 
             const data = await response.json();
             
-            if (response.ok && data.success) {
+            if (data.success) {
                 window.location.href = data.redirect_url;
             } else {
-                alert('Error creating quote: ' + (data.error || 'Unknown error'));
+                alert('Error creating quote: ' + data.error);
             }
         } catch (error) {
             console.error('Error:', error);

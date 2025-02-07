@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .sale-detail {
+        padding: 2rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .sale-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+    .sale-info {
+        flex: 1;
+    }
+    .sale-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    .sale-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .meta-item {
+        background: #f8fafc;
+        padding: 1rem;
+        border-radius: 4px;
+    }
+    .meta-label {
+        color: #64748b;
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+    }
+    .meta-value {
+        font-size: 1.125rem;
+        font-weight: 600;
+    }
+    .items-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 2rem;
+    }
+    .items-table th,
+    .items-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+    .items-table th {
+        background: #f8fafc;
+        font-weight: 600;
+    }
+    .totals {
+        margin-left: auto;
+        width: 300px;
+    }
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+    }
+    .total-row.final {
+        font-weight: 600;
+        font-size: 1.125rem;
+        border-top: 2px solid #eee;
+        margin-top: 0.5rem;
+        padding-top: 1rem;
+    }
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    .status-paid {
+        background: #dcfce7;
+        color: #166534;
+    }
+    .status-pending {
+        background: #fef9c3;
+        color: #854d0e;
+    }
+    .status-cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sale-detail">
+    <div class="sale-header">
+        <div class="sale-info">
+            <h1>Sale Details</h1>
+            <p class="text-gray-600">{{ sale.created_at|date:"d M Y, H:i" }}</p>
+        </div>
+        <div class="sale-actions">
+            {% if sale.document_set.exists %}
+                {% for doc in sale.document_set.all %}
+                    <a href="{{ doc.file.url }}" class="btn btn-secondary" target="_blank">
+                        <i class="fas fa-download"></i> Download Receipt
+                    </a>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="sale-meta">
+        <div class="meta-item">
+            <div class="meta-label">Client</div>
+            <div class="meta-value">{{ sale.client.name }}</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Payment Method</div>
+            <div class="meta-value">{{ sale.get_payment_method_display }}</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Status</div>
+            <div class="meta-value">
+                <span class="status-badge status-{{ sale.payment_status|lower }}">
+                    {{ sale.get_payment_status_display }}
+                </span>
+            </div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Date</div>
+            <div class="meta-value">{{ sale.sale_date|date:"d M Y" }}</div>
+        </div>
+    </div>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Discount</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in sale.items.all %}
+            <tr>
+                <td>{{ item.description }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>${{ item.unit_price|floatformat:2 }}</td>
+                <td>{{ item.discount }}%</td>
+                <td>${{ item.get_total|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="totals">
+        <div class="total-row">
+            <span>Subtotal</span>
+            <span>${{ sale.subtotal|floatformat:2 }}</span>
+        </div>
+        <div class="total-row">
+            <span>Tax</span>
+            <span>${{ sale.tax_amount|floatformat:2 }}</span>
+        </div>
+        <div class="total-row final">
+            <span>Total</span>
+            <span>${{ sale.total_amount|floatformat:2 }}</span>
+        </div>
+    </div>
+</div>
+{% endblock %} 

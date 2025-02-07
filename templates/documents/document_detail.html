@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* Include the CSS directly in the template for PDF generation */
+.document-container {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.document-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.company-info h1 {
+    font-size: 24px;
+    color: #1e293b;
+    margin: 0 0 10px 0;
+}
+
+.client-info {
+    text-align: right;
+}
+
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.items-table th,
+.items-table td {
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+.items-table th {
+    background: #f8fafc;
+    font-weight: bold;
+}
+
+.totals-section {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.total-row {
+    margin: 5px 0;
+}
+
+.grand-total {
+    font-weight: bold;
+    font-size: 18px;
+    margin-top: 10px;
+}
+
+.terms-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+@media print {
+    .document-actions {
+        display: none;
+    }
+    
+    .document-container {
+        padding: 0;
+        max-width: none;
+    }
+    
+    /* Add any other print-specific styles */
+    @page {
+        margin: 0.75in;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="document-container">
+    <div class="document-header">
+        <div class="company-info">
+            <h1>{{ document.title }}</h1>
+            <p>{{ document.document_type }}</p>
+            <p>Date: {{ document.document_date|date:"d/m/Y" }}</p>
+        </div>
+        
+        <div class="client-info">
+            <h2>Client Information</h2>
+            <p>{{ document.client.name }}</p>
+            <p>{{ document.client.email }}</p>
+            <p>{{ document.client.phone }}</p>
+            <p>{{ document.client.address }}</p>
+        </div>
+    </div>
+
+    {% if document.document_type == 'QUOTE' and document.quote %}
+    <div class="items-section">
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Discount</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in document.quote.items.all %}
+                <tr>
+                    <td>{{ item.description }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.unit_price|floatformat:2 }}</td>
+                    <td>{{ item.discount }}%</td>
+                    <td>${{ item.total|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="totals-section">
+        <div class="totals">
+            <div class="total-row">
+                <span>Subtotal:</span>
+                <span>${{ document.quote.subtotal|floatformat:2 }}</span>
+            </div>
+            <div class="total-row">
+                <span>Tax ({{ document.quote.tax_rate }}%):</span>
+                <span>${{ document.quote.tax_amount|floatformat:2 }}</span>
+            </div>
+            <div class="total-row grand-total">
+                <span>Total:</span>
+                <span>${{ document.quote.total_amount|floatformat:2 }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="terms-section">
+        <h3>Terms and Conditions</h3>
+        <p>{{ document.quote.terms }}</p>
+        <p>Valid until: {{ document.quote.valid_until|date:"d/m/Y" }}</p>
+    </div>
+    {% endif %}
+
+    {% if not is_download_view %}
+    <div class="document-actions">
+        <a href="{% url 'documents:document_list' %}" class="btn btn-secondary">Back to List</a>
+        <button onclick="window.print()" class="btn btn-primary">Print/Save as PDF</button>
+        {% if document.document_type == 'QUOTE' %}
+        <button class="btn btn-success generate-invoice" data-quote-id="{{ document.quote.id }}">Generate Invoice</button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const generateInvoiceBtn = document.querySelector('.generate-invoice');
+    if (generateInvoiceBtn) {
+        generateInvoiceBtn.addEventListener('click', function() {
+            const quoteId = this.dataset.quoteId;
+            fetch(`/documents/quote/${quoteId}/generate-invoice/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/documents/';
+                } else {
+                    alert('Error generating invoice: ' + data.error);
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %} 

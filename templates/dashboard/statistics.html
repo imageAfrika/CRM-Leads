@@ -22,6 +22,21 @@
             <canvas id="revenueVsExpenditureChart"></canvas>
         </div>
     </div>
+
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <h3>Expenditure</h3>
+            <a href="{% url 'documents:expenditure' %}" class="view-all">View All</a>
+        </div>
+        <div class="stat-card-body">
+            <div class="stat-value">
+                ${{ total_expenses|floatformat:2 }}
+            </div>
+            <div class="stat-label">
+                Total Expenses This Month
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 

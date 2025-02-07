@@ -1,6 +1,6 @@
 .quote-container {
     display: grid;
-    grid-template-columns: 400px 1fr;
+    grid-template-columns: 500px 1fr;
     gap: 20px;
     padding: 20px;
     height: calc(100vh - 80px);
@@ -54,40 +54,74 @@
     resize: vertical;
 }
 
-/* Quote items styling */
-.quote-item {
-    display: grid;
-    grid-template-columns: 2fr 0.8fr 0.8fr 0.8fr auto;
-    gap: 5px;
-    margin-bottom: 5px;
-    align-items: start;
+/* Specific field widths */
+.form-group.quote-number-field,
+.form-group.quote-title-field {
+    width: 150px;  /* Adjust this value as needed */
 }
 
-.quote-item input {
-    padding: 0.3rem 0.5rem;
+.form-group.quote-number-field input,
+.form-group.quote-title-field input {
+    width: 100%;
+    text-align: left;
+}
+
+/* Quote items styling */
+#quote-items {
+    width: 480px;  /* Increased from 450px to 480px */
+    margin: 0 auto;
+}
+
+.quote-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 15px;
+    padding: 15px;
     border: 1px solid var(--border-color);
     border-radius: 4px;
-    font-size: 0.8rem;
+    background: #f8f9fa;
 }
 
-.remove-item {
-    padding: 0.3rem 0.5rem;
-    background: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
+/* Add specific widths for different input types */
+.quote-item input[name*="description"] {
+    width: 100%;  /* Description field takes full width */
+}
+
+.quote-item input[name*="quantity"],
+.quote-item input[name*="unit_price"],
+.quote-item input[name*="discount"] {
+    width: 120px;  /* Reduced width for numeric fields */
+}
+
+.quote-item label {
+    font-size: 0.7rem;
+    color: #666;
+    margin-bottom: 2px;
+}
+
+/* Add horizontal alignment for numeric fields */
+.quote-item .numeric-fields {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.quote-item .remove-item {
+    align-self: flex-end;
+    margin-top: 5px;
 }
 
 #add-item {
+    width: 480px;  /* Increased from 450px to 480px */
+    margin: 10px auto;
+    display: block;
     background: #3498db;
     color: white;
     border: none;
     padding: 0.4rem 0.8rem;
     border-radius: 4px;
     cursor: pointer;
-    margin: 5px 0;
     font-size: 0.8rem;
 }
 
@@ -138,4 +172,13 @@
     background: var(--card-background);
     border: 1px solid var(--border-color);
     padding: 1.5rem;
+}
+
+.form-group input[type="date"] {
+    width: 150px;  /* Match other compact fields */
+}
+
+.form-group input[readonly] {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
 } 

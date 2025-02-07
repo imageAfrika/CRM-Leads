@@ -58,33 +58,41 @@
             </div>
         </div>
 
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-chart-line"></i>
-            </div>
-            <div class="stat-content">
-                <h3>Revenue</h3>
-                <div class="stat-number">${{ stats.total_revenue|floatformat:0 }}</div>
-                <div class="stat-trend {% if stats.revenue_trend >= 0 %}positive{% else %}negative{% endif %}">
-                    <i class="fas fa-{% if stats.revenue_trend >= 0 %}arrow-up{% else %}arrow-down{% endif %}"></i>
-                    {{ stats.revenue_trend }}%
-                </div>
-            </div>
-        </div>
+        
 
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-wallet"></i>
-            </div>
-            <div class="stat-content">
-                <h3>Expenditure</h3>
-                <div class="stat-number">${{ stats.total_expenditure|floatformat:0 }}</div>
-                <div class="stat-trend {% if stats.expenditure_trend >= 0 %}positive{% else %}negative{% endif %}">
-                    <i class="fas fa-{% if stats.expenditure_trend >= 0 %}arrow-up{% else %}arrow-down{% endif %}"></i>
-                    {{ stats.expenditure_trend }}%
+        <a href="{% url 'documents:expenditure' %}" class="stat-link">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #fee2e2; color: #dc2626;">
+                    <i class="fas fa-money-bill"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Total Expenditure</h3>
+                    <div class="stat-value">${{ total_expenditure|floatformat:2 }}</div>
+                    <div class="stat-trend {% if expenditure_trend > 0 %}up{% elif expenditure_trend < 0 %}down{% endif %}">
+                        <i class="fas fa-{% if expenditure_trend > 0 %}arrow-up{% elif expenditure_trend < 0 %}arrow-down{% else %}minus{% endif %}"></i>
+                        {{ expenditure_trend|floatformat:1 }}%
+                    </div>
                 </div>
             </div>
-        </div>
+        </a>
+
+       
+
+        <a href="{% url 'documents:invoice_list' %}" class="stat-link">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #dcfce7; color: #16a34a;">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Total Revenue</h3>
+                    <div class="stat-value">${{ total_revenue|floatformat:2 }}</div>
+                    <div class="stat-trend {% if revenue_trend > 0 %}up{% elif revenue_trend < 0 %}down{% endif %}">
+                        <i class="fas fa-{% if revenue_trend > 0 %}arrow-up{% elif revenue_trend < 0 %}arrow-down{% else %}minus{% endif %}"></i>
+                        {{ revenue_trend|floatformat:1 }}%
+                    </div>
+                </div>
+            </div>
+        </a>
 
         <div class="stat-card">
             <div class="stat-icon">
@@ -101,6 +109,7 @@
                 </a>
             </div>
         </div>
+
     </div>
 
     <!-- Recent Activities -->

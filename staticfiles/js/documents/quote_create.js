@@ -1,4 +1,15 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    // Add this at the beginning of your DOMContentLoaded handler
+    try {
+        const quoteNumberUrl = document.getElementById('quote-form').dataset.quoteNumberUrl;
+        const response = await fetch(quoteNumberUrl);
+        const data = await response.json();
+        document.getElementById('quote_number').value = data.quote_number;
+        document.getElementById('preview-quote-number').textContent = data.quote_number;
+    } catch (error) {
+        console.error('Error fetching quote number:', error);
+    }
+
     const quoteForm = document.getElementById('quote-form');
     const addItemBtn = document.getElementById('add-item');
     const quoteItems = document.getElementById('quote-items');
@@ -68,10 +79,26 @@ document.addEventListener('DOMContentLoaded', function() {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'quote-item';
         itemDiv.innerHTML = `
+            <label>Description</label>
             <input type="text" name="items[][description]" placeholder="Description" required>
-            <input type="number" name="items[][quantity]" placeholder="Quantity" required>
-            <input type="number" name="items[][unit_price]" placeholder="Unit Price" required>
-            <input type="number" name="items[][discount]" placeholder="Discount %" required>
+            
+            <div class="numeric-fields">
+                <div>
+                    <label>Quantity</label>
+                    <input type="number" name="items[][quantity]" placeholder="Quantity" required>
+                </div>
+                
+                <div>
+                    <label>Unit Price</label>
+                    <input type="number" name="items[][unit_price]" placeholder="Unit Price" required>
+                </div>
+                
+                <div>
+                    <label>Discount %</label>
+                    <input type="number" name="items[][discount]" placeholder="Discount %" required>
+                </div>
+            </div>
+            
             <button type="button" class="remove-item">Remove</button>
         `;
         quoteItems.appendChild(itemDiv);
@@ -97,4 +124,45 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initial preview update
     updatePreview();
+
+    // Handle form submission
+    quoteForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Collect form data
+        const formData = {
+            client_id: document.getElementById('client').value,
+            quote_number: document.getElementById('quote_number').value,
+            title: document.getElementById('title').value,
+            description: document.getElementById('description').value,
+            subtotal: document.getElementById('subtotal').value,
+            tax_rate: document.getElementById('tax_rate').value,
+            tax_amount: document.getElementById('tax_amount').value,
+            total_amount: document.getElementById('total_amount').value,
+            valid_until: document.getElementById('valid_until').value,
+            terms: document.getElementById('terms').value
+        };
+
+        try {
+            const response = await fetch('/documents/quote/create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                window.location.href = data.redirect_url;
+            } else {
+                alert('Error creating quote: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to create quote. Please try again.');
+        }
+    });
 }); 

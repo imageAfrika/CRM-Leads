@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/documents/invoice_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="invoice-container">
+    <div class="invoice-header">
+        <h1>Invoices</h1>
+        <div class="header-actions">
+            <div class="total-revenue">
+                Total Revenue: ${{ total_revenue|floatformat:2 }}
+            </div>
+        </div>
+    </div>
+
+    <div class="invoice-content">
+        <div class="filter-section">
+            <div class="filters">
+                <input type="month" id="monthFilter" class="filter-input">
+                <input type="text" id="searchFilter" class="filter-input" placeholder="Search invoices...">
+            </div>
+        </div>
+
+        <div class="invoice-list">
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Client</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td>{{ invoice.invoice_number }}</td>
+                        <td>{{ invoice.client.name }}</td>
+                        <td>{{ invoice.created_at|date:"d/m/Y" }}</td>
+                        <td>${{ invoice.total_amount|floatformat:2 }}</td>
+                        <td>
+                            <span class="status-badge status-{{ invoice.status|lower }}">
+                                {{ invoice.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="actions">
+                            <a href="{% url 'documents:document_detail' invoice.pk %}" class="btn-icon view-invoice">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="#" class="btn-icon download-invoice" data-id="{{ invoice.pk }}">
+                                <i class="fas fa-download"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="no-invoices">No invoices found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/documents/invoice_list.js' %}"></script>
+{% endblock %} 

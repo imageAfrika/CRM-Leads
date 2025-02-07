@@ -1,7 +1,7 @@
 from django.views.generic import TemplateView
 from clients.models import Client
 from sales.models import Sale
-from documents.models import Document, Quote
+from documents.models import Document, Quote, Expenditure
 from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
@@ -52,29 +52,20 @@ class DashboardView(TemplateView):
         # Calculate revenue
         total_revenue = Document.objects.filter(
             document_type='INVOICE'
-        ).aggregate(
-            total=Sum('total_amount')
-        )['total'] or Decimal('0')
+        ).aggregate(total=Sum('total_amount'))['total'] or 0
         
-        revenue_this_month = Document.objects.filter(
-            document_type='INVOICE',
-            created_at__gte=this_month_start
-        ).aggregate(
-            total=Sum('total_amount')
-        )['total'] or Decimal('0')
-        
-        revenue_last_month = Document.objects.filter(
+        # Calculate previous month's revenue
+        last_month_revenue = Document.objects.filter(
             document_type='INVOICE',
             created_at__gte=last_month_start,
             created_at__lt=this_month_start
-        ).aggregate(
-            total=Sum('total_amount')
-        )['total'] or Decimal('0')
+        ).aggregate(total=Sum('total_amount'))['total'] or 0
         
-        # Calculate trends
-        quote_trend = self.calculate_trend(quotes_this_month, quotes_last_month)
-        invoice_trend = self.calculate_trend(invoices_this_month, invoices_last_month)
-        revenue_trend = self.calculate_trend(revenue_this_month, revenue_last_month)
+        # Calculate revenue trend
+        if last_month_revenue > 0:
+            revenue_trend = ((total_revenue - last_month_revenue) / last_month_revenue) * 100
+        else:
+            revenue_trend = 0
         
         # Calculate conversion rate
         conversion_rate = round((total_invoices / total_quotes * 100) if total_quotes > 0 else 0, 1)
@@ -83,40 +74,37 @@ class DashboardView(TemplateView):
         conversion_trend = self.calculate_trend(conversion_this_month, conversion_last_month)
         
         # Calculate expenditure
-        total_expenditure = Document.objects.filter(
-            document_type='EXPENSE'
-        ).aggregate(
-            total=Sum('total_amount')
-        )['total'] or Decimal('0')
+        total_expenditure = Expenditure.objects.aggregate(
+            total=Sum('amount')
+        )['total'] or 0
         
-        expenditure_this_month = Document.objects.filter(
-            document_type='EXPENSE',
-            created_at__gte=this_month_start
-        ).aggregate(
-            total=Sum('total_amount')
-        )['total'] or Decimal('0')
+        # Calculate previous month's expenditure
+        last_month_expenditure = Expenditure.objects.filter(
+            date__gte=last_month_start,
+            date__lt=this_month_start
+        ).aggregate(total=Sum('amount'))['total'] or 0
         
-        expenditure_last_month = Document.objects.filter(
-            document_type='EXPENSE',
-            created_at__gte=last_month_start,
-            created_at__lt=this_month_start
-        ).aggregate(
-            total=Sum('total_amount')
-        )['total'] or Decimal('0')
+        # Calculate expenditure trend
+        if last_month_expenditure > 0:
+            expenditure_trend = ((total_expenditure - last_month_expenditure) / last_month_expenditure) * 100
+        else:
+            expenditure_trend = 0
 
-        expenditure_trend = self.calculate_trend(expenditure_this_month, expenditure_last_month)
+        # Get current month's expenses
+        today = timezone.now()
+        current_month_expenses = Expenditure.objects.filter(
+            date__year=today.year,
+            date__month=today.month
+        ).aggregate(Sum('amount'))['amount__sum'] or 0
 
         context['stats'] = {
             'total_quotes': total_quotes,
             'total_invoices': total_invoices,
             'total_revenue': total_revenue,
-            'quote_trend': quote_trend,
-            'invoice_trend': invoice_trend,
             'revenue_trend': revenue_trend,
-            'conversion_rate': conversion_rate,
-            'conversion_trend': conversion_trend,
             'total_expenditure': total_expenditure,
             'expenditure_trend': expenditure_trend,
+            'total_expenses': current_month_expenses,
         }
         
         return context

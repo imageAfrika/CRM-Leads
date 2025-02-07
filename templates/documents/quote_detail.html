@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="quote-detail-container">
+    {% csrf_token %}
+    <div class="quote-header">
+        <h1>Quote Details</h1>
+        <div class="quote-actions">
+            <a href="{% url 'documents:document_download' quote.pk %}" class="btn btn-secondary">
+                <i class="fas fa-download"></i> Download PDF
+            </a>
+            {% if quote.status == 'DRAFT' or quote.status == 'SENT' %}
+            <button class="btn btn-primary generate-invoice" data-quote-id="{{ quote.pk }}">
+                <i class="fas fa-file-invoice"></i> Generate Invoice
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="quote-content">
+        <!-- Quote details here -->
+        <div class="quote-info">
+            <p><strong>Quote Number:</strong> {{ quote.quote_number }}</p>
+            <p><strong>Client:</strong> {{ quote.client.name }}</p>
+            <p><strong>Date:</strong> {{ quote.created_at|date:"d/m/Y" }}</p>
+            <p><strong>Status:</strong> {{ quote.get_status_display }}</p>
+            <p><strong>Total Amount:</strong> ${{ quote.total_amount|floatformat:2 }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const generateInvoiceBtn = document.querySelector('.generate-invoice');
+    if (generateInvoiceBtn) {
+        generateInvoiceBtn.addEventListener('click', async function() {
+            try {
+                const response = await fetch(`/documents/quote/${this.dataset.quoteId}/generate-invoice/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert('Error generating invoice: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to generate invoice. Please try again.');
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

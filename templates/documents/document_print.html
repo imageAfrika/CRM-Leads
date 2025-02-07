@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ document.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            margin: 0;
+            padding: 0;
+        }
+
+        .document-container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .document-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .company-info h1 {
+            font-size: 24px;
+            color: #1e293b;
+            margin: 0 0 10px 0;
+        }
+
+        .client-info {
+            text-align: right;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .items-table th,
+        .items-table td {
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        .items-table th {
+            background: #f8fafc;
+            font-weight: bold;
+        }
+
+        .totals-section {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .total-row {
+            margin: 5px 0;
+        }
+
+        .grand-total {
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        .terms-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        @page {
+            margin: 0.75in;
+            size: A4;
+        }
+    </style>
+</head>
+<body>
+    <div class="document-container">
+        <div class="document-header">
+            <div class="company-info">
+                <h1>{{ document.title }}</h1>
+                <p>{{ document.document_type }}</p>
+                <p>Date: {{ document.document_date|date:"d/m/Y" }}</p>
+            </div>
+            
+            <div class="client-info">
+                <h2>Client Information</h2>
+                <p>{{ document.client.name }}</p>
+                <p>{{ document.client.email }}</p>
+                <p>{{ document.client.phone }}</p>
+                <p>{{ document.client.address }}</p>
+            </div>
+        </div>
+
+        {% if document.document_type == 'QUOTE' and document.quote %}
+        <div class="items-section">
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Discount</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in document.quote.items.all %}
+                    <tr>
+                        <td>{{ item.description }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ item.unit_price|floatformat:2 }}</td>
+                        <td>{{ item.discount }}%</td>
+                        <td>${{ item.total|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="totals-section">
+            <div class="totals">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span>${{ document.quote.subtotal|floatformat:2 }}</span>
+                </div>
+                <div class="total-row">
+                    <span>Tax ({{ document.quote.tax_rate }}%):</span>
+                    <span>${{ document.quote.tax_amount|floatformat:2 }}</span>
+                </div>
+                <div class="total-row grand-total">
+                    <span>Total:</span>
+                    <span>${{ document.quote.total_amount|floatformat:2 }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="terms-section">
+            <h3>Terms and Conditions</h3>
+            <p>{{ document.quote.terms }}</p>
+            <p>Valid until: {{ document.quote.valid_until|date:"d/m/Y" }}</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html> 

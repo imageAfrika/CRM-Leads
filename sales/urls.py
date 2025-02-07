@@ -9,4 +9,5 @@ urlpatterns = [
     path('new/', views.SaleCreateView.as_view(), name='sale_create'),
     path('<int:pk>/edit/', views.SaleUpdateView.as_view(), name='sale_update'),
     path('<int:pk>/delete/', views.SaleDeleteView.as_view(), name='sale_delete'),
+    path('direct-sale/', views.direct_sale, name='direct_sale'),
 ]
