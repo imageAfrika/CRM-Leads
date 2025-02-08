@@ -10,7 +10,6 @@ from reportlab.lib.pagesizes import letter
 from io import BytesIO
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
-import pdfkit
 
 class Document(models.Model):
     DOCUMENT_TYPES = (
@@ -20,6 +19,7 @@ class Document(models.Model):
         ('DELIVERY_NOTE', 'Delivery Note'),
         ('PROFORMA_INVOICE', 'Proforma Invoice'),
         ('PAYMENT_RECEIPT', 'Payment Receipt'),
+        ('SALES_RECEIPT', 'Sales Receipt'),
     )
 
     STATUS_CHOICES = (
@@ -73,11 +73,19 @@ class Document(models.Model):
             if self.document_type == 'QUOTE':
                 # Get the last quote number
                 last_quote = Document.objects.filter(document_type='QUOTE').order_by('-quote_number').first()
-                self.quote_number = (last_quote.quote_number + 1) if last_quote else 1
-            elif self.document_type == 'RECEIPT':
+                self.quote_number = (last_quote.quote_number or 0) + 1 if last_quote else 1
+            elif self.document_type in ['RECEIPT', 'SALES_RECEIPT']:
                 # Get the last receipt number
-                last_receipt = Document.objects.filter(document_type='RECEIPT').order_by('-receipt_number').first()
-                self.receipt_number = (last_receipt.receipt_number + 1) if last_receipt else 1
+                last_receipt = Document.objects.filter(
+                    document_type__in=['RECEIPT', 'SALES_RECEIPT'],
+                    receipt_number__isnull=False  # Only get records with non-null receipt numbers
+                ).order_by('-receipt_number').first()
+                
+                # Safely get the next receipt number
+                if last_receipt and last_receipt.receipt_number is not None:
+                    self.receipt_number = last_receipt.receipt_number + 1
+                else:
+                    self.receipt_number = 1
 
         # Calculate subtotal if not set
         if not self.subtotal:
@@ -99,7 +107,7 @@ class Document(models.Model):
             return self.invoice_number
         elif self.document_type == 'QUOTE':
             return f"Q{self.quote_number:04d}" if self.quote_number else None
-        elif self.document_type == 'RECEIPT':
+        elif self.document_type in ['RECEIPT', 'SALES_RECEIPT']:
             return f"R{self.receipt_number:04d}" if self.receipt_number else None
         return None
 
@@ -108,6 +116,52 @@ class Document(models.Model):
 
     def get_absolute_url(self):
         return reverse('documents:document_detail', args=[str(self.id)])
+
+    def clean(self):
+        """Validate the document"""
+        from django.core.exceptions import ValidationError
+        
+        if self.document_type == 'INVOICE' and not self.due_date:
+            raise ValidationError({'due_date': 'Due date is required for invoices'})
+        
+        if self.due_date and self.due_date < self.document_date:
+            raise ValidationError({'due_date': 'Due date cannot be earlier than document date'})
+
+    def mark_as_sent(self):
+        """Mark document as sent"""
+        if self.status == 'DRAFT':
+            self.status = 'SENT'
+            self.save()
+        else:
+            raise ValueError(f"Cannot mark as sent: document is {self.status}")
+
+    def mark_as_paid(self):
+        """Mark document as paid"""
+        if self.status in ['SENT', 'OVERDUE']:
+            self.status = 'PAID'
+            self.save()
+        else:
+            raise ValueError(f"Cannot mark as paid: document is {self.status}")
+
+    def generate_pdf(self):
+        # Create a BytesIO buffer for the PDF
+        buffer = BytesIO()
+        
+        # Create the PDF object, using the BytesIO object as its "file."
+        p = canvas.Canvas(buffer, pagesize=letter)
+        
+        # Draw things on the PDF
+        p.drawString(100, 750, f"Document #{self.pk}")
+        # ... add more content as needed ...
+        
+        # Close the PDF object cleanly
+        p.showPage()
+        p.save()
+        
+        # Get the value of the BytesIO buffer and write it to the response.
+        pdf = buffer.getvalue()
+        buffer.close()
+        return pdf
 
 class Quote(models.Model):
     STATUS_CHOICES = (
@@ -131,9 +185,44 @@ class Quote(models.Model):
     terms = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    # PDF handling
     pdf_file = models.FileField(upload_to='quotes/', blank=True, null=True)
+
+    def create_document(self):
+        """Create a Document instance from this Quote"""
+        return Document.objects.create(
+            client=self.client,
+            document_type='QUOTE',
+            description=self.description,
+            subtotal=self.subtotal,
+            tax_rate=self.tax_rate,
+            tax_amount=self.tax_amount,
+            total_amount=self.total_amount,
+            document_date=self.created_at.date(),
+            status='DRAFT',
+            quote=self
+        )
+
+    def convert_to_invoice(self):
+        """Convert this quote to an invoice"""
+        if self.status != 'ACCEPTED':
+            raise ValueError("Only accepted quotes can be converted to invoices")
+        
+        document = Document.objects.create(
+            client=self.client,
+            document_type='INVOICE',
+            description=self.description,
+            subtotal=self.subtotal,
+            tax_rate=self.tax_rate,
+            tax_amount=self.tax_amount,
+            total_amount=self.total_amount,
+            document_date=self.created_at.date(),
+            status='DRAFT'
+        )
+        
+        self.status = 'INVOICED'
+        self.save()
+        
+        return document
 
     class Meta:
         ordering = ['-created_at']

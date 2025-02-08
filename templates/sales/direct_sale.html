@@ -6,76 +6,72 @@
 {% endblock %}
 
 {% block content %}
-<div class="direct-sale-container">
+<div class="sale-container">
     <div class="sale-header">
-        <h1>Direct Sale</h1>
+        <h1>New Sale</h1>
     </div>
 
-    <form id="directSaleForm" class="sale-form">
+    <form id="sale-form" method="post" novalidate>
         {% csrf_token %}
         
+        <!-- Client Selection -->
         <div class="form-section">
-            <h3>Customer Information</h3>
+            <h2>Client Information</h2>
             <div class="form-group">
-                <label for="client">Client</label>
+                <label for="client">Select Client <span class="required">*</span></label>
                 <select id="client" name="client" required>
-                    <option value="">Select Client</option>
+                    <option value="">-- Select a client --</option>
                     {% for client in clients %}
-                    <option value="{{ client.id }}">{{ client.name }}</option>
+                        <option value="{{ client.id }}">{{ client.name }}</option>
                     {% endfor %}
                 </select>
+                <div class="error-message" id="client-error"></div>
             </div>
         </div>
 
+        <!-- Items Section -->
         <div class="form-section">
-            <h3>Sale Items</h3>
-            <div id="saleItems">
-                <div class="sale-item">
-                    <div class="form-group">
-                        <label>Description</label>
-                        <input type="text" name="items[][description]" required>
+            <h2>Items</h2>
+            <div class="items-header">
+                <div class="item-col description">Description</div>
+                <div class="item-col quantity">Quantity</div>
+                <div class="item-col unit-price">Unit Price</div>
+                <div class="item-col discount">Discount %</div>
+                <div class="item-col total">Total</div>
+                <div class="item-col actions">Actions</div>
+            </div>
+            <div id="items-list">
+                <div class="item">
+                    <div class="item-input">
+                        <input type="text" name="description[]" placeholder="Item Description" required
+                               data-error="Description is required">
+                        <div class="error-message"></div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Quantity</label>
-                            <input type="number" name="items[][quantity]" min="1" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Unit Price</label>
-                            <input type="number" name="items[][unit_price]" step="0.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Discount %</label>
-                            <input type="number" name="items[][discount]" min="0" max="100" value="0">
-                        </div>
+                    <div class="item-input">
+                        <input type="number" name="quantity[]" placeholder="Qty" min="1" step="1" required
+                               data-error="Quantity must be at least 1">
+                        <div class="error-message"></div>
                     </div>
+                    <div class="item-input">
+                        <input type="number" name="unit_price[]" placeholder="Unit Price" step="0.01" min="0.01" required
+                               data-error="Price must be greater than 0">
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="item-input">
+                        <input type="number" name="discount[]" placeholder="Discount" min="0" max="100" value="0" step="0.01"
+                               data-error="Discount must be between 0 and 100">
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="item-total">$0.00</div>
+                    <button type="button" class="remove-item" title="Remove item">×</button>
                 </div>
             </div>
-            <button type="button" id="addItemBtn" class="btn btn-secondary">Add Item</button>
+            <button type="button" id="add-item" class="btn-add">+ Add Item</button>
+            <div class="error-message" id="items-error"></div>
         </div>
 
-        <div class="form-section">
-            <h3>Payment Details</h3>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Payment Method</label>
-                    <select name="payment_method" required>
-                        <option value="CASH">Cash</option>
-                        <option value="CARD">Card</option>
-                        <option value="BANK_TRANSFER">Bank Transfer</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Payment Status</label>
-                    <select name="payment_status" required>
-                        <option value="PAID">Paid</option>
-                        <option value="PENDING">Pending</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="totals-section">
+        <!-- Totals Section -->
+        <div class="form-section totals">
             <div class="total-row">
                 <span>Subtotal:</span>
                 <span id="subtotal">$0.00</span>
@@ -84,17 +80,59 @@
                 <span>Tax ({{ tax_rate }}%):</span>
                 <span id="tax">$0.00</span>
             </div>
-            <div class="total-row total">
+            <div class="total-row grand-total">
                 <span>Total:</span>
                 <span id="total">$0.00</span>
             </div>
         </div>
 
+        <!-- Payment Section -->
+        <div class="form-section">
+            <h2>Payment Details</h2>
+            <div class="form-group">
+                <label>VAT Options</label>
+                <div class="vat-options">
+                    <label class="radio-label">
+                        <input type="radio" name="include_tax" value="true" checked>
+                        Include 16% VAT
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="include_tax" value="false">
+                        Exclude VAT
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="payment_method">Payment Method <span class="required">*</span></label>
+                <select id="payment_method" name="payment_method" required>
+                    <option value="">-- Select payment method --</option>
+                    <option value="CASH">Cash</option>
+                    <option value="CARD">Card</option>
+                    <option value="BANK_TRANSFER">Bank Transfer</option>
+                </select>
+                <div class="error-message" id="payment-method-error"></div>
+            </div>
+            <div class="form-group">
+                <label for="payment_status">Payment Status <span class="required">*</span></label>
+                <select id="payment_status" name="payment_status" required>
+                    <option value="">-- Select payment status --</option>
+                    <option value="PAID">Paid</option>
+                    <option value="PENDING">Pending</option>
+                </select>
+                <div class="error-message" id="payment-status-error"></div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Complete Sale</button>
+            <button type="submit" class="btn-primary">Complete Sale</button>
+            <a href="{% url 'sales:sale_list' %}" class="btn-secondary">Cancel</a>
         </div>
     </form>
 </div>
+
+<!-- Notification -->
+<div id="notification" class="notification"></div>
 {% endblock %}
 
 {% block extra_js %}

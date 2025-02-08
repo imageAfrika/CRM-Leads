@@ -5,6 +5,7 @@ from django.urls import reverse
 # Create your models here.
 class Client(models.Model):
     name = models.CharField(max_length=200)
+    contact_person = models.CharField(max_length=200, blank=True, null=True)
     email = models.EmailField()
     phone = models.CharField(max_length=20)
     address = models.TextField()

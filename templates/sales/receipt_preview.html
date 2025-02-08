@@ -1,0 +1,342 @@
+{% extends "print_base.html" %}
+{% load static %}
+
+{% block title %}Receipt #{{ sale.pk }}{% endblock %}
+
+{% block actions %}
+<div class="receipt-actions">
+    <button class="btn btn-secondary" onclick="window.print()">
+        <i class="fas fa-print"></i> Print
+    </button>
+    <button class="btn btn-primary" id="savePDF">
+        <i class="fas fa-file-pdf"></i> Save as PDF
+    </button>
+    <a href="{% url 'sales:sale_detail' sale.pk %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Action Buttons */
+    .receipt-actions {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        display: flex;
+        gap: 0.5rem;
+        z-index: 1000;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background: #2563eb;
+    }
+
+    .btn-secondary {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+        text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+        background: #e2e8f0;
+    }
+
+    /* Receipt Container */
+    .receipt-preview-container {
+        max-width: 21cm;
+        margin: 2rem auto;
+        padding: 2.5cm;
+        background: white;
+        color: #1e293b;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Header Styles */
+    .receipt-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 3rem;
+    }
+
+    .company-logo {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1e293b;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 0.75rem;
+    }
+
+    .receipt-title {
+        text-align: right;
+    }
+
+    .receipt-title h1 {
+        font-size: 2.5rem;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .receipt-number {
+        color: #64748b;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Info Sections */
+    .info-sections {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .info-section {
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-radius: 0.75rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .info-section h2 {
+        font-size: 1.1rem;
+        color: #64748b;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .info-section p {
+        margin: 0.5rem 0;
+        color: #1e293b;
+    }
+
+    /* Items Table */
+    .items-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 2rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+
+    .items-table th {
+        background: #f8fafc;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #475569;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .items-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .items-table tr:hover td {
+        background-color: #f8fafc;
+    }
+
+    /* Totals Section */
+    .totals {
+        margin-left: auto;
+        width: 300px;
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-radius: 0.75rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        color: #475569;
+    }
+
+    .total-row.final {
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: #1e293b;
+        border-top: 1px solid #e2e8f0;
+        margin-top: 0.5rem;
+        padding-top: 1rem;
+    }
+
+    /* Footer */
+    .footer {
+        margin-top: 4rem;
+        padding-top: 2rem;
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-radius: 0.75rem;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+        color: #64748b;
+    }
+
+    /* Print Styles */
+    @media print {
+        .receipt-preview-container {
+            margin: 0;
+            padding: 2cm;
+            max-width: none;
+            box-shadow: none;
+            border-radius: 0;
+        }
+        
+        .info-section,
+        .items-table,
+        .totals,
+        .footer {
+            border: none;
+            background: none;
+        }
+        
+        tr {
+            page-break-inside: avoid;
+        }
+        
+        * {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="receipt-preview-container">
+    <div class="receipt-header">
+        <div class="company-logo">
+            {{ company_name }}
+        </div>
+        <div class="receipt-title">
+            <h1>RECEIPT</h1>
+            <div class="receipt-number">#{{ sale.pk }}</div>
+        </div>
+    </div>
+
+    <div class="info-sections">
+        <div class="info-section">
+            <h2>From</h2>
+            <p><strong>{{ company_name }}</strong></p>
+            <p>{{ company_address }}</p>
+            <p>Phone: {{ company_phone }}</p>
+            <p>Email: {{ company_email }}</p>
+        </div>
+
+        <div class="info-section">
+            <h2>Bill To</h2>
+            <p><strong>{{ sale.client.name }}</strong></p>
+            <p>{{ sale.client.address }}</p>
+            <p>Phone: {{ sale.client.phone }}</p>
+            <p>Email: {{ sale.client.email }}</p>
+        </div>
+
+        <div class="info-section">
+            <h2>Receipt Details</h2>
+            <p><strong>Date:</strong> {{ sale.sale_date|date:"F d, Y" }}</p>
+            <p><strong>Payment Method:</strong> {{ sale.get_payment_method_display }}</p>
+            <p><strong>Status:</strong> {{ sale.get_payment_status_display }}</p>
+        </div>
+    </div>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Discount</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in sale.items.all %}
+            <tr>
+                <td>{{ item.description }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>${{ item.unit_price|floatformat:2 }}</td>
+                <td>{{ item.discount|floatformat:2 }}%</td>
+                <td>${{ item.get_total|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="totals">
+        <div class="total-row">
+            <span>Subtotal</span>
+            <span>${{ sale.subtotal|floatformat:2 }}</span>
+        </div>
+        {% if sale.include_tax %}
+        <div class="total-row">
+            <span>VAT ({{ sale.tax_rate|floatformat:2 }}%)</span>
+            <span>${{ sale.tax_amount|floatformat:2 }}</span>
+        </div>
+        {% endif %}
+        <div class="total-row final">
+            <span>Total</span>
+            <span>${{ sale.total_amount|floatformat:2 }}</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Thank you for your business!</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('savePDF').addEventListener('click', async function() {
+    try {
+        const response = await fetch(`/sales/{{ sale.pk }}/generate-receipt-pdf/`);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `receipt_{{ sale.pk }}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to generate PDF. Please try again.');
+    }
+});
+</script>
+{% endblock %} 

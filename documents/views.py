@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from .models import Quote, Document, QuoteItem, Client, Expenditure
 from .forms import QuoteForm
-from django.http import JsonResponse, FileResponse
+from django.http import JsonResponse, FileResponse, HttpResponse
 from django.views.decorators.http import require_POST
 from decimal import Decimal
 from clients.models import Client
@@ -15,8 +15,9 @@ from django.template.loader import render_to_string
 from django.conf import settings
 import tempfile
 import os
-import pdfkit
-from django.utils.dateparse import parse_date
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from io import BytesIO
 
 def generate_quote_number():
     # Get today's date in YYYYMMDD format
@@ -361,3 +362,20 @@ def invoice_list(request):
         'invoices': invoices,
         'total_revenue': total_revenue
     })
+
+def generate_document_pdf(request, pk):
+    try:
+        document = get_object_or_404(Document, pk=pk)
+        pdf = document.generate_pdf()
+        
+        # Create the HTTP response
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="document_{document.pk}.pdf"'
+        response.write(pdf)
+        return response
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)

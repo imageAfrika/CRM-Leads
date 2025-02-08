@@ -111,6 +111,9 @@
                     </a>
                 {% endfor %}
             {% endif %}
+            <button class="btn btn-primary" onclick="window.location.href='{% url 'sales:preview_receipt' sale.pk %}'">
+                <i class="fas fa-file-invoice"></i> Generate Receipt
+            </button>
         </div>
     </div>
 
@@ -175,4 +178,26 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const generateReceiptBtn = document.querySelector('.generate-receipt');
+    
+    if (generateReceiptBtn) {
+        generateReceiptBtn.addEventListener('click', async function() {
+            const saleId = this.dataset.saleId;
+            
+            try {
+                // Open receipt in new window/tab
+                window.open(`/sales/${saleId}/generate-receipt/`, '_blank');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to generate receipt. Please try again.');
+            }
+        });
+    }
+});
+</script>
 {% endblock %} 

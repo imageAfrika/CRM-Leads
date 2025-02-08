@@ -6,38 +6,98 @@
 {% endblock %}
 
 {% block content %}
-    <h2>{% if object %}Update Client{% else %}Register New Client{% endif %}</h2>
-    <form method="post">
+<div class="client-form-container">
+    <div class="form-header">
+        <h1>{% if form.instance.pk %}Edit Client{% else %}Register New Client{% endif %}</h1>
+        <p>Complete the form below to {% if form.instance.pk %}update{% else %}register{% endif %} client information</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="success-message">
+                <i class="fas fa-check-circle"></i>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" novalidate>
         {% csrf_token %}
-        <div class="form-group">
-            {{ form.name.label_tag }}
-            {{ form.name }}
-            {% if form.name.errors %}
-                <div class="alert alert-danger">{{ form.name.errors }}</div>
-            {% endif %}
+        
+        <!-- Company Information -->
+        <div class="form-section">
+            <h2 class="section-title">Company Information</h2>
+            <div class="form-grid">
+                <div class="form-group required">
+                    <label for="{{ form.name.id_for_label }}">Company Name</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="error-message">{{ form.name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.contact_person.id_for_label }}">Contact Person</label>
+                    {{ form.contact_person }}
+                    {% if form.contact_person.errors %}
+                        <div class="error-message">{{ form.contact_person.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            {{ form.email.label_tag }}
-            {{ form.email }}
-            {% if form.email.errors %}
-                <div class="alert alert-danger">{{ form.email.errors }}</div>
-            {% endif %}
+
+        <!-- Contact Information -->
+        <div class="form-section">
+            <h2 class="section-title">Contact Information</h2>
+            <div class="form-grid">
+                <div class="form-group required">
+                    <label for="{{ form.email.id_for_label }}">Email Address</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="error-message">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group required">
+                    <label for="{{ form.phone.id_for_label }}">Phone Number</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}
+                        <div class="error-message">{{ form.phone.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="{{ form.address.id_for_label }}">Address</label>
+                    {{ form.address }}
+                    {% if form.address.errors %}
+                        <div class="error-message">{{ form.address.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            {{ form.phone.label_tag }}
-            {{ form.phone }}
-            {% if form.phone.errors %}
-                <div class="alert alert-danger">{{ form.phone.errors }}</div>
-            {% endif %}
+
+        <!-- Additional Information -->
+        <div class="form-section">
+            <h2 class="section-title">Additional Information</h2>
+            <div class="form-group">
+                <label for="{{ form.notes.id_for_label }}">Notes</label>
+                {{ form.notes }}
+                {% if form.notes.help_text %}
+                    <div class="help-text">{{ form.notes.help_text }}</div>
+                {% endif %}
+            </div>
         </div>
-        <div class="form-group">
-            {{ form.address.label_tag }}
-            {{ form.address }}
-            {% if form.address.errors %}
-                <div class="alert alert-danger">{{ form.address.errors }}</div>
-            {% endif %}
+
+        <div class="form-actions">
+            <a href="{% url 'clients:client_list' %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                {% if form.instance.pk %}Update Client{% else %}Register Client{% endif %}
+            </button>
         </div>
-        <button type="submit" class="btn btn-primary">{% if object %}Update{% else %}Create{% endif %}</button>
-        <a href="{% url 'clients:client_list' %}" class="btn btn-secondary">Cancel</a>
     </form>
+</div>
 {% endblock %}
