@@ -10,27 +10,29 @@ body {
 
 /* Navigation Styles */
 nav {
-    background-color: #f8f9fa;
-    color: #333;
+    height: 60px;
+    background-color: #2563eb;  /* Changed to primary color */
+    color: white;  /* Changed text color */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 30px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding: 0 30px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
 }
 
 .nav-brand a {
-    color: #333;
+    color: white;  /* Updated color */
     text-decoration: none;
     font-size: 22px;
     font-weight: 600;
     display: flex;
     align-items: center;
-    transition: color 0.3s;
+    transition: opacity 0.3s;
 }
 
 .nav-brand a:hover {
-    color: #2980b9;
+    opacity: 0.9;  /* Changed hover effect */
 }
 
 .nav-brand i {
@@ -39,22 +41,31 @@ nav {
 }
 
 .nav-links {
+    height: 100%;
     display: flex;
     gap: 25px;
+    align-items: center;
+    justify-content: center;  /* Center nav items */
+    flex: 1;  /* Take up available space */
+    margin: 0 2rem;  /* Add margin for spacing */
 }
 
 .nav-links a {
-    color: #555;
-    text-decoration: none;
-    font-size: 16px;
-    font-weight: 500;
+    height: 100%;
     display: flex;
     align-items: center;
-    transition: color 0.3s;
+    padding: 0 15px;
+    color: rgba(255, 255, 255, 0.9);  /* Slightly transparent white */
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;  /* For hover effect */
 }
 
 .nav-links a:hover {
-    color: #2980b9;
+    color: white;
+    border-bottom-color: white;  /* Show border on hover */
 }
 
 .nav-links i {
@@ -65,30 +76,215 @@ nav {
 /* Base Responsive Styles */
 @media (max-width: 768px) {
     nav {
+        height: auto;
+        padding: 1rem;
+    }
+
+    /* Only apply these styles when user is authenticated */
+    .nav-brand {
+        margin-bottom: 0;  /* Reset margin */
+    }
+
+    /* Styles for authenticated navigation */
+    body.authenticated nav {
         flex-direction: column;
-        align-items: flex-start;
-        padding: 15px;
     }
 
-    .nav-brand a {
-        font-size: 20px;
+    body.authenticated .nav-brand {
+        margin-bottom: 1rem;
     }
 
-    .nav-brand i {
-        font-size: 18px;
-    }
-
-    .nav-links {
+    body.authenticated .nav-links {
+        width: 100%;
         flex-direction: column;
-        gap: 12px;
-        margin-top: 15px;
+        gap: 0.5rem;
+        margin: 1rem 0;
     }
 
-    .nav-links a {
-        font-size: 15px;
+    body.authenticated .nav-links a {
+        width: 100%;
+        padding: 0.75rem;
+        justify-content: center;
+        border-bottom: none;  /* Remove bottom border on mobile */
+        background: rgba(255, 255, 255, 0.1);  /* Add background for better touch targets */
+        border-radius: 8px;
     }
 
-    .nav-links i {
-        font-size: 16px;
+    body.authenticated .nav-links a:hover {
+        background: rgba(255, 255, 255, 0.2);
     }
+
+    body.authenticated .nav-actions {
+        width: 100%;
+        justify-content: center;
+        margin-top: 1rem;
+    }
+
+    body.authenticated .profile-dropdown-content {
+        width: calc(100vw - 2rem);
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        right: -1rem;
+        margin-top: 0;
+    }
+
+    body.authenticated .profile-toggle {
+        width: auto;
+        justify-content: center;
+    }
+
+    /* Non-authenticated styles remain simple */
+    .nav-actions {
+        margin-left: auto;
+    }
+}
+
+/* Nav Actions Container */
+.nav-actions {
+    display: flex;
+    align-items: center;
+    margin-left: auto; /* Push to the right */
+    gap: 1rem;
+}
+
+/* Login Button */
+.login-button {
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);  /* Semi-transparent background */
+    color: white !important;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.login-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+/* Profile Dropdown */
+.nav-profile {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.profile-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);  /* Semi-transparent background */
+    border: none;
+    cursor: pointer;
+    color: white;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.profile-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Avatar Styles */
+.nav-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.2);  /* Lighter border */
+}
+
+.nav-default-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);  /* Semi-transparent background */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 600;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Dropdown Content */
+.profile-dropdown-content {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    min-width: 240px;
+    display: none;
+    z-index: 1000;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.profile-dropdown-content.show {
+    display: block;  /* Show when class is added */
+}
+
+.dropdown-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.full-name {
+    display: block;
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 0.9rem;
+}
+
+.user-email {
+    display: block;
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+.profile-dropdown-content a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.profile-dropdown-content a i {
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.profile-dropdown-content a:hover {
+    background: #f8fafc;
+    color: #3498db;
+}
+
+.logout-link {
+    color: #ef4444 !important;
+}
+
+.logout-link:hover {
+    background: #fef2f2 !important;
+    color: #dc2626 !important;
+}
+
+.profile-dropdown:hover .profile-dropdown-content {
+    display: block;
 }

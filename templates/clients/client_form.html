@@ -8,8 +8,8 @@
 {% block content %}
 <div class="client-form-container">
     <div class="form-header">
-        <h1>{% if form.instance.pk %}Edit Client{% else %}Register New Client{% endif %}</h1>
-        <p>Complete the form below to {% if form.instance.pk %}update{% else %}register{% endif %} client information</p>
+        <h1>{% if form.instance.pk %}Edit Client{% else %}New Client{% endif %}</h1>
+        <p>Enter client information below</p>
     </div>
 
     {% if messages %}
@@ -24,12 +24,11 @@
     <form method="post" novalidate>
         {% csrf_token %}
         
-        <!-- Company Information -->
         <div class="form-section">
-            <h2 class="section-title">Company Information</h2>
-            <div class="form-grid">
-                <div class="form-group required">
-                    <label for="{{ form.name.id_for_label }}">Company Name</label>
+            <h2 class="section-title">Basic Information</h2>
+            <div class="company-info">
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}">Company Name*</label>
                     {{ form.name }}
                     {% if form.name.errors %}
                         <div class="error-message">{{ form.name.errors.0 }}</div>
@@ -44,28 +43,29 @@
                     {% endif %}
                 </div>
             </div>
-        </div>
-
-        <!-- Contact Information -->
-        <div class="form-section">
-            <h2 class="section-title">Contact Information</h2>
-            <div class="form-grid">
-                <div class="form-group required">
-                    <label for="{{ form.email.id_for_label }}">Email Address</label>
+            
+            <div class="contact-info">
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">Email*</label>
                     {{ form.email }}
                     {% if form.email.errors %}
                         <div class="error-message">{{ form.email.errors.0 }}</div>
                     {% endif %}
                 </div>
 
-                <div class="form-group required">
-                    <label for="{{ form.phone.id_for_label }}">Phone Number</label>
+                <div class="form-group">
+                    <label for="{{ form.phone.id_for_label }}">Phone*</label>
                     {{ form.phone }}
                     {% if form.phone.errors %}
                         <div class="error-message">{{ form.phone.errors.0 }}</div>
                     {% endif %}
                 </div>
+            </div>
+        </div>
 
+        <div class="form-section">
+            <h2 class="section-title">Additional Details</h2>
+            <div class="form-grid">
                 <div class="form-group full-width">
                     <label for="{{ form.address.id_for_label }}">Address</label>
                     {{ form.address }}
@@ -73,29 +73,20 @@
                         <div class="error-message">{{ form.address.errors.0 }}</div>
                     {% endif %}
                 </div>
-            </div>
-        </div>
 
-        <!-- Additional Information -->
-        <div class="form-section">
-            <h2 class="section-title">Additional Information</h2>
-            <div class="form-group">
-                <label for="{{ form.notes.id_for_label }}">Notes</label>
-                {{ form.notes }}
-                {% if form.notes.help_text %}
-                    <div class="help-text">{{ form.notes.help_text }}</div>
-                {% endif %}
+                <div class="form-group full-width">
+                    <label for="{{ form.notes.id_for_label }}">Notes</label>
+                    {{ form.notes }}
+                </div>
             </div>
         </div>
 
         <div class="form-actions">
             <a href="{% url 'clients:client_list' %}" class="btn btn-secondary">
-                <i class="fas fa-times"></i>
-                Cancel
+                <i class="fas fa-times"></i> Cancel
             </a>
             <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i>
-                {% if form.instance.pk %}Update Client{% else %}Register Client{% endif %}
+                <i class="fas fa-save"></i> {% if form.instance.pk %}Update{% else %}Save{% endif %}
             </button>
         </div>
     </form>

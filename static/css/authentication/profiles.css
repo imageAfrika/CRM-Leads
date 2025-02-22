@@ -1,0 +1,212 @@
+:root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --background-color: #ffffff;
+    --card-background: #f8fafc;
+    --text-color: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --border-radius: 12px;
+    --input-background: #f1f5f9;
+    --avatar-size: 160px;
+    --avatar-border: 5px;
+}
+
+.profiles-wrapper {
+    min-height: 100vh;
+    background-color: var(--background-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+}
+
+.profiles-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem;
+}
+
+.profiles-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.profiles-header h1 {
+    color: var(--text-color);
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.profiles-header .subtitle {
+    color: var(--text-muted);
+    font-size: 1.25rem;
+}
+
+.profiles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 3rem;
+    justify-items: center;
+}
+
+.profile-card {
+    text-decoration: none;
+    color: var(--text-color);
+    transition: transform 0.2s ease;
+    width: 200px;
+    text-align: center;
+}
+
+.profile-card:hover {
+    transform: translateY(-6px);
+}
+
+.avatar-container {
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    margin: 0 auto 1.5rem;
+    border-radius: 9999px;
+    overflow: hidden;
+    background-color: var(--card-background);
+    box-shadow: 0 6px 8px -1px rgb(0 0 0 / 0.05);
+    transition: all 0.2s ease;
+    border: var(--avatar-border) solid var(--card-background);
+    position: relative;
+}
+
+.profile-card:hover .avatar-container {
+    box-shadow: 0 12px 20px -1px rgb(0 0 0 / 0.1);
+    border-color: var(--primary-color);
+    transform: translateY(-6px);
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 9999px;
+}
+
+.default-avatar {
+    width: 100%;
+    height: 100%;
+    background: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(var(--avatar-size) * 0.4);
+    font-weight: 500;
+    border-radius: 9999px;
+}
+
+.add-avatar {
+    width: 100%;
+    height: 100%;
+    background: var(--card-background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+    border-radius: 9999px;
+}
+
+.add-avatar svg {
+    width: 32px;
+    height: 32px;
+}
+
+.profile-card:hover .add-avatar {
+    background: var(--primary-color);
+    color: white;
+}
+
+.profile-name {
+    color: var(--text-color);
+    font-size: 1.25rem;
+    font-weight: 500;
+    display: block;
+    margin-top: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    :root {
+        --avatar-size: 140px;
+        --avatar-border: 4px;
+    }
+
+    .profiles-container {
+        padding: 2rem;
+    }
+    
+    .profiles-header h1 {
+        font-size: 2rem;
+    }
+    
+    .profiles-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --avatar-size: 120px;
+        --avatar-border: 4px;
+    }
+
+    .profiles-container {
+        padding: 1.5rem;
+    }
+    
+    .profiles-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .profiles-grid {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .profile-name {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --avatar-size: 100px;
+        --avatar-border: 3px;
+    }
+    
+    .profiles-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+    }
+    
+    .profile-name {
+        font-size: 1rem;
+    }
+}
+
+/* Animation for hover effect */
+@keyframes pulseScale {
+    0% {
+        transform: scale(1) translateY(-6px);
+    }
+    50% {
+        transform: scale(1.05) translateY(-6px);
+    }
+    100% {
+        transform: scale(1) translateY(-6px);
+    }
+}
+
+.profile-card:hover .avatar-container {
+    animation: pulseScale 0.3s ease;
+} 

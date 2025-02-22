@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .delete-container {
+        max-width: 500px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        text-align: center;
+    }
+
+    .warning-icon {
+        font-size: 3rem;
+        color: #ef4444;
+        margin-bottom: 1.5rem;
+    }
+
+    .delete-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .delete-header h1 {
+        font-size: 1.5rem;
+        color: #1e293b;
+        margin: 0 0 0.5rem;
+    }
+
+    .delete-header p {
+        color: #64748b;
+        font-size: 0.875rem;
+        margin: 0;
+    }
+
+    .client-info {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+
+    .client-name {
+        font-size: 1.125rem;
+        font-weight: 500;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    .client-details {
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+
+    .actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        min-width: 120px;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-delete {
+        background: #ef4444;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: #dc2626;
+        transform: translateY(-1px);
+    }
+
+    .btn-cancel {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .btn-cancel:hover {
+        background: #e2e8f0;
+        transform: translateY(-1px);
+    }
+
+    @media (max-width: 768px) {
+        .delete-container {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+
+        .actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-container">
+    <i class="fas fa-exclamation-triangle warning-icon"></i>
+    
+    <div class="delete-header">
+        <h1>Delete Client</h1>
+        <p>Are you sure you want to delete this client? This action cannot be undone.</p>
+    </div>
+
+    <div class="client-info">
+        <div class="client-name">{{ object.name }}</div>
+        <div class="client-details">
+            <div>{{ object.contact_person|default:"No contact person" }}</div>
+            <div>{{ object.email }}</div>
+            <div>{{ object.phone }}</div>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="actions">
+            <a href="{% url 'clients:client_list' %}" class="btn btn-cancel">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-delete">
+                <i class="fas fa-trash"></i> Delete Client
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %} 

@@ -20,9 +20,11 @@ from documents.views import quote_create, quote_detail
 from dashboard.views import DashboardView
 from django.conf import settings
 from django.conf.urls.static import static
+# from . import views
 
 urlpatterns = [
-    path('', include('dashboard.urls')),
+    path('', include('authentication.urls')),
+    path('dashboard/', include('dashboard.urls')),
     path('admin/', admin.site.urls),
     path('clients/', include('clients.urls')),
     path('sales/', include('sales.urls')),

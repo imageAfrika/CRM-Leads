@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'documents',
     'dashboard',
     'django_extensions',
+    'authentication',
 ]
 
 MIDDLEWARE = [
@@ -121,10 +122,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
-
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
@@ -137,6 +137,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 COMPANY_NAME = "Your Company Name"
 COMPANY_ADDRESS = "Your Company Address"
 
-# Media settings for PDF storage
+# Media files
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = BASE_DIR / 'media'
+
+LOGIN_URL = 'authentication:login'
+LOGIN_REDIRECT_URL = 'authentication:profile_selection'
+
+# Message settings
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'

@@ -119,3 +119,209 @@ h2 {
         padding: 8px 16px;
     }
 }
+
+.client-form-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.form-header {
+    text-align: center;  /* Center header text */
+    margin-bottom: 2rem;
+}
+
+.form-header h1 {
+    font-size: 1.75rem;
+    color: #1e293b;
+    margin: 0;
+}
+
+.form-header p {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin: 0.5rem 0 0;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.form-section {
+    background: #f8fafc;
+    padding: 2rem;
+    border-radius: 12px;
+}
+
+.section-title {
+    font-size: 1.125rem;
+    color: #475569;
+    margin: 0 0 1.5rem;
+    font-weight: 500;
+    text-align: center;  /* Center section titles */
+}
+
+/* Updated grid layouts with better proportions */
+.company-info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 1.5rem;  /* Space before contact info */
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    color: #475569;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    background: #fff;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    outline: none;
+}
+
+.form-group.full-width {
+    grid-column: span 2;
+}
+
+.form-group textarea {
+    height: 100px;  /* Increased height for better proportions */
+    resize: none;
+}
+
+/* Center-aligned form actions */
+.form-actions {
+    display: flex;
+    justify-content: center;  /* Center the buttons */
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 120px;  /* Consistent button width */
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+    border: none;
+}
+
+.btn-secondary:hover {
+    background: #e2e8f0;
+    transform: translateY(-1px);
+}
+
+.error-message {
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 0.375rem;
+}
+
+.success-message {
+    background: #34d399;
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;  /* Center success message */
+    gap: 0.5rem;
+    font-weight: 500;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .client-form-container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+
+    .form-section {
+        padding: 1.5rem;
+    }
+
+    .company-info,
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .form-group.full-width {
+        grid-column: auto;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+
+/* Update the contact info grid layout */
+.contact-info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;  /* Increased gap between email and phone */
+    margin-top: 2rem;  /* Add space after company info */
+}

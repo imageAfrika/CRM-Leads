@@ -1,102 +1,110 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <title>Receipt #{{ sale.pk }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/sales/receipt_template.css' %}">
     <style>
+        /* Fallback styles in case static file doesn't load */
         body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            background: white;
         }
-        .receipt-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .company-info {
-            margin-bottom: 20px;
-        }
-        .receipt-details {
-            margin-bottom: 30px;
-        }
-        .items-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-        }
-        .items-table th, .items-table td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-        .items-table th {
-            background: #f5f5f5;
-        }
-        .totals {
+        
+        .numeric-value,
+        .currency-value {
+            font-family: 'Courier New', monospace;
             text-align: right;
-            margin-bottom: 30px;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 50px;
-            font-size: 0.9em;
-            color: #666;
+            white-space: nowrap;
         }
     </style>
 </head>
 <body>
-    <div class="receipt-header">
-        <h1>RECEIPT</h1>
-        <div class="receipt-number">Receipt #{{ sale.pk }}</div>
+    <!-- Add the action buttons container -->
+    <div class="receipt-actions no-print">
+        <button onclick="window.print()" class="btn btn-secondary">
+            <i class="fas fa-print"></i> Print Receipt
+        </button>
+        <a href="{% url 'sales:generate_receipt' sale.pk %}" class="btn btn-primary">
+            <i class="fas fa-download"></i> Download PDF
+        </a>
     </div>
 
-    <div class="company-info">
-        <h2>{{ company_name }}</h2>
-        <p>{{ company_address }}<br>
-        Phone: {{ company_phone }}<br>
-        Email: {{ company_email }}</p>
-    </div>
+    <div class="receipt-container">
+        <div class="receipt-header">
+            <h1>Sales Receipt</h1>
+        </div>
 
-    <div class="receipt-details">
-        <p><strong>Date:</strong> {{ sale_date }}</p>
-        <p><strong>Client:</strong> {{ sale.client.name }}</p>
-        <p><strong>Payment Method:</strong> {{ sale.get_payment_method_display }}</p>
-        <p><strong>Status:</strong> {{ sale.get_payment_status_display }}</p>
-    </div>
+        <div class="company-info">
+            <div>{{ company_name }}</div>
+            <div>{{ company_address }}</div>
+            <div>{{ company_phone }}</div>
+            <div>{{ company_email }}</div>
+        </div>
 
-    <table class="items-table">
-        <thead>
-            <tr>
-                <th>Description</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Discount</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in items %}
-            <tr>
-                <td>{{ item.description }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>${{ item.unit_price|floatformat:2 }}</td>
-                <td>{{ item.discount|floatformat:2 }}%</td>
-                <td>${{ item.get_total|floatformat:2 }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <div class="receipt-details">
+            <div class="detail-row">
+                <div class="detail-label">Receipt #</div>
+                <div class="detail-value">{{ sale.pk }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Date</div>
+                <div class="detail-value">{{ sale.sale_date|date:"Y-m-d" }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Client</div>
+                <div class="detail-value">{{ sale.client.name }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Payment Method</div>
+                <div class="detail-value">{{ sale.get_payment_method_display }}</div>
+            </div>
+        </div>
 
-    <div class="totals">
-        <p><strong>Subtotal:</strong> ${{ sale.subtotal|floatformat:2 }}</p>
-        <p><strong>Tax ({{ sale.tax_rate|floatformat:2 }}%):</strong> ${{ sale.tax_amount|floatformat:2 }}</p>
-        <p><strong>Total Amount:</strong> ${{ sale.total_amount|floatformat:2 }}</p>
-    </div>
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Discount</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.description }}</td>
+                    <td class="numeric-value">{{ item.quantity|floatformat:0 }}</td>
+                    <td class="currency-value">{{ item.unit_price|floatformat:2 }}</td>
+                    <td class="numeric-value">{{ item.discount|floatformat:0 }}%</td>
+                    <td class="currency-value">{{ item.get_total|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-    <div class="footer">
-        <p>Thank you for your business!</p>
+        <div class="totals">
+            <div class="total-row">
+                <span>Subtotal</span>
+                <span class="currency-value">{{ sale.subtotal|floatformat:2 }}</span>
+            </div>
+            <div class="total-row">
+                <span>Tax ({{ sale.tax_rate|floatformat:2 }}%)</span>
+                <span class="currency-value">{{ sale.tax_amount|floatformat:2 }}</span>
+            </div>
+            <div class="total-row final">
+                <span>Total Amount</span>
+                <span class="currency-value">{{ sale.total_amount|floatformat:2 }}</span>
+            </div>
+        </div>
+
+        <div class="receipt-footer">
+            <p>Thank you for your business!</p>
+        </div>
     </div>
 </body>
 </html> 

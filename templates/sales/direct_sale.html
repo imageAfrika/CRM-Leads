@@ -14,10 +14,19 @@
     <form id="sale-form" method="post" novalidate>
         {% csrf_token %}
         
-        <!-- Client Selection -->
+        <!-- Client Information Section -->
         <div class="form-section">
             <h2>Client Information</h2>
-            <div class="form-group">
+            
+            <div class="client-toggle">
+                <label>
+                    <input type="checkbox" id="toggle-manual-client" name="toggle_manual_client">
+                    <span>Manually Enter Client Name</span>
+                </label>
+            </div>
+
+            <!-- Dropdown for Registered Clients -->
+            <div class="form-group" id="registered-client-group">
                 <label for="client">Select Client <span class="required">*</span></label>
                 <select id="client" name="client" required>
                     <option value="">-- Select a client --</option>
@@ -26,6 +35,13 @@
                     {% endfor %}
                 </select>
                 <div class="error-message" id="client-error"></div>
+            </div>
+
+            <!-- Input Field for Manual Client Entry -->
+            <div class="form-group" id="manual-client-group" style="display: none;">
+                <label for="manual-client-name">Client Name <span class="required">*</span></label>
+                <input type="text" id="manual-client-name" name="manual_client_name" placeholder="Enter client name">
+                <div class="error-message" id="manual-client-error"></div>
             </div>
         </div>
 
@@ -53,7 +69,10 @@
                         <div class="error-message"></div>
                     </div>
                     <div class="item-input">
-                        <input type="number" name="unit_price[]" placeholder="Unit Price" step="0.01" min="0.01" required
+                        <input type="text" 
+                               name="unit_price[]" 
+                               placeholder="Unit Price" 
+                               required
                                data-error="Price must be greater than 0">
                         <div class="error-message"></div>
                     </div>
@@ -137,4 +156,25 @@
 
 {% block extra_js %}
 <script src="{% static 'js/sales/direct_sale.js' %}"></script>
-{% endblock %} 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleCheckbox = document.getElementById('toggle-manual-client');
+        const registeredClientGroup = document.getElementById('registered-client-group');
+        const manualClientGroup = document.getElementById('manual-client-group');
+
+        toggleCheckbox.addEventListener('change', function () {
+            if (this.checked) {
+                registeredClientGroup.style.display = 'none';
+                manualClientGroup.style.display = 'block';
+                document.getElementById('client').removeAttribute('required');
+                document.getElementById('manual-client-name').setAttribute('required', true);
+            } else {
+                registeredClientGroup.style.display = 'block';
+                manualClientGroup.style.display = 'none';
+                document.getElementById('client').setAttribute('required', true);
+                document.getElementById('manual-client-name').removeAttribute('required');
+            }
+        });
+    });
+</script>
+{% endblock %}

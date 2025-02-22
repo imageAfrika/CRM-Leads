@@ -3,17 +3,25 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/clients/client_list.css' %}">
+<link rel="stylesheet" href="{% static 'css/clients/client_details_modal.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="container">
-    <h1>Clients Profiles</h1>
+    <div class="header">
+        <h1>Client Directory</h1>
+        <a href="{% url 'clients:client_create' %}" class="btn btn-add">
+            <i class="fas fa-plus"></i> Add New Client
+        </a>
+    </div>
+
     <div class="client-list">
         {% if clients %}
             <table class="client-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
+                        <th>Company Name</th>
+                        <th>Contact Person</th>
                         <th>Email</th>
                         <th>Phone</th>
                         <th>Actions</th>
@@ -22,21 +30,119 @@
                 <tbody>
                     {% for client in clients %}
                         <tr>
-                            <td><a href="{% url 'clients:client_detail' client.pk %}" class="client-name">{{ client.name }}</a></td>
+                            <td>
+                                <a href="javascript:void(0)" class="client-name" 
+                                   onclick="showDetailsModal(
+                                       {{ client.pk }}, 
+                                       '{{ client.name }}', 
+                                       '{{ client.contact_person|default:'' }}', 
+                                       '{{ client.email }}', 
+                                       '{{ client.phone }}', 
+                                       '{{ client.address|escapejs }}', 
+                                       '{{ client.notes|default:''|escapejs }}'
+                                   )">
+                                    <i class="fas fa-building"></i>
+                                    {{ client.name }}
+                                </a>
+                            </td>
+                            <td>{{ client.contact_person|default:"-" }}</td>
                             <td>{{ client.email }}</td>
                             <td>{{ client.phone }}</td>
                             <td class="actions">
-                                <a href="{% url 'clients:client_update' client.pk %}" class="btn-edit">Edit</a>
-                                <a href="{% url 'clients:client_delete' client.pk %}" class="btn-delete">Delete</a>
+                                <a href="{% url 'clients:client_update' client.pk %}" class="btn btn-edit">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <button class="btn btn-delete" onclick="showDeleteModal({{ client.pk }}, '{{ client.name }}', '{{ client.contact_person|default:'No contact person' }}', '{{ client.email }}', '{{ client.phone }}')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
                             </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         {% else %}
-            <p class="no-clients">No clients found.</p>
+            <div class="no-clients">
+                <div class="no-clients-content">
+                    <i class="fas fa-users"></i>
+                    <h3>No Clients Yet</h3>
+                    <p>Start by adding your first client to the directory.</p>
+                    <a href="{% url 'clients:client_create' %}" class="btn btn-add">
+                        <i class="fas fa-plus"></i> Add New Client
+                    </a>
+                </div>
+            </div>
         {% endif %}
     </div>
-    <a href="{% url 'clients:client_create' %}" class="btn-add">Add New Client</a>
 </div>
+
+<!-- Delete Modal -->
+<div class="modal-backdrop" id="modalBackdrop"></div>
+<div class="modal" id="deleteModal">
+    <i class="fas fa-exclamation-triangle warning-icon"></i>
+    
+    <div class="modal-header">
+        <h2>Delete Client</h2>
+        <p>Are you sure you want to delete this client? This action cannot be undone.</p>
+    </div>
+
+    <div class="client-info">
+        <div class="client-name" id="modalClientName"></div>
+        <div class="client-details">
+            <div id="modalContactPerson"></div>
+            <div id="modalEmail"></div>
+            <div id="modalPhone"></div>
+        </div>
+    </div>
+
+    <form id="deleteForm" method="post">
+        {% csrf_token %}
+        <div class="modal-actions">
+            <button type="button" class="btn btn-cancel" onclick="hideDeleteModal()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button type="submit" class="btn btn-delete">
+                <i class="fas fa-trash"></i> Delete Client
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Add this after your delete modal -->
+<div class="modal-backdrop" id="detailsModalBackdrop"></div>
+<div class="client-details-modal" id="clientDetailsModal">
+    <div class="client-details-header">
+        <h2><i class="fas fa-building"></i> <span id="detailsClientName"></span></h2>
+    </div>
+    <div class="client-details-content">
+        <div class="detail-group">
+            <div class="detail-label">Contact Person</div>
+            <div class="detail-value" id="detailsContactPerson"></div>
+        </div>
+        <div class="detail-group">
+            <div class="detail-label">Email</div>
+            <div class="detail-value" id="detailsEmail"></div>
+        </div>
+        <div class="detail-group">
+            <div class="detail-label">Phone</div>
+            <div class="detail-value" id="detailsPhone"></div>
+        </div>
+        <div class="detail-group">
+            <div class="detail-label">Address</div>
+            <div class="detail-value" id="detailsAddress"></div>
+        </div>
+        <div class="detail-group">
+            <div class="detail-label">Notes</div>
+            <div class="detail-value" id="detailsNotes"></div>
+        </div>
+    </div>
+    <div class="client-details-footer">
+        <button class="close-modal-btn" onclick="hideDetailsModal()">
+            <i class="fas fa-times"></i> Close
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/clients/client_list.js' %}"></script>
 {% endblock %}

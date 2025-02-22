@@ -8,19 +8,22 @@
     <title>CRM Leads</title>
     <!-- External CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <!-- Base CSS -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}"> 
     <!-- Page-specific CSS -->
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="{% if request.user.is_authenticated %}authenticated{% endif %}">
     <nav>
         <div class="nav-brand">
             <a href="{% url 'dashboard:dashboard' %}">
                 <i class="fas fa-bolt"></i> CRM Leads
             </a>
         </div>
+        
+        {% if request.user.is_authenticated %}
         <div class="nav-links">
             <a href="{% url 'dashboard:dashboard' %}">
                 <i class="fas fa-home"></i> Dashboard
@@ -38,11 +41,54 @@
                 <i class="fas fa-calendar"></i> Calendar
             </a>
         </div>
+        
+        <div class="nav-actions">
+            {% if request.user.is_authenticated and profile %}
+            <div class="nav-profile">
+                <div class="profile-dropdown">
+                    <button class="profile-toggle">
+                        {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" alt="{{ profile.name }}" class="nav-avatar">
+                        {% else %}
+                        <div class="nav-default-avatar">
+                            {% with name_parts=profile.name.split %}
+                                {{ name_parts.0.0|upper }}{% if name_parts|length > 1 %}{{ name_parts.1.0|upper }}{% endif %}
+                            {% endwith %}
+                        </div>
+                        {% endif %}
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="profile-dropdown-content">
+                        <div class="dropdown-header">
+                            <span class="full-name">{{ profile.name }}</span>
+                            <span class="user-email">{{ request.user.email }}</span>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'authentication:profile_selection' %}">
+                            <i class="fas fa-exchange-alt"></i> Switch Profile
+                        </a>
+                        <a href="{% url 'authentication:logout' %}" class="logout-link">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="nav-actions">
+            <a href="{% url 'authentication:login' %}" class="login-button">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        </div>
+        {% endif %}
     </nav>  
+    
     <main>
         {% block content %}
         {% endblock %}
     </main>
+    <script src="{% static 'js/base.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html> 

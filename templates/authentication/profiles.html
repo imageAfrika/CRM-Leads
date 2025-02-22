@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/authentication/profiles.css' %}">
+{% endblock %}
+
+
+{% block content %}
+<div class="profiles-wrapper">
+    <div class="profiles-container">
+        <div class="profiles-header">
+            <h1>Select Profile</h1>
+            <p class="subtitle">Choose your profile to continue</p>
+        </div>
+        
+        <div class="profiles-grid">
+            {% for profile in profiles %}
+            <a href="{% url 'authentication:profile_select' profile.pk %}" class="profile-card">
+                <div class="avatar-container">
+                    {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" alt="{{ profile.name }}" class="profile-avatar">
+                    {% else %}
+                    <div class="default-avatar">{{ profile.name|first }}</div>
+                    {% endif %}
+                </div>
+                <span class="profile-name">{{ profile.name }}</span>
+            </a>
+            {% endfor %}
+            
+            {% if profiles.count < 3 %}
+            <a href="{% url 'authentication:profile_create' %}" class="profile-card add-profile">
+                <div class="avatar-container">
+                    <div class="add-avatar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </div>
+                </div>
+                <span class="profile-name">New Profile</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

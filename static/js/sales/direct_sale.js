@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const itemsList = document.getElementById('items-list');
     const addItemBtn = document.getElementById('add-item');
     const notification = document.getElementById('notification');
-    const TAX_RATE = 15; // 15%
+    let currentPrices = new Map();
 
     function formatCurrency(number) {
         return new Intl.NumberFormat('en-US', {
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function parseCurrency(value) {
         if (!value) return 0;
-        return parseFloat(value.replace(/[$,\s]/g, '')) || 0;
+        return parseFloat(value.replace(/[^0-9.-]+/g, '')) || 0;
     }
 
     function showNotification(message, isError = false) {
@@ -71,57 +71,98 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     }
 
-    function calculateItemTotal(item) {
+    function calculateItemTotal(item, includeTax) {
+        // Get input values
         const quantity = parseCurrency(item.querySelector('input[name="quantity[]"]').value);
-        const unitPrice = parseCurrency(item.querySelector('input[name="unit_price[]"]').value);
-        const discount = parseCurrency(item.querySelector('input[name="discount[]"]').value);
+        const unitPriceInput = item.querySelector('input[name="unit_price[]"]');
+        const unitPrice = parseCurrency(unitPriceInput.value);
+        const discount = parseCurrency(item.querySelector('input[name="discount[]"]').value) / 100;
         
-        const subtotal = quantity * unitPrice;
-        const discountAmount = subtotal * (discount / 100);
-        const total = subtotal - discountAmount;
+        // Calculate line total before discount
+        const lineTotal = quantity * unitPrice;
         
-        item.querySelector('.item-total').textContent = formatCurrency(total);
-        return total;
+        // Apply discount
+        const discountAmount = lineTotal * discount;
+        const totalAfterDiscount = lineTotal - discountAmount;
+
+        // Calculate VAT and final total
+        let baseTotal, vatAmount, finalTotal;
+        
+        if (includeTax) {
+            // If price includes VAT, base amount is total/1.16
+            baseTotal = totalAfterDiscount ;
+            vatAmount = baseTotal * 0.16;
+            finalTotal = totalAfterDiscount + vatAmount; // Already includes VAT
+        } else {
+            // If price excludes VAT
+            baseTotal = totalAfterDiscount;
+            vatAmount = 0;
+            finalTotal = totalAfterDiscount;
+        }
+
+        // Update display
+        item.querySelector('.item-total').textContent = formatCurrency(finalTotal);
+        
+        return {
+            baseTotal: baseTotal,
+            vatAmount: vatAmount,
+            finalTotal: finalTotal
+        };
     }
 
     function updateTotals() {
         const items = document.querySelectorAll('.item');
-        let subtotal = 0;
-        
-        items.forEach(item => {
-            const quantity = parseCurrency(item.querySelector('input[name="quantity[]"]').value);
-            const unitPrice = parseCurrency(item.querySelector('input[name="unit_price[]"]').value);
-            const discount = parseCurrency(item.querySelector('input[name="discount[]"]').value);
-            
-            const itemTotal = calculateItemTotal(item);
-            item.querySelector('.item-total').textContent = formatCurrency(itemTotal);
-            subtotal += itemTotal;
-        });
-        
-        document.getElementById('subtotal').textContent = formatCurrency(subtotal);
         const includeTax = document.querySelector('input[name="include_tax"]:checked').value === 'true';
-        const taxAmount = includeTax ? subtotal * 0.16 : 0;  // 16% VAT if included
-        document.getElementById('tax').textContent = formatCurrency(taxAmount);
-        document.getElementById('total').textContent = formatCurrency(subtotal + taxAmount);
+        
+        let subtotal = 0;
+        let totalVat = 0;
+        let grandTotal = 0;
+
+        items.forEach(item => {
+            const totals = calculateItemTotal(item, includeTax);
+            subtotal += totals.baseTotal;
+            totalVat += totals.vatAmount;
+            grandTotal += totals.finalTotal;
+        });
+
+        // Update display
+        document.getElementById('subtotal').textContent = formatCurrency(subtotal);
+        document.getElementById('tax').textContent = formatCurrency(totalVat);
+        document.getElementById('total').textContent = formatCurrency(grandTotal);
     }
 
-    // Format input values on blur
+    // Handle input events
+    itemsList.addEventListener('input', function(e) {
+        if (e.target.matches('input[name="quantity[]"], input[name="unit_price[]"], input[name="discount[]"]')) {
+            validateInput(e.target);
+            updateTotals();
+        }
+    });
+
+    // Format numbers on blur
     itemsList.addEventListener('blur', function(e) {
         if (e.target.matches('input[name="quantity[]"]')) {
-            const value = parseCurrency(e.target.value);
-            e.target.value = formatNumber(value);
+            const value = Math.max(1, parseInt(e.target.value) || 1);
+            e.target.value = value;
         }
         if (e.target.matches('input[name="unit_price[]"]')) {
-            const value = parseCurrency(e.target.value);
+            const value = Math.max(0, parseCurrency(e.target.value));
             e.target.value = formatNumber(value);
         }
         if (e.target.matches('input[name="discount[]"]')) {
-            const value = parseCurrency(e.target.value);
+            const value = Math.min(100, Math.max(0, parseCurrency(e.target.value)));
             e.target.value = formatNumber(value);
         }
+        updateTotals();
     }, true);
 
-    // Add new item
+    // VAT toggle handler
+    document.querySelectorAll('input[name="include_tax"]').forEach(radio => {
+        radio.addEventListener('change', updateTotals);
+    });
+
+    // Add new item with unique ID
+    let itemCounter = 1;
     addItemBtn.addEventListener('click', function() {
         const newItem = document.querySelector('.item').cloneNode(true);
         
@@ -129,6 +170,11 @@ document.addEventListener('DOMContentLoaded', function() {
         newItem.querySelectorAll('input').forEach(input => {
             input.classList.remove('error');
             input.parentElement.querySelector('.error-message').style.display = 'none';
+            
+            // Add unique ID for price tracking
+            if (input.name === 'unit_price[]') {
+                input.setAttribute('data-input-id', `price-${itemCounter}`);
+            }
             
             if (input.name === 'quantity[]') {
                 input.value = '1';
@@ -141,16 +187,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        itemCounter++;
         newItem.querySelector('.item-total').textContent = formatCurrency(0);
         itemsList.appendChild(newItem);
-        
-        // Add validation listeners to new inputs
-        newItem.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', function() {
-                validateInput(this);
-                updateTotals();
-            });
-        });
+    });
+
+    // Initialize existing items with unique IDs
+    document.querySelectorAll('input[name="unit_price[]"]').forEach((input, index) => {
+        input.setAttribute('data-input-id', `price-${index}`);
     });
 
     // Remove item
@@ -162,19 +206,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateTotals();
             }
         }
-    });
-
-    // Input validation and calculation
-    itemsList.addEventListener('input', function(e) {
-        if (e.target.matches('input')) {
-            validateInput(e.target);
-            updateTotals();
-        }
-    });
-
-    // Add event listeners for VAT options
-    document.querySelectorAll('input[name="include_tax"]').forEach(radio => {
-        radio.addEventListener('change', updateTotals);
     });
 
     // Form submission
@@ -260,3 +291,4 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial calculation
     updateTotals();
 }); 
+

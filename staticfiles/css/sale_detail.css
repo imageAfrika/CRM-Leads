@@ -1,0 +1,17 @@
+.numeric-value,
+.currency-value {
+    font-family: 'Courier New', monospace;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.currency-value {
+    min-width: 100px;
+    display: inline-block;
+}
+
+/* Ensure table cells with numbers are properly aligned */
+.items-table td:not(:first-child) {
+    font-family: 'Courier New', monospace;
+    white-space: nowrap;
+} 

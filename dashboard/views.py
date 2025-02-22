@@ -10,6 +10,9 @@ from decimal import Decimal
 from django.http import JsonResponse
 from django.db.models.functions import TruncDate
 from datetime import datetime
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from authentication.models import Profile
 
 class DashboardView(TemplateView):
     template_name = 'dashboard/dashboard.html'
@@ -235,3 +238,13 @@ def get_chart_data(request):
         'revenue_data': [float(next((item['total'] for item in revenue_data if item['date'] == date), 0)) for date in dates],
         'expenditure_data': [float(next((item['total'] for item in expenditure_data if item['date'] == date), 0)) for date in dates],
     }) 
+
+@login_required
+def dashboard(request):
+    profile_id = request.session.get('profile_id')
+    profile = Profile.objects.get(id=profile_id) if profile_id else None
+    
+    context = {
+        'profile': profile,
+    }
+    return render(request, 'dashboard/dashboard.html', context) 

@@ -111,7 +111,7 @@ def generate_receipt_pdf(sale, document):
 def direct_sale_form(request):
     """Render the direct sale form"""
     clients = Client.objects.all()
-    tax_rate = 15
+    tax_rate = 16
     return render(request, 'sales/direct_sale.html', {
         'clients': clients,
         'tax_rate': tax_rate
@@ -171,107 +171,24 @@ def generate_receipt(request, pk):
     try:
         sale = get_object_or_404(Sale.objects.prefetch_related('items'), pk=pk)
         
-        # Create a file-like buffer to receive PDF data
-        buffer = BytesIO()
-        
-        # Create the PDF object, using the buffer as its "file."
-        doc = SimpleDocTemplate(
-            buffer,
-            pagesize=A4,
-            rightMargin=72,
-            leftMargin=72,
-            topMargin=72,
-            bottomMargin=72
-        )
-
-        # Create the list of flowables for the document
-        elements = []
-        
-        # Get styles
-        styles = getSampleStyleSheet()
-        title_style = ParagraphStyle(
-            'CustomTitle',
-            parent=styles['Heading1'],
-            fontSize=24,
-            spaceAfter=30,
-            alignment=1  # Center alignment
+        # Create a new document
+        document = Document.objects.create(
+            sale=sale,
+            client=sale.client,
+            document_type='RECEIPT',
+            document_date=timezone.now(),
+            tax_rate=sale.tax_rate
         )
         
-        # Add the receipt header
-        elements.append(Paragraph("RECEIPT", title_style))
-        elements.append(Paragraph(f"Receipt #{sale.pk}", styles['Heading2']))
-        elements.append(Spacer(1, 20))
+        # Generate PDF content
+        pdf_content = generate_receipt_pdf(sale, document)
         
-        # Add company info
-        elements.append(Paragraph("Company Information", styles['Heading3']))
-        elements.append(Paragraph(settings.COMPANY_NAME, styles['Normal']))
-        elements.append(Paragraph(settings.COMPANY_ADDRESS, styles['Normal']))
-        elements.append(Spacer(1, 20))
+        # Save PDF to document
+        document.file.save(f'receipt_{sale.pk}.pdf', pdf_content)
         
-        # Add client info
-        elements.append(Paragraph("Client Information", styles['Heading3']))
-        elements.append(Paragraph(f"Client: {sale.client.name}", styles['Normal']))
-        elements.append(Paragraph(f"Date: {timezone.localtime(sale.sale_date).strftime('%Y-%m-%d %H:%M')}", styles['Normal']))
-        elements.append(Paragraph(f"Payment Method: {sale.get_payment_method_display()}", styles['Normal']))
-        elements.append(Paragraph(f"Status: {sale.get_payment_status_display()}", styles['Normal']))
-        elements.append(Spacer(1, 20))
-        
-        # Create items table
-        table_data = [['Description', 'Quantity', 'Unit Price', 'Discount', 'Total']]
-        for item in sale.items.all():
-            table_data.append([
-                item.description,
-                str(item.quantity),
-                f"${item.unit_price:.2f}",
-                f"{item.discount}%",
-                f"${item.get_total():.2f}"
-            ])
-            
-        # Add totals
-        table_data.extend([
-            ['', '', '', 'Subtotal:', f"${sale.subtotal:.2f}"],
-            ['', '', '', f"Tax ({sale.tax_rate}%):", f"${sale.tax_amount:.2f}"],
-            ['', '', '', 'Total:', f"${sale.total_amount:.2f}"]
-        ])
-        
-        # Create and style the table
-        table = Table(table_data)
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 14),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 1), (-1, -1), 12),
-            ('ALIGN', (-2, -3), (-1, -1), 'RIGHT'),
-            ('GRID', (0, 0), (-1, -4), 1, colors.black),
-            ('LINEBELOW', (-2, -1), (-1, -1), 1, colors.black),
-            ('TOPPADDING', (0, 1), (-1, -1), 12),
-            ('BOTTOMPADDING', (0, -1), (-1, -1), 12),
-        ]))
-        
-        elements.append(table)
-        elements.append(Spacer(1, 30))
-        
-        # Add thank you message
-        elements.append(Paragraph("Thank you for your business!", styles['Normal']))
-        
-        # Build the PDF document
-        doc.build(elements)
-        
-        # Get the value of the BytesIO buffer and write it to the response
-        pdf = buffer.getvalue()
-        buffer.close()
-        
-        # Create the HTTP response with PDF
-        response = HttpResponse(content_type='application/pdf')
+        # For direct download
+        response = HttpResponse(pdf_content, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="receipt_{sale.pk}.pdf"'
-        response.write(pdf)
-        
         return response
 
     except Exception as e:
@@ -283,8 +200,9 @@ def generate_receipt(request, pk):
 
 def preview_receipt(request, pk):
     sale = get_object_or_404(Sale.objects.prefetch_related('items'), pk=pk)
-    return render(request, 'sales/receipt_preview.html', {
+    return render(request, 'sales/receipt_template.html', {
         'sale': sale,
+        'items': sale.items.all(),
         'company_name': settings.COMPANY_NAME,
         'company_address': settings.COMPANY_ADDRESS,
         'company_phone': getattr(settings, 'COMPANY_PHONE', ''),

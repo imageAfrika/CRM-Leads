@@ -15,6 +15,9 @@
     align-items: center;
     margin-bottom: 20px;
     gap: 10px;
+    padding: 15px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .dashboard-header h1 {
@@ -315,6 +318,37 @@
 
 .stat-link:hover h3 {
     color: #3498db;
+}
+
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.header-default-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+}
+
+.profile-name {
+    font-size: 1rem;
+    color: #333;
 }
 
 
