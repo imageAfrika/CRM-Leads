@@ -3,6 +3,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Profile
+from django.contrib.auth.models import Group
 
 @login_required
 def profile_selection(request):
@@ -18,12 +19,49 @@ def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        role = request.POST.get('role')
+
+        # Debug prints
+        print(f"Login attempt - Username: {username}, Role: {role}")
+
         user = authenticate(request, username=username, password=password)
+        
         if user is not None:
-            login(request, user)
-            return redirect('authentication:profile_selection')
+            print(f"User authenticated - Is superuser: {user.is_superuser}, Is staff: {user.is_staff}")
+            print(f"User groups: {list(user.groups.all())}")
+            
+            # Check if user has the appropriate role
+            if role == 'admin' and user.is_superuser:
+                login(request, user)
+                profile = Profile.objects.filter(user=user).first()
+                if not profile:
+                    profile = Profile.objects.create(
+                        user=user,
+                        name='Administrator',
+                        pin='0000'
+                    )
+                request.session['profile_id'] = profile.id
+                return redirect('dashboard:dashboard')
+            
+            elif role == 'staff' and user.is_staff:  # Changed condition
+                if not user.groups.filter(name='Staff').exists():
+                    # Add user to Staff group if not already in it
+                    from django.contrib.auth.models import Group
+                    staff_group, _ = Group.objects.get_or_create(name='Staff')
+                    user.groups.add(staff_group)
+                
+                login(request, user)
+                return redirect('authentication:profile_selection')
+            
+            else:
+                if role == 'admin':
+                    messages.error(request, 'You do not have administrator privileges')
+                else:
+                    messages.error(request, 'You do not have staff privileges')
         else:
             messages.error(request, 'Invalid username or password')
+            print("Authentication failed")
+    
     return render(request, 'authentication/login.html')
 
 @login_required
@@ -38,16 +76,34 @@ def logout_view(request):
 @login_required
 def profile_create(request):
     if request.method == 'POST':
-        name = request.POST.get('name')
+        name = request.POST.get('name', '').strip()
         avatar = request.FILES.get('avatar')
-        pin = request.POST.get('pin') # Get the PIN from the form
-        profile = Profile.objects.create(
-            user=request.user,
-            name=name,
-            avatar=avatar,
-            pin=pin # Save the PIN
-        )
-        return redirect('authentication:profile_selection')
+        pin = request.POST.get('pin')
+
+        # Validate name
+        restricted_names = ['admin', 'administrator', 'owner']
+        if name.lower() in restricted_names:
+            messages.error(request, 'This profile name is not allowed')
+            return render(request, 'authentication/profile_form.html')
+
+        # Validate PIN
+        if not pin or not pin.isdigit() or len(pin) != 4:
+            messages.error(request, 'PIN must be 4 digits')
+            return render(request, 'authentication/profile_form.html')
+
+        try:
+            profile = Profile.objects.create(
+                user=request.user,
+                name=name,
+                avatar=avatar,
+                pin=pin
+            )
+            messages.success(request, 'Profile created successfully')
+            return redirect('authentication:profile_selection')
+        except Exception as e:
+            messages.error(request, f'Error creating profile: {str(e)}')
+            return render(request, 'authentication/profile_form.html')
+
     return render(request, 'authentication/profile_form.html')
 
 @login_required

@@ -44,30 +44,29 @@
         
         <div class="nav-actions">
             {% if request.user.is_authenticated and profile %}
-            <div class="nav-profile">
-                <div class="profile-dropdown">
-                    <button class="profile-toggle">
-                        {% if profile.avatar %}
-                        <img src="{{ profile.avatar.url }}" alt="{{ profile.name }}" class="nav-avatar">
+            <div class="user-menu">
+                <div class="user-dropdown">
+                    <button class="dropdown-toggle">
+                        {% if request.user.is_superuser %}
+                            <img src="{% static 'images/admin-avatar.png' %}" alt="Admin" class="avatar">
+                            <span>Administrator</span>
                         {% else %}
-                        <div class="nav-default-avatar">
-                            {% with name_parts=profile.name.split %}
-                                {{ name_parts.0.0|upper }}{% if name_parts|length > 1 %}{{ name_parts.1.0|upper }}{% endif %}
-                            {% endwith %}
-                        </div>
+                            {% if profile.avatar %}
+                                <img src="{{ profile.avatar.url }}" alt="{{ profile.name }}" class="avatar">
+                            {% else %}
+                                <img src="{% static 'images/default-avatar.png' %}" alt="{{ profile.name }}" class="avatar">
+                            {% endif %}
+                            <span>{{ profile.name }}</span>
                         {% endif %}
                         <i class="fas fa-chevron-down"></i>
                     </button>
-                    <div class="profile-dropdown-content">
-                        <div class="dropdown-header">
-                            <span class="full-name">{{ profile.name }}</span>
-                            <span class="user-email">{{ request.user.email }}</span>
-                        </div>
-                        <div class="dropdown-divider"></div>
-                        <a href="{% url 'authentication:profile_selection' %}">
-                            <i class="fas fa-exchange-alt"></i> Switch Profile
-                        </a>
-                        <a href="{% url 'authentication:logout' %}" class="logout-link">
+                    <div class="dropdown-menu">
+                        {% if not request.user.is_superuser %}
+                            <a href="{% url 'authentication:profile_selection' %}" class="dropdown-item">
+                                <i class="fas fa-exchange-alt"></i> Switch Profile
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'authentication:logout' %}" class="dropdown-item">
                             <i class="fas fa-sign-out-alt"></i> Logout
                         </a>
                     </div>

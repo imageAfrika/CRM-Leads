@@ -20,10 +20,14 @@ from documents.views import quote_create, quote_detail
 from dashboard.views import DashboardView
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic.base import RedirectView
 # from . import views
 
 urlpatterns = [
-    path('', include('authentication.urls')),
+    # Redirect root URL to login
+    path('', RedirectView.as_view(url='auth/login/', permanent=False), name='index'),
+    
+    path('auth/', include('authentication.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('admin/', admin.site.urls),
     path('clients/', include('clients.urls')),
