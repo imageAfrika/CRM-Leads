@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block app_css %}
+<link rel="stylesheet" href="{% static 'purchases/css/shared.css' %}">
+<link rel="stylesheet" href="{% static 'purchases/css/sidebar.css' %}">
+<link rel="stylesheet" href="{% static 'purchases/css/purchase_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="purchases-layout">
+    <div class="purchases-sidebar">
+        {% include 'purchases/includes/sidebar.html' %}
+    </div>
+    
+    <div class="purchase-detail-container">
+        <div class="purchase-detail">
+            <div class="purchase-detail-header">
+                <h2>Confirm Delete</h2>
+            </div>
+            
+            <div class="alert alert-danger">
+                <p>Are you sure you want to delete the purchase "{{ purchase.title }}"?</p>
+                <p>This action cannot be undone.</p>
+            </div>
+            
+            <div class="purchase-info">
+                <div class="info-group">
+                    <label>Amount:</label>
+                    <span class="amount">{{ purchase.amount|kes_format }}</span>
+                </div>
+                
+                <div class="info-group">
+                    <label>Category:</label>
+                    <span>{{ purchase.category.name }}</span>
+                </div>
+                
+                <div class="info-group">
+                    <label>Date:</label>
+                    <span>{{ purchase.date }}</span>
+                </div>
+                
+                {% if purchase.description %}
+                <div class="info-group">
+                    <label>Description:</label>
+                    <p class="description">{{ purchase.description|linebreaks }}</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-actions">
+                <form method="post">
+                    {% csrf_token %}
+                    <a href="{% url 'purchases:purchase_detail' purchase.id %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

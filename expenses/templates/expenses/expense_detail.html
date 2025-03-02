@@ -1,100 +1,115 @@
-{% extends 'expenses/expenses_base.html' %}
+{% extends 'base.html' %}
 {% load static %}
+{% load currency_filters %}
 
-{% block expenses_content %}
-<div class="expense-detail">
-    <div class="expense-detail-header">
-        <h2>{{ expense.title }}</h2>
-        <div class="expense-actions">
-            <a href="{% url 'expenses:expense_update' expense.pk %}" class="btn btn-primary">Edit</a>
-            <a href="{% url 'expenses:expense_delete' expense.pk %}" class="btn btn-danger">Delete</a>
-        </div>
+{% block app_css %}
+<link rel="stylesheet" href="{% static 'expenses/css/shared.css' %}">
+<link rel="stylesheet" href="{% static 'expenses/css/sidebar.css' %}">
+<link rel="stylesheet" href="{% static 'expenses/css/expense_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="expenses-layout">
+    <div class="expenses-sidebar">
+        {% include 'expenses/includes/sidebar.html' %}
     </div>
     
-    <div class="expense-info">
-        <div class="info-group">
-            <label>Amount:</label>
-            <span class="amount">${{ expense.amount|floatformat:2 }}</span>
-        </div>
-        
-        <div class="info-group">
-            <label>Category:</label>
-            <span>{{ expense.category.name }}</span>
-        </div>
-        
-        <div class="info-group">
-            <label>Date:</label>
-            <span>{{ expense.date }}</span>
-        </div>
-        
-        <div class="info-group">
-            <label>Payment Method:</label>
-            <span>{{ expense.get_payment_method_display }}</span>
-        </div>
-        
-        {% if expense.description %}
-        <div class="info-group">
-            <label>Description:</label>
-            <p class="description">{{ expense.description|linebreaks }}</p>
-        </div>
-        {% endif %}
-        
-        {% if expense.receipt %}
-        <div class="info-group">
-            <label>Receipt:</label>
-            <div class="receipt-container">
-                <a href="{{ expense.receipt.url }}" target="_blank" class="btn btn-outline-secondary">
-                    View Receipt
+    <div class="expense-detail-container">
+        <div class="expense-detail">
+            <div class="expense-detail-header">
+                <h2>{{ expense.title }}</h2>
+                <div class="expense-actions">
+                    <a href="{% url 'expenses:expense_update' expense.pk %}" class="btn btn-primary">Edit</a>
+                    <a href="{% url 'expenses:expense_delete' expense.pk %}" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+            
+            <div class="expense-info">
+                <div class="info-group">
+                    <label>Amount:</label>
+                    <span class="amount">{{ expense.amount|kes_format }}</span>
+                </div>
+                
+                <div class="info-group">
+                    <label>Category:</label>
+                    <span>{{ expense.category.name }}</span>
+                </div>
+                
+                <div class="info-group">
+                    <label>Date:</label>
+                    <span>{{ expense.date }}</span>
+                </div>
+                
+                <div class="info-group">
+                    <label>Payment Method:</label>
+                    <span>{{ expense.get_payment_method_display }}</span>
+                </div>
+                
+                {% if expense.description %}
+                <div class="info-group">
+                    <label>Description:</label>
+                    <p class="description">{{ expense.description|linebreaks }}</p>
+                </div>
+                {% endif %}
+                
+                {% if expense.receipt %}
+                <div class="info-group">
+                    <label>Receipt:</label>
+                    <div class="receipt-container">
+                        <a href="{{ expense.receipt.url }}" target="_blank" class="btn btn-outline-secondary">
+                            View Receipt
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if expense.created_by %}
+                <div class="info-group">
+                    <label>Created By:</label>
+                    <span>{{ expense.created_by.username }}</span>
+                </div>
+                {% endif %}
+                
+                {% if expense.profile %}
+                <div class="info-group">
+                    <label>Profile:</label>
+                    <span>{{ expense.profile.name }}</span>
+                </div>
+                {% endif %}
+                
+                <div class="info-group">
+                    <label>Created:</label>
+                    <span>{{ expense.created_at }}</span>
+                </div>
+                
+                <div class="info-group">
+                    <label>Last Updated:</label>
+                    <span>{{ expense.updated_at }}</span>
+                </div>
+            </div>
+            
+            {% if expense.recurring_expenses.exists %}
+            <div class="recurring-info">
+                <h3>Recurring Schedule</h3>
+                {% for recurring in expense.recurring_expenses.all %}
+                <div class="recurring-detail">
+                    <p>Frequency: {{ recurring.get_frequency_display }}</p>
+                    <p>Start Date: {{ recurring.start_date }}</p>
+                    {% if recurring.end_date %}
+                    <p>End Date: {{ recurring.end_date }}</p>
+                    {% endif %}
+                    <p>Status: {% if recurring.is_active %}Active{% else %}Inactive{% endif %}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="back-link">
+                <a href="{% url 'expenses:expense_list' %}" class="btn btn-secondary">
+                    Back to Expenses
                 </a>
             </div>
         </div>
-        {% endif %}
-        
-        {% if expense.created_by %}
-        <div class="info-group">
-            <label>Created By:</label>
-            <span>{{ expense.created_by.username }}</span>
-        </div>
-        {% endif %}
-        
-        {% if expense.profile %}
-        <div class="info-group">
-            <label>Profile:</label>
-            <span>{{ expense.profile.name }}</span>
-        </div>
-        {% endif %}
-        
-        <div class="info-group">
-            <label>Created:</label>
-            <span>{{ expense.created_at }}</span>
-        </div>
-        
-        <div class="info-group">
-            <label>Last Updated:</label>
-            <span>{{ expense.updated_at }}</span>
-        </div>
-    </div>
-    
-    {% if expense.recurring_expenses.exists %}
-    <div class="recurring-info">
-        <h3>Recurring Schedule</h3>
-        {% for recurring in expense.recurring_expenses.all %}
-        <div class="recurring-detail">
-            <p>Frequency: {{ recurring.get_frequency_display }}</p>
-            <p>Start Date: {{ recurring.start_date }}</p>
-            {% if recurring.end_date %}
-            <p>End Date: {{ recurring.end_date }}</p>
-            {% endif %}
-            <p>Status: {% if recurring.is_active %}Active{% else %}Inactive{% endif %}</p>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    
-    <div class="back-link">
-        <a href="{% url 'expenses:expense_list' %}" class="btn btn-secondary">
-            Back to Expenses
-        </a>
     </div>
 </div>
 {% endblock %} 

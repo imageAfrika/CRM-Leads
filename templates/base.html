@@ -12,6 +12,7 @@
     
     <!-- Base CSS -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}?v={% now 'U' %}">
+    <link rel="stylesheet" href="{% static 'css/notifications.css' %}?v={% now 'U' %}">
     
     <!-- App-specific CSS -->
     {% block app_css %}
@@ -37,6 +38,9 @@
             </a>
             <a href="{% url 'clients:client_list' %}">
                 <i class="fas fa-users"></i> Clients
+            </a>
+            <a href="{% url 'purchases:purchase_list' %}">
+                <i class="fas fa-chart-line"></i> Purchases
             </a>
             <a href="{% url 'sales:direct_sale_form' %}">
                 <i class="fas fa-chart-line"></i> Sales
@@ -130,6 +134,9 @@
         {% endblock %}
     </main>
     
+    <!-- Common JavaScript -->
+    <script src="{% static 'js/notifications.js' %}"></script>
+    
     {% block extra_js %}{% endblock %}
     
     <script>
@@ -150,6 +157,21 @@
                 }
             }
         }
+        
+        // Auto-hide Django messages after 3 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.messages-container .message');
+            if (messages.length > 0) {
+                messages.forEach(message => {
+                    setTimeout(() => {
+                        message.style.opacity = '0';
+                        setTimeout(() => {
+                            message.remove();
+                        }, 300);
+                    }, 3000);
+                });
+            }
+        });
     </script>
 </body>
 </html> 

@@ -1,43 +1,22 @@
-{% extends 'expenses/expenses_base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block expenses_content %}
-<div class="content-header">
-    <h1>Delete Expense</h1>
-</div>
-
-<div class="delete-confirmation-container">
-    <div class="delete-confirmation-card">
-        <div class="delete-icon">
-            <i class="fas fa-exclamation-triangle"></i>
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h3>Confirm Deletion</h3>
         </div>
-        <h2>Are you sure you want to delete "{{ expense.title }}"?</h2>
-        <p>This action cannot be undone. This expense will be permanently deleted.</p>
-        
-        <div class="expense-summary">
-            <div class="summary-item">
-                <span class="summary-label">Amount:</span>
-                <span class="summary-value">{{ expense.amount }}</span>
-            </div>
-            <div class="summary-item">
-                <span class="summary-label">Date:</span>
-                <span class="summary-value">{{ expense.date }}</span>
-            </div>
-            <div class="summary-item">
-                <span class="summary-label">Category:</span>
-                <span class="summary-value">{{ expense.category.name|default:"Uncategorized" }}</span>
-            </div>
-        </div>
-        
-        <div class="confirmation-actions">
-            <a href="{% url 'expenses:expense_list' %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Cancel
-            </a>
-            <form method="post" class="d-inline">
+        <div class="card-body">
+            <p>Are you sure you want to delete the expense "{{ expense.title }}" with amount {{ expense.amount }}?</p>
+            <p class="text-danger">This action cannot be undone.</p>
+            
+            <form method="post">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger">
-                    <i class="fas fa-trash"></i> Delete Expense
-                </button>
+                <div class="d-flex justify-content-end">
+                    <a href="{% url 'expenses:expense_list' %}" class="btn btn-secondary mr-2">Cancel</a>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
             </form>
         </div>
     </div>

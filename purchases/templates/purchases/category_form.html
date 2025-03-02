@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block app_css %}
+<link rel="stylesheet" href="{% static 'purchases/css/shared.css' %}">
+<link rel="stylesheet" href="{% static 'purchases/css/sidebar.css' %}">
+<link rel="stylesheet" href="{% static 'purchases/css/category_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="purchases-layout">
+    <div class="purchases-sidebar">
+        {% include 'purchases/includes/sidebar.html' %}
+    </div>
+    
+    <div class="category-container">
+        <div class="content-header">
+            <h1>{{ title }}</h1>
+        </div>
+        
+        <div class="category-card">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}">Category Name*</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="error-message">{{ form.name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}">Description</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="error-message">{{ form.description.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-actions">
+                    <a href="{% url 'purchases:category_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> {% if form.instance.pk %}Update{% else %}Save{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

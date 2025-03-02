@@ -17,7 +17,7 @@ def expense_list(request):
     else:
         expenses = Expense.objects.filter(created_by=request.user)
     
-    total_expenses = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
+    total_amount = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
     
     # Filter categories by profile if not superuser
     if request.user.is_superuser:
@@ -29,7 +29,7 @@ def expense_list(request):
     
     context = {
         'expenses': expenses,
-        'total_expenses': total_expenses,
+        'total_amount': total_amount,
         'categories': categories,
     }
     return render(request, 'expenses/expense_list.html', context)
@@ -139,7 +139,52 @@ def expense_delete(request, pk):
 
 @login_required
 def category_list(request):
-    categories = ExpenseCategory.objects.all().order_by('name')
+    if request.method == 'POST':
+        # Check if we're editing an existing category
+        category_id = request.POST.get('category_id')
+        name = request.POST.get('name')
+        description = request.POST.get('description', '')
+        
+        if category_id:
+            # Editing an existing category
+            category = get_object_or_404(ExpenseCategory, pk=category_id)
+            
+            # Check if user has permission to edit this category
+            if not request.user.is_superuser:
+                if hasattr(request, 'profile') and request.profile:
+                    if category.profile != request.profile:
+                        messages.error(request, "You don't have permission to edit this category.")
+                        return redirect('expenses:category_list')
+                elif category.created_by != request.user:
+                    messages.error(request, "You don't have permission to edit this category.")
+                    return redirect('expenses:category_list')
+            
+            category.name = name
+            category.description = description
+            category.save()
+            messages.success(request, 'Category updated successfully!')
+        elif name:
+            # Creating a new category
+            category = ExpenseCategory(
+                name=name,
+                description=description,
+                created_by=request.user
+            )
+            if hasattr(request, 'profile') and request.profile:
+                category.profile = request.profile
+            category.save()
+            messages.success(request, 'Category created successfully!')
+        
+        return redirect('expenses:category_list')
+    
+    # Get categories
+    if request.user.is_superuser:
+        categories = ExpenseCategory.objects.all()
+    elif hasattr(request, 'profile') and request.profile:
+        categories = ExpenseCategory.objects.filter(profile=request.profile)
+    else:
+        categories = ExpenseCategory.objects.filter(created_by=request.user)
+    
     return render(request, 'expenses/category_list.html', {'categories': categories})
 
 @login_required
@@ -165,9 +210,14 @@ def category_edit(request, pk):
 @login_required
 def category_delete(request, pk):
     category = get_object_or_404(ExpenseCategory, pk=pk)
-    if request.method == 'POST':
-        category.delete()
-        messages.success(request, 'Category deleted successfully.')
+
+    # Check if there are any expenses associated with this category
+    if Expense.objects.filter(category=category).exists():
+        messages.error(request, "Cannot delete this category because it has associated expenses.")
+        return redirect('expenses:category_list')
+
+    category.delete()
+    messages.success(request, 'Category deleted successfully!')
     return redirect('expenses:category_list')
 
 @login_required

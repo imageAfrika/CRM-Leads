@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block app_css %}
+<link rel="stylesheet" href="{% static 'purchases/css/shared.css' %}">
+<link rel="stylesheet" href="{% static 'purchases/css/sidebar.css' %}">
+<link rel="stylesheet" href="{% static 'purchases/css/category_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="purchases-layout">
+    <div class="purchases-sidebar">
+        {% include 'purchases/includes/sidebar.html' %}
+    </div>
+    
+    <div class="category-container">
+        <div class="content-header">
+            <h1>Confirm Delete Category</h1>
+        </div>
+        
+        <div class="category-card">
+            <div class="alert alert-danger">
+                <p>Are you sure you want to delete the category "{{ category.name }}"?</p>
+                <p>This action cannot be undone.</p>
+                <p><strong>Note:</strong> Categories with associated purchases cannot be deleted.</p>
+            </div>
+            
+            <div class="category-card-header">
+                <h3>{{ category.name }}</h3>
+            </div>
+            
+            {% if category.description %}
+            <div class="category-description">
+                <p>{{ category.description }}</p>
+            </div>
+            {% endif %}
+            
+            <div class="form-actions">
+                <form method="post">
+                    {% csrf_token %}
+                    <a href="{% url 'purchases:category_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

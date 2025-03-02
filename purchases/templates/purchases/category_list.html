@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block app_css %}
+<link rel="stylesheet" href="{% static 'purchases/css/shared.css' %}">
+<link rel="stylesheet" href="{% static 'purchases/css/sidebar.css' %}">
+<link rel="stylesheet" href="{% static 'purchases/css/category_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="purchases-layout">
+    <div class="purchases-sidebar">
+        {% include 'purchases/includes/sidebar.html' %}
+    </div>
+    
+    <div class="category-container">
+        <div class="content-header">
+            <h1>Categories</h1>
+            
+            <div class="action-buttons">
+                <a href="{% url 'purchases:category_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Category
+                </a>
+            </div>
+        </div>
+        
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="category-card">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Purchase Count</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in categories %}
+                        <tr>
+                            <td>{{ category.name }}</td>
+                            <td>{{ category.description|default:"-" }}</td>
+                            <td>{{ category.purchase_count }}</td>
+                            <td class="actions">
+                                <a href="{% url 'purchases:category_update' category.id %}" class="btn-icon" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'purchases:category_delete' category.id %}" class="btn-icon text-danger" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="empty-message">No categories found. <a href="{% url 'purchases:category_create' %}">Create one</a>.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

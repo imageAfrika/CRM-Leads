@@ -18,11 +18,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.success) {
                     window.open(data.pdf_url, '_blank');
                 } else {
-                    alert('Error generating PDF: ' + data.error);
+                    showError('Error generating PDF: ' + data.error);
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Failed to generate PDF. Please try again.');
+                showError('Failed to generate PDF. Please try again.');
             }
         });
     });
@@ -44,15 +44,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
                 
                 if (data.success) {
-                    alert('Invoice generated successfully!');
+                    showSuccess('Invoice generated successfully!');
                     // Optionally refresh the page or update the UI
-                    window.location.reload();
+                    setTimeout(() => window.location.reload(), 1500);
                 } else {
-                    alert('Error generating invoice: ' + data.error);
+                    showError('Error generating invoice: ' + data.error);
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Failed to generate invoice. Please try again.');
+                showError('Failed to generate invoice. Please try again.');
             }
         });
     });

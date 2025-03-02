@@ -1,0 +1,91 @@
+.purchase-detail-container {
+    flex: 1;
+    padding: 20px;
+    background-color: #f8f9fa;
+}
+
+.purchase-detail {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.purchase-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.purchase-detail-header h2 {
+    margin: 0;
+    color: #343a40;
+    font-size: 24px;
+}
+
+.purchase-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.purchase-info {
+    margin-bottom: 30px;
+}
+
+.info-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.info-group label {
+    font-weight: 600;
+    color: #495057;
+    width: 150px;
+    margin-right: 10px;
+}
+
+.info-group .amount {
+    font-weight: 600;
+    color: #28a745;
+}
+
+.info-group .description {
+    margin-top: 10px;
+    color: #6c757d;
+    width: 100%;
+    padding-left: 160px;
+}
+
+.receipt-container {
+    margin-top: 10px;
+}
+
+.back-link {
+    margin-top: 30px;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .purchase-detail-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .info-group {
+        flex-direction: column;
+    }
+    
+    .info-group label {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+    
+    .info-group .description {
+        padding-left: 0;
+    }
+} 

@@ -6,8 +6,8 @@ from authentication.models import Profile
 from django.utils import timezone
 
 class ExpenseCategory(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_categories')
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True, related_name='categories')
     created_at = models.DateTimeField(default=timezone.now)
@@ -36,8 +36,8 @@ class Expense(models.Model):
     )
     category = models.ForeignKey(
         ExpenseCategory, 
-        on_delete=models.PROTECT,
-        related_name='expenses'
+        on_delete=models.SET_NULL,
+        null=True
     )
     date = models.DateField(default=timezone.now)
     payment_method = models.CharField(

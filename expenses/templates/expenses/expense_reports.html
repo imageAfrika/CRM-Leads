@@ -3,38 +3,101 @@
 {% load currency_filters %}
 
 {% block app_css %}
-<link rel="stylesheet" href="{% static 'expenses/css/expense_reports.css' %}">
+<link rel="stylesheet" href="{% static 'expenses/css/shared.css' %}">
+<link rel="stylesheet" href="{% static 'expenses/css/reports.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="expenses-layout">
-    {% include 'expenses/includes/sidebar.html' %}
-    
-    <div class="content-container">
-        <div class="content-header">
-            <h1>Expense Reports</h1>
-            <div class="date-range-picker">
-                <form method="get" class="date-form">
-                    <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
-                    <span>to</span>
-                    <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
-                    <button type="submit" class="btn btn-primary btn-sm">Update</button>
-                </form>
-            </div>
+<div class="reports-layout">
+    <div class="content-header">
+        <h1>Expense Reports</h1>
+        <div class="date-range-picker">
+            <form method="get" class="date-form">
+                <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+                <span>to</span>
+                <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+                <button type="submit" class="btn btn-primary btn-sm">Update</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="reports-grid">
+        <!-- Monthly Expenses Chart -->
+        <div class="report-card">
+            <h2>Monthly Expenses</h2>
+            <canvas id="monthlyExpensesChart"></canvas>
         </div>
 
-        <div class="reports-grid">
-            <!-- Monthly Expenses Chart -->
-            <div class="report-card">
-                <h2>Monthly Expenses</h2>
-                <canvas id="monthlyExpensesChart"></canvas>
-            </div>
+        <!-- Weekly Expenses Chart -->
+        <div class="report-card">
+            <h2>Weekly Expenses</h2>
+            <canvas id="weeklyExpensesChart"></canvas>
+        </div>
 
-            <!-- Category Expenses Chart -->
-            <div class="report-card">
-                <h2>Expenses by Category</h2>
-                <canvas id="categoryExpensesChart"></canvas>
-            </div>
+        <!-- Expenses by Category Chart -->
+        <div class="report-card">
+            <h2>Expenses by Category</h2>
+            <canvas id="categoryExpensesChart"></canvas>
+        </div>
+
+        <!-- Expenses by Volume Chart -->
+        <div class="report-card">
+            <h2>Expenses by Volume</h2>
+            <canvas id="volumeExpensesChart"></canvas>
+        </div>
+
+        <!-- Yearly Expense Overview Chart -->
+        <div class="report-card">
+            <h2>Yearly Expense Overview</h2>
+            <canvas id="yearlyExpensesChart"></canvas>
+        </div>
+
+        <!-- Expense Distribution by Payment Method Chart -->
+        <div class="report-card">
+            <h2>Expense Distribution by Payment Method</h2>
+            <canvas id="paymentMethodChart"></canvas>
+        </div>
+
+        <!-- Top 5 Expense Categories Chart -->
+        <div class="report-card">
+            <h2>Top 5 Expense Categories</h2>
+            <canvas id="topCategoriesChart"></canvas>
+        </div>
+
+        <!-- Monthly Average Expenses Chart -->
+        <div class="report-card">
+            <h2>Monthly Average Expenses</h2>
+            <canvas id="averageExpensesChart"></canvas>
+        </div>
+
+        <!-- Cumulative Expenses Over Time Chart -->
+        <div class="report-card">
+            <h2>Cumulative Expenses Over Time</h2>
+            <canvas id="cumulativeExpensesChart"></canvas>
+        </div>
+
+        <!-- Comparison of Budget vs. Actual Expenses Chart -->
+        <div class="report-card">
+            <h2>Budget vs. Actual Expenses</h2>
+            <canvas id="budgetVsActualChart"></canvas>
+        </div>
+
+        <!-- Recurring vs. One-Time Expenses Chart -->
+        <div class="report-card">
+            <h2>Recurring vs. One-Time Expenses</h2>
+            <canvas id="recurringVsOneTimeChart"></canvas>
+        </div>
+
+        <!-- Expense Heatmap Chart -->
+        <div class="report-card">
+            <h2>Expense Heatmap</h2>
+            <canvas id="expenseHeatmapChart"></canvas>
+        </div>
+
+        <!-- Savings Over Time Chart -->
+        <div class="report-card">
+            <h2>Savings Over Time</h2>
+            <canvas id="savingsChart"></canvas>
         </div>
     </div>
 </div>

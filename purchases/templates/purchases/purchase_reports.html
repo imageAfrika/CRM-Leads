@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block app_css %}
+<link rel="stylesheet" href="{% static 'purchases/css/shared.css' %}">
+<link rel="stylesheet" href="{% static 'purchases/css/sidebar.css' %}">
+<link rel="stylesheet" href="{% static 'purchases/css/purchase_reports.css' %}">
+{% endblock %}
+
+{% block app_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'purchases/js/purchase_reports.js' %}" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="purchases-layout">
+    <div class="purchases-sidebar">
+        {% include 'purchases/includes/sidebar.html' %}
+    </div>
+    
+    <div class="purchases-content">
+        <div class="content-header">
+            <h1>Purchase Reports</h1>
+            
+            <div class="filter-controls">
+                <form method="get" id="report-filter-form">
+                    <div class="filter-group">
+                        <label for="period">Time Period:</label>
+                        <select name="period" id="period">
+                            <option value="month" {% if period == 'month' %}selected{% endif %}>This Month</option>
+                            <option value="quarter" {% if period == 'quarter' %}selected{% endif %}>This Quarter</option>
+                            <option value="year" {% if period == 'year' %}selected{% endif %}>This Year</option>
+                            <option value="all" {% if period == 'all' %}selected{% endif %}>All Time</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="summary-boxes">
+            <div class="summary-box">
+                <div class="summary-icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="summary-info">
+                    <h3>Total Purchases</h3>
+                    <p class="summary-value">{{ total_amount|kes_format }}</p>
+                    <p class="summary-label">{{ period_label }}</p>
+                </div>
+            </div>
+            
+            <div class="summary-box">
+                <div class="summary-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="summary-info">
+                    <h3>Purchase Count</h3>
+                    <p class="summary-value">{{ purchase_count }}</p>
+                    <p class="summary-label">{{ period_label }}</p>
+                </div>
+            </div>
+            
+            <div class="summary-box">
+                <div class="summary-icon">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <div class="summary-info">
+                    <h3>Average Purchase</h3>
+                    <p class="summary-value">{{ average_amount|kes_format }}</p>
+                    <p class="summary-label">{{ period_label }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="reports-grid">
+            <div class="report-card">
+                <h3>Purchases by Category</h3>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="report-card">
+                <h3>Monthly Trend</h3>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="report-card full-width">
+                <h3>Top Purchases</h3>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for purchase in top_purchases %}
+                            <tr>
+                                <td>{{ purchase.date|date:"M d, Y" }}</td>
+                                <td>{{ purchase.title }}</td>
+                                <td>{{ purchase.category.name }}</td>
+                                <td class="amount">{{ purchase.amount|kes_format }}</td>
+                                <td>
+                                    <a href="{% url 'purchases:purchase_detail' purchase.id %}" class="btn-icon" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="empty-message">No purchases found for this period.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="report-data" 
+             data-categories="{{ categories_json }}" 
+             data-category-amounts="{{ category_amounts_json }}"
+             data-months="{{ months_json }}"
+             data-monthly-amounts="{{ monthly_amounts_json }}">
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'clients.apps.ClientsConfig',
     'sales',
     'documents',
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'authentication',
     'expenses.apps.ExpensesConfig',
+    'purchases.apps.PurchasesConfig',
 ]
 
 MIDDLEWARE = [
@@ -127,6 +129,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
+    BASE_DIR / 'expenses' / 'static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
