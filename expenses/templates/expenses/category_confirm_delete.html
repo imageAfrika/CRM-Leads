@@ -1,0 +1,37 @@
+{% extends 'expenses/expenses_base.html' %}
+{% load static %}
+
+{% block expenses_content %}
+<div class="content-header">
+    <h1>Delete Category</h1>
+</div>
+
+<div class="delete-confirmation-container">
+    <div class="delete-confirmation-card">
+        <div class="delete-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h2>Are you sure you want to delete "{{ category.name }}"?</h2>
+        <p>This action cannot be undone. All data associated with this category will be permanently deleted.</p>
+        
+        {% if category.expense_set.exists %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>This category has {{ category.expense_set.count }} expense(s) associated with it. You must reassign these expenses before deleting this category.</span>
+        </div>
+        {% endif %}
+        
+        <div class="confirmation-actions">
+            <a href="{% url 'expenses:category_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Cancel
+            </a>
+            <form method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" {% if category.expense_set.exists %}disabled{% endif %}>
+                    <i class="fas fa-trash"></i> Delete Category
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

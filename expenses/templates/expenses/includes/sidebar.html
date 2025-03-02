@@ -1,0 +1,18 @@
+<div class="sidebar">
+    <h2>Expenses Menu</h2>
+    <ul>
+        <li><a href="{% url 'expenses:expense_list' %}">All Expenses</a></li>
+        <li><a href="{% url 'expenses:expense_create' %}">Add Expense</a></li>
+        <li>
+            <a href="{% url 'expenses:category_list' %}" {% if request.resolver_match.url_name == 'category_list' %}class="active"{% endif %}>
+                <i class="fas fa-tags"></i> Categories
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'expenses:recurring_expense_list' %}" {% if request.resolver_match.url_name == 'recurring_expense_list' %}class="active"{% endif %}>
+                <i class="fas fa-sync-alt"></i> Recurring Expenses
+            </a>
+        </li>
+        <li><a href="{% url 'expenses:expense_reports' %}">Reports</a></li>
+    </ul>
+</div> 

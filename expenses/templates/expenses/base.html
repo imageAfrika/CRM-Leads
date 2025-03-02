@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'expenses/css/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="expenses-container">
+    <div class="expenses-sidebar">
+        <h3>Expenses Management</h3>
+        <nav class="expenses-nav">
+            <ul>
+                <li>
+                    <a href="{% url 'expenses:expense_list' %}" class="{% if request.resolver_match.url_name == 'expense_list' %}active{% endif %}">
+                        <i class="fas fa-list"></i> All Expenses
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'expenses:expense_create' %}" class="{% if request.resolver_match.url_name == 'expense_create' %}active{% endif %}">
+                        <i class="fas fa-plus-circle"></i> Add Expense
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'expenses:category_list' %}" class="{% if request.resolver_match.url_name == 'category_list' %}active{% endif %}">
+                        <i class="fas fa-tags"></i> Categories
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'expenses:recurring_expense_list' %}" class="{% if request.resolver_match.url_name == 'recurring_expense_list' %}active{% endif %}">
+                        <i class="fas fa-sync-alt"></i> Recurring Expenses
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    
+    <div class="expenses-main">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% block expenses_content %}
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'expenses/js/scripts.js' %}"></script>
+{% endblock %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Expenses{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'expenses/css/shared.css' %}">
+    <link rel="stylesheet" href="{% static 'expenses/css/expense_form.css' %}">
+    <link rel="stylesheet" href="{% static 'expenses/css/expense_list.css' %}">
+    <link rel="stylesheet" href="{% static 'expenses/css/expense_detail.css' %}">
+    <link rel="stylesheet" href="{% static 'expenses/css/category_list.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="container">
+            <h1 class="logo">Expense Tracker</h1>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="{% url 'expenses:expense_list' %}">Expenses</a></li>
+                    <li><a href="{% url 'expenses:category_list' %}">Categories</a></li>
+                    <li><a href="{% url 'expenses:expense_create' %}" class="btn btn-primary">Add Expense</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; {{ current_year }} Expense Tracker. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'expenses/js/shared.js' %}"></script>
+</body>
+</html> 

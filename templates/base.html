@@ -11,7 +11,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <!-- Base CSS -->
-    <link rel="stylesheet" href="{% static 'css/base.css' %}"> 
+    <link rel="stylesheet" href="{% static 'css/base.css' %}?v={% now 'U' %}">
+    
+    <!-- App-specific CSS -->
+    {% block app_css %}
+    <link rel="stylesheet" href="{% static 'expenses/css/shared.css' %}">
+    <link rel="stylesheet" href="{% static 'expenses/css/sidebar.css' %}">
+    {% endblock %}
+    
     <!-- Page-specific CSS -->
     {% block extra_css %}{% endblock %}
 </head>
@@ -37,36 +44,60 @@
             <a href="{% url 'documents:document_list' %}">
                 <i class="fas fa-file-invoice"></i> Documents
             </a>
+            <a href="{% url 'expenses:expense_list' %}">
+                <i class="fas fa-money-bill-wave"></i> Expenses
+            </a>
             <a href="{% url 'dashboard:schedule' %}">
                 <i class="fas fa-calendar"></i> Calendar
             </a>
         </div>
         
         <div class="nav-actions">
-            {% if request.user.is_authenticated and profile %}
-            <div class="user-menu">
-                <div class="user-dropdown">
-                    <button class="dropdown-toggle">
+            {% if request.user.is_authenticated %}
+            <div class="nav-profile">
+                <div class="dropdown">
+                    <button onclick="toggleDropdown()" class="dropbtn">
                         {% if request.user.is_superuser %}
-                            <img src="{% static 'images/admin-avatar.png' %}" alt="Admin" class="avatar">
+                            <div class="nav-default-avatar admin-avatar">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
                             <span>Administrator</span>
-                        {% else %}
-                            {% if profile.avatar %}
-                                <img src="{{ profile.avatar.url }}" alt="{{ profile.name }}" class="avatar">
+                        {% elif request.profile %}
+                            {% if request.profile.avatar %}
+                                <img src="{{ request.profile.avatar.url }}" alt="{{ request.profile.name }}" class="nav-avatar">
                             {% else %}
-                                <img src="{% static 'images/default-avatar.png' %}" alt="{{ profile.name }}" class="avatar">
+                                <div class="nav-default-avatar profile-avatar">
+                                    {{ request.profile.name|first|upper }}
+                                </div>
                             {% endif %}
-                            <span>{{ profile.name }}</span>
+                            <span>{{ request.profile.name }}</span>
+                        {% else %}
+                            <div class="nav-default-avatar user-avatar">
+                                {{ request.user.username|first|upper }}
+                            </div>
+                            <span>{{ request.user.username }}</span>
                         {% endif %}
                         <i class="fas fa-chevron-down"></i>
                     </button>
-                    <div class="dropdown-menu">
+                    <div id="userDropdown" class="dropdown-content">
+                        <div class="dropdown-header">
+                            <span class="full-name">
+                                {% if request.user.is_superuser %}
+                                    Administrator
+                                {% elif request.profile %}
+                                    {{ request.profile.name }}
+                                {% else %}
+                                    {{ request.user.username }}
+                                {% endif %}
+                            </span>
+                            <span class="user-email">{{ request.user.email }}</span>
+                        </div>
                         {% if not request.user.is_superuser %}
-                            <a href="{% url 'authentication:profile_selection' %}" class="dropdown-item">
+                            <a href="{% url 'authentication:profile_selection' %}">
                                 <i class="fas fa-exchange-alt"></i> Switch Profile
                             </a>
                         {% endif %}
-                        <a href="{% url 'authentication:logout' %}" class="dropdown-item">
+                        <a href="{% url 'authentication:logout' %}" class="logout-link">
                             <i class="fas fa-sign-out-alt"></i> Logout
                         </a>
                     </div>
@@ -84,10 +115,41 @@
     </nav>  
     
     <main>
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+                <button class="message-close" onclick="this.parentElement.remove();"><i class="fas fa-times"></i></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
         {% block content %}
         {% endblock %}
     </main>
-    <script src="{% static 'js/base.js' %}"></script>
+    
     {% block extra_js %}{% endblock %}
+    
+    <script>
+        // Simple dropdown toggle function
+        function toggleDropdown() {
+            document.getElementById("userDropdown").classList.toggle("show");
+        }
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropbtn') && !event.target.matches('.dropbtn *')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
 </body>
 </html> 

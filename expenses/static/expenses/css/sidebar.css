@@ -1,0 +1,89 @@
+.sidebar {
+    background-color: #ffffff; /* White background for a clean look */
+    padding: 0.5rem; /* Reduced padding for better spacing */
+    border-right: 1px solid #e0e0e0; /* Light border for separation */
+    height: auto; /* Allow height to adjust based on content */
+    max-height: 80vh; /* Optional: Set a maximum height for the sidebar */
+    overflow-y: auto; /* Enable scrolling if content exceeds max height */
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    transition: background-color 0.3s; /* Smooth background transition */
+}
+
+.sidebar h2 {
+    font-size: 1.25rem; /* Reduced font size */
+    margin-bottom: 0.5rem; /* Reduced margin */
+    color: #333; /* Dark text color */
+    font-weight: 600; /* Bold header */
+    text-align: center; /* Center the header */
+    border-bottom: 2px solid #007bff; /* Bottom border for emphasis */
+    padding-bottom: 0.25rem; /* Reduced padding */
+}
+
+.sidebar ul {
+    list-style-type: none; /* Remove default list styling */
+    padding: 0; /* Remove padding */
+    margin: 0; /* Remove margin */
+}
+
+.sidebar ul li {
+    margin-bottom: 0.25rem; /* Reduced spacing between items */
+}
+
+.sidebar ul li a {
+    text-decoration: none; /* Remove underline from links */
+    color: #007bff; /* Link color */
+    padding: 0.5rem; /* Reduced padding */
+    border-radius: 4px; /* Rounded corners */
+    display: block; /* Make the link fill the entire list item */
+    transition: background-color 0.3s, color 0.3s, transform 0.2s; /* Smooth background transition */
+    font-weight: 500; /* Medium font weight */
+    text-align: center; /* Center text in links */
+    position: relative; /* Position for pseudo-elements */
+}
+
+.sidebar ul li a:hover {
+    background-color: #e9ecef; /* Light background on hover */
+    color: #0056b3; /* Darker link color on hover */
+    transform: translateY(-2px); /* Slight lift effect on hover */
+}
+
+.sidebar ul li a.active {
+    background-color: #007bff; /* Active link background */
+    color: white; /* Active link text color */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Shadow for active link */
+}
+
+/* Add a subtle transition effect for the sidebar */
+.sidebar:hover {
+    background-color: #f7f7f7; /* Slightly darker background on hover */
+}
+
+/* Add a focus effect for accessibility */
+.sidebar ul li a:focus {
+    outline: none; /* Remove default outline */
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); /* Custom focus outline */
+}
+
+.expenses-sidebar {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    height: 100%; /* Change this to 100% to match the parent's height */
+}
+
+.sidebar-header {
+    padding-bottom: 0.25rem; /* Further reduced padding */
+    margin-bottom: 0.25rem; /* Further reduced margin */
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.sidebar-menu li {
+    margin-bottom: 0.25rem; /* Reduced spacing */
+}
+
+.sidebar-menu a {
+    padding: 0.5rem 0.75rem; /* Reduced padding */
+    font-size: 0.8rem; /* Smaller font size */
+} 

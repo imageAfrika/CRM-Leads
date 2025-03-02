@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'dashboard',
     'django_extensions',
     'authentication',
+    'expenses.apps.ExpensesConfig',
 ]
 
 MIDDLEWARE = [
@@ -54,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'authentication.middleware.ProfileAuthenticationMiddleware',
 ]
 
 ROOT_URLCONF = 'crm_leads.urls'

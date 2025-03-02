@@ -1,0 +1,111 @@
+/* Expenses Container */
+.expenses-container {
+    display: flex;
+    height: calc(100vh - 60px); /* Full height minus nav bar */
+    background-color: #f8fafc;
+}
+
+/* Sidebar Styles */
+.expenses-sidebar {
+    width: 280px;
+    background-color: white;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.expenses-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.expenses-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a202c;
+    margin: 0;
+}
+
+/* Expenses Navigation */
+.expenses-nav {
+    padding: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.expenses-nav a {
+    display: flex;
+    align-items: center;
+    padding: 0.875rem 1.5rem;
+    color: #4a5568;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.expenses-nav a:hover {
+    background-color: #f7fafc;
+    color: #2563eb;
+}
+
+.expenses-nav a.active {
+    background-color: #ebf5ff;
+    color: #2563eb;
+    border-left-color: #2563eb;
+}
+
+.expenses-nav i {
+    width: 20px;
+    margin-right: 12px;
+    font-size: 1.1rem;
+}
+
+.expenses-nav span {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* Content Area */
+.expenses-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .expenses-container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .expenses-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .expenses-nav {
+        padding: 0.75rem;
+        gap: 0.75rem;
+    }
+
+    .expenses-nav a {
+        padding: 1rem;
+        border-left: none;
+        border-radius: 8px;
+        background-color: #f8fafc;
+    }
+
+    .expenses-nav a.active {
+        background-color: #ebf5ff;
+        border-left: none;
+        border-radius: 8px;
+    }
+
+    .expenses-content {
+        padding: 1rem;
+    }
+} 

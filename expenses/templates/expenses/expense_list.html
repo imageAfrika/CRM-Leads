@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block app_css %}
+<link rel="stylesheet" href="{% static 'expenses/css/shared.css' %}">
+<link rel="stylesheet" href="{% static 'expenses/css/expense_list.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'expenses/js/shared.js' %}"></script>
+<script src="{% static 'expenses/js/expense_list.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="expenses-layout">
+    <div class="content-header">
+        <h1>Expenses</h1>
+        <a href="{% url 'expenses:expense_create' %}" class="btn btn-primary">Add Expense</a>
+    </div>
+
+    {% if expenses %}
+    <div class="expenses-list">
+        {% for expense in expenses %}
+        <div class="expense-card">
+            <div class="expense-card-header">
+                <div class="expense-title">
+                    <h3>{{ expense.title }}</h3>
+                    <span class="expense-category">{{ expense.category.name }}</span>
+                </div>
+                <span class="expense-amount">${{ expense.amount|floatformat:2 }}</span>
+            </div>
+            <div class="expense-details">
+                <div class="detail-item">
+                    <span class="detail-label">Date:</span>
+                    <span>{{ expense.date|date:"M d, Y" }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Payment Method:</span>
+                    <span>{{ expense.get_payment_method_display }}</span>
+                </div>
+            </div>
+            <div class="expense-actions">
+                <a href="{% url 'expenses:expense_detail' expense.pk %}" class="btn btn-outline-secondary">View Details</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-receipt"></i>
+        </div>
+        <p>You haven't added any expenses yet.</p>
+        <a href="{% url 'expenses:expense_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Your First Expense
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

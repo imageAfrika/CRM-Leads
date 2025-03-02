@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'expenses/css/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="expenses-container">
+    <div class="expenses-sidebar">
+        <div class="expenses-header">
+            <h2>Expenses</h2>
+        </div>
+        <nav class="expenses-nav">
+            <a href="{% url 'expenses:expense_list' %}" class="{% if request.resolver_match.url_name == 'expense_list' %}active{% endif %}">
+                <i class="fas fa-receipt"></i>
+                <span>All Expenses</span>
+            </a>
+            <a href="{% url 'expenses:category_list' %}" class="{% if request.resolver_match.url_name == 'category_list' or request.resolver_match.url_name == 'category_create' or request.resolver_match.url_name == 'category_update' %}active{% endif %}">
+                <i class="fas fa-tags"></i>
+                <span>Categories</span>
+            </a>
+            <a href="{% url 'expenses:recurring_expense_list' %}" class="{% if request.resolver_match.url_name == 'recurring_expense_list' or request.resolver_match.url_name == 'recurring_expense_create' or request.resolver_match.url_name == 'recurring_expense_update' %}active{% endif %}">
+                <i class="fas fa-sync-alt"></i>
+                <span>Recurring Expenses</span>
+            </a>
+            <a href="#" class="{% if request.resolver_match.url_name == 'expense_reports' %}active{% endif %}">
+                <i class="fas fa-chart-pie"></i>
+                <span>Reports</span>
+            </a>
+        </nav>
+    </div>
+    <div class="expenses-content">
+        {% block expenses_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %} 

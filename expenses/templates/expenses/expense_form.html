@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block app_css %}
+<link rel="stylesheet" href="{% static 'expenses/css/shared.css' %}">
+<link rel="stylesheet" href="{% static 'expenses/css/sidebar.css' %}">
+<link rel="stylesheet" href="{% static 'expenses/css/expense_form.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="expenses-layout">
+    <div class="expenses-sidebar">
+        {% include 'expenses/includes/sidebar.html' %}
+    </div>
+    
+    <div class="expense-form-container">
+        <div class="form-header">
+            <h1>{% if form.instance.pk %}Edit Expense{% else %}New Expense{% endif %}</h1>
+            <p>Enter expense details below</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="success-message">
+                    <i class="fas fa-check-circle"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" action="{% if form.instance.pk %}{% url 'expenses:expense_update' form.instance.pk %}{% else %}{% url 'expenses:expense_create' %}{% endif %}" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h2 class="section-title">Basic Information</h2>
+                <div class="expense-main-info">
+                    <div class="form-group">
+                        <label for="{{ form.amount.id_for_label }}">Amount*</label>
+                        {{ form.amount }}
+                        {% if form.amount.errors %}
+                            <div class="error-message">{{ form.amount.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.date.id_for_label }}">Date*</label>
+                        {{ form.date }}
+                        {% if form.date.errors %}
+                            <div class="error-message">{{ form.date.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="expense-details">
+                    <div class="form-group">
+                        <label for="{{ form.category.id_for_label }}">Category*</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <div class="error-message">{{ form.category.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.payment_method.id_for_label }}">Payment Method</label>
+                        {{ form.payment_method }}
+                        {% if form.payment_method.errors %}
+                            <div class="error-message">{{ form.payment_method.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2 class="section-title">Additional Details</h2>
+                <div class="form-group full-width">
+                    <label for="{{ form.title.id_for_label }}">Title*</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <div class="error-message">{{ form.title.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="{{ form.description.id_for_label }}">Description</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="error-message">{{ form.description.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="{{ form.receipt.id_for_label }}">Receipt</label>
+                    {{ form.receipt }}
+                    {% if form.receipt.errors %}
+                        <div class="error-message">{{ form.receipt.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'expenses:expense_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> {% if form.instance.pk %}Update{% else %}Save{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

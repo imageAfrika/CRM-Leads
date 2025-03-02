@@ -1,0 +1,31 @@
+{% extends 'expenses/expenses_base.html' %}
+{% load static %}
+
+{% block expenses_content %}
+<div class="content-header">
+    <h1>Delete Recurring Expense</h1>
+</div>
+
+<div class="delete-confirmation-container">
+    <div class="delete-confirmation-card">
+        <div class="delete-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h2>Are you sure you want to delete "{{ recurring_expense.title }}"?</h2>
+        <p>This action cannot be undone. This recurring expense will be permanently deleted.</p>
+        <p>This will not delete any expenses that have already been created from this recurring expense.</p>
+        
+        <div class="confirmation-actions">
+            <a href="{% url 'expenses:recurring_expense_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Cancel
+            </a>
+            <form method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Delete Recurring Expense
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

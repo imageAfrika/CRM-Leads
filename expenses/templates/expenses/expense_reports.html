@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load currency_filters %}
+
+{% block app_css %}
+<link rel="stylesheet" href="{% static 'expenses/css/expense_reports.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="expenses-layout">
+    {% include 'expenses/includes/sidebar.html' %}
+    
+    <div class="content-container">
+        <div class="content-header">
+            <h1>Expense Reports</h1>
+            <div class="date-range-picker">
+                <form method="get" class="date-form">
+                    <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+                    <span>to</span>
+                    <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+                    <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="reports-grid">
+            <!-- Monthly Expenses Chart -->
+            <div class="report-card">
+                <h2>Monthly Expenses</h2>
+                <canvas id="monthlyExpensesChart"></canvas>
+            </div>
+
+            <!-- Category Expenses Chart -->
+            <div class="report-card">
+                <h2>Expenses by Category</h2>
+                <canvas id="categoryExpensesChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Monthly Expenses Chart
+    const monthlyCtx = document.getElementById('monthlyExpensesChart').getContext('2d');
+    new Chart(monthlyCtx, {
+        type: 'line',
+        data: {
+            labels: [{% for expense in monthly_expenses %}'{{ expense.month|date:"M Y" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Monthly Expenses',
+                data: [{% for expense in monthly_expenses %}{{ expense.total }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                borderColor: '#2563eb',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    });
+
+    // Category Expenses Chart
+    const categoryCtx = document.getElementById('categoryExpensesChart').getContext('2d');
+    new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [{% for expense in category_expenses %}'{{ expense.category__name }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                data: [{% for expense in category_expenses %}{{ expense.total }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: [
+                    '#2563eb',
+                    '#7c3aed',
+                    '#db2777',
+                    '#dc2626',
+                    '#d97706',
+                    '#059669',
+                    '#2563eb',
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                }
+            }
+        }
+    });
+</script>
+{% endblock %} 
