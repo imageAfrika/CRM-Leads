@@ -1,29 +1,30 @@
-/* Container for the table */
+/* Container and Layout */
 .container {
-    max-width: 1200px;
+    max-width: 1280px;
     margin: 2rem auto;
-    padding: 1.5rem;
+    padding: 2rem;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
 }
 
 .header h1 {
-    font-size: 1.75rem;
-    color: #1e293b;
+    font-size: 2rem;
+    color: #0f172a;
     font-weight: 600;
+    letter-spacing: -0.025em;
     margin: 0;
 }
 
-/* Table Container */
+/* Client List Container */
 .client-list {
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
     overflow: hidden;
 }
 
@@ -37,7 +38,7 @@
 
 .client-table th {
     background: #f8fafc;
-    padding: 1rem 1.5rem;
+    padding: 1.25rem 1.5rem;
     text-align: left;
     font-size: 0.875rem;
     font-weight: 500;
@@ -48,29 +49,20 @@
 }
 
 .client-table td {
-    padding: 1rem 1.5rem;
-    font-size: 0.875rem;
-    color: #475569;
-    border-bottom: 1px solid #e2e8f0;
+    padding: 1.25rem 1.5rem;
+    font-size: 0.9375rem;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
 }
 
-.client-table td:last-child {
-    padding-right: 1.5rem;
-    text-align: right;
-    min-width: 240px;
-}
-
-.client-table tr:last-child td {
-    border-bottom: none;
-}
-
 .client-table tbody tr {
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease-in-out;
 }
 
 .client-table tbody tr:hover {
     background-color: #f8fafc;
+    transform: translateY(-1px);
 }
 
 /* Client Name Link */
@@ -80,99 +72,122 @@
     font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.625rem;
+    transition: color 0.2s ease;
 }
 
 .client-name:hover {
     color: #1d4ed8;
 }
 
+.client-name i {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
 /* Action Buttons */
 .actions {
     display: flex;
-    gap: 1rem;
-    white-space: nowrap;
+    gap: 0.75rem;
+    justify-content: flex-end;
 }
 
 .btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
     padding: 0.625rem 1.25rem;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.875rem;
     font-weight: 500;
     transition: all 0.2s ease;
     text-decoration: none;
     cursor: pointer;
     border: none;
+    white-space: nowrap;
 }
 
 .btn-add {
     background: #2563eb;
     color: white;
     padding: 0.75rem 1.5rem;
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.1);
 }
 
 .btn-add:hover {
     background: #1d4ed8;
     transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(37, 99, 235, 0.06);
 }
 
 .btn-edit {
-    background: #f1f5f9;
+    background: #f8fafc;
     color: #475569;
-    min-width: 100px;
-    justify-content: center;
+    border: 1px solid #e2e8f0;
 }
 
 .btn-edit:hover {
-    background: #e2e8f0;
+    background: #f1f5f9;
     transform: translateY(-1px);
+    border-color: #cbd5e1;
 }
 
 .btn-delete {
     background: #fef2f2;
     color: #dc2626;
-    min-width: 100px;
-    justify-content: center;
+    border: 1px solid #fee2e2;
 }
 
 .btn-delete:hover {
     background: #fee2e2;
     transform: translateY(-1px);
+    border-color: #fecaca;
 }
 
 /* Empty State */
 .no-clients {
     text-align: center;
-    padding: 3rem 2rem;
+    padding: 4rem 2rem;
     color: #64748b;
-    font-size: 0.875rem;
 }
 
 .no-clients-content {
     max-width: 400px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
 }
 
 .no-clients i {
-    font-size: 2.5rem;
+    font-size: 3rem;
     color: #94a3b8;
-    margin-bottom: 1rem;
+    opacity: 0.8;
 }
 
 .no-clients h3 {
-    font-size: 1.125rem;
-    color: #475569;
-    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    color: #334155;
+    font-weight: 600;
+    margin: 0;
 }
 
 .no-clients p {
-    margin: 0 0 1.5rem;
+    margin: 0;
+    color: #64748b;
+    line-height: 1.5;
 }
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+    .container {
+        margin: 1.5rem;
+        padding: 1.5rem;
+    }
+}
+
 @media (max-width: 768px) {
     .container {
         margin: 1rem;
@@ -181,9 +196,13 @@
 
     .header {
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.25rem;
         align-items: stretch;
         text-align: center;
+    }
+
+    .header h1 {
+        font-size: 1.75rem;
     }
 
     .client-table {
@@ -194,19 +213,32 @@
 
     .client-table th,
     .client-table td {
-        padding: 0.75rem 1rem;
+        padding: 1rem;
         white-space: nowrap;
     }
 
     .actions {
         flex-direction: row;
         justify-content: flex-end;
+        min-width: 200px;
     }
 
     .btn {
-        padding: 0.5rem 0.75rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.8125rem;
+    }
+
+    .btn i {
+        margin-right: 0;
     }
 }
+
+/* Column Widths */
+.client-table th:nth-child(1) { width: 25%; }  /* Company Name */
+.client-table th:nth-child(2) { width: 20%; }  /* Contact Person */
+.client-table th:nth-child(3) { width: 20%; }  /* Email */
+.client-table th:nth-child(4) { width: 15%; }  /* Phone */
+.client-table th:nth-child(5) { width: 20%; }  /* Actions */
 
 /* Modal Styles */
 .modal-backdrop {
@@ -216,9 +248,11 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(15, 23, 42, 0.5);
     z-index: 1000;
     backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .modal {
@@ -226,26 +260,34 @@
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 400px;
+    transform: translate(-50%, -50%) scale(0.95);
+    max-width: 450px;
     width: 90%;
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     z-index: 1001;
     text-align: center;
-    padding: 2rem;
+    padding: 2.5rem;
+    opacity: 0;
+    transition: all 0.3s ease;
 }
 
 .modal.show,
 .modal-backdrop.show {
     display: block;
+    opacity: 1;
+}
+
+.modal.show {
+    transform: translate(-50%, -50%) scale(1);
 }
 
 .warning-icon {
-    font-size: 3rem;
+    font-size: 3.5rem;
     color: #ef4444;
     margin-bottom: 1.5rem;
+    opacity: 0.9;
 }
 
 .modal-header {
@@ -254,73 +296,58 @@
 
 .modal-header h2 {
     font-size: 1.5rem;
-    color: #1e293b;
-    margin: 0 0 0.5rem;
+    color: #0f172a;
+    font-weight: 600;
+    margin: 0 0 0.75rem;
 }
 
 .modal-header p {
     color: #64748b;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
     margin: 0;
 }
 
 .client-info {
     background: #f8fafc;
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    text-align: left;
 }
 
-.client-name {
+.client-info .client-name {
     font-size: 1.125rem;
-    font-weight: 500;
-    color: #1e293b;
-    margin-bottom: 0.5rem;
+    color: #0f172a;
+    margin-bottom: 1rem;
+    display: block;
 }
 
 .client-details {
-    color: #64748b;
-    font-size: 0.875rem;
+    display: grid;
+    gap: 0.5rem;
+    color: #475569;
+    font-size: 0.9375rem;
 }
 
 .modal-actions {
     display: flex;
     gap: 1rem;
-    justify-content: center;
+    justify-content: flex-end;
+    margin-top: 2rem;
 }
 
 @media (max-width: 768px) {
     .modal {
-        padding: 1.5rem;
+        padding: 2rem 1.5rem;
     }
 
     .modal-actions {
-        flex-direction: column;
+        flex-direction: column-reverse;
+        gap: 0.75rem;
     }
 
     .modal-actions .btn {
         width: 100%;
     }
-}
-
-/* Optional: Adjust table column widths for better distribution */
-.client-table th:nth-child(1) {  /* Company Name */
-    width: 25%;
-}
-
-.client-table th:nth-child(2) {  /* Contact Person */
-    width: 20%;
-}
-
-.client-table th:nth-child(3) {  /* Email */
-    width: 25%;
-}
-
-.client-table th:nth-child(4) {  /* Phone */
-    width: 15%;
-}
-
-.client-table th:nth-child(5) {  /* Actions */
-    width: 15%;
-    min-width: 240px;
 }

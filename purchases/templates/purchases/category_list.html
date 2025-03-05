@@ -6,19 +6,21 @@
 <link rel="stylesheet" href="{% static 'purchases/css/shared.css' %}">
 <link rel="stylesheet" href="{% static 'purchases/css/sidebar.css' %}">
 <link rel="stylesheet" href="{% static 'purchases/css/category_list.css' %}">
+<link rel="stylesheet" href="{% static 'purchases/css/purchase_styles_new.css' %}">
+
 {% endblock %}
 
 {% block content %}
-<div class="purchases-layout">
-    <div class="purchases-sidebar">
+<div class="expenses-layout">
+    <div class="expenses-sidebar">
         {% include 'purchases/includes/sidebar.html' %}
     </div>
     
-    <div class="category-container">
+    <div class="expenses-content">
         <div class="content-header">
             <h1>Categories</h1>
             
-            <div class="action-buttons">
+            <div class="header-actions">
                 <a href="{% url 'purchases:category_create' %}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Add Category
                 </a>
@@ -35,41 +37,49 @@
         </div>
         {% endif %}
         
-        <div class="category-card">
-            <div class="table-responsive">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>Purchase Count</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for category in categories %}
-                        <tr>
-                            <td>{{ category.name }}</td>
-                            <td>{{ category.description|default:"-" }}</td>
-                            <td>{{ category.purchase_count }}</td>
-                            <td class="actions">
-                                <a href="{% url 'purchases:category_update' category.id %}" class="btn-icon" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="{% url 'purchases:category_delete' category.id %}" class="btn-icon text-danger" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="empty-message">No categories found. <a href="{% url 'purchases:category_create' %}">Create one</a>.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        {% if categories %}
+        <div class="categories-list">
+            {% for category in categories %}
+            <div class="category-card">
+                <div class="category-header">
+                    <h2 class="category-title">{{ category.name }}</h2>
+                    <div class="category-actions">
+                        <a href="{% url 'purchases:category_update' category.id %}" class="btn-icon" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'purchases:category_delete' category.id %}" class="btn-icon text-danger" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                {% if category.description %}
+                <div class="category-description">
+                    {{ category.description }}
+                </div>
+                {% endif %}
+                
+                <div class="category-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Purchases</span>
+                        <span class="stat-value">{{ category.purchase_count }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Amount</span>
+                        <span class="stat-value">{{ category.total_amount|kes_format }}</span>
+                    </div>
+                </div>
             </div>
+            {% endfor %}
         </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-tags"></i>
+            </div>
+            <p class="empty-message">No categories found. <a href="{% url 'purchases:category_create' %}">Add one</a>.</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %} 

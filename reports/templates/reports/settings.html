@@ -1,0 +1,989 @@
+{% extends 'reports/reports_base.html' %}
+{% load static %}
+
+{% block reports_content %}
+<div class="reports-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Report Settings</h1>
+        <a href="{% url 'reports:dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="list-group" id="settings-tabs" role="tablist">
+                <a class="list-group-item list-group-item-action active" id="general-tab" data-toggle="list" href="#general" role="tab" aria-controls="general">
+                    <i class="fas fa-cog"></i> General Settings
+                </a>
+                <a class="list-group-item list-group-item-action" id="email-tab" data-toggle="list" href="#email" role="tab" aria-controls="email">
+                    <i class="fas fa-envelope"></i> Email Settings
+                </a>
+                <a class="list-group-item list-group-item-action" id="appearance-tab" data-toggle="list" href="#appearance" role="tab" aria-controls="appearance">
+                    <i class="fas fa-palette"></i> Appearance
+                </a>
+                <a class="list-group-item list-group-item-action" id="data-sources-tab" data-toggle="list" href="#data-sources" role="tab" aria-controls="data-sources">
+                    <i class="fas fa-database"></i> Data Sources
+                </a>
+                <a class="list-group-item list-group-item-action" id="api-tab" data-toggle="list" href="#api" role="tab" aria-controls="api">
+                    <i class="fas fa-code"></i> API Settings
+                </a>
+                <a class="list-group-item list-group-item-action" id="permissions-tab" data-toggle="list" href="#permissions" role="tab" aria-controls="permissions">
+                    <i class="fas fa-user-lock"></i> Permissions
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card report-card">
+                <div class="card-body">
+                    <div class="tab-content">
+                        <!-- General Settings -->
+                        <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+                            <h5 class="card-title">General Settings</h5>
+                            <form method="post" action="{% url 'reports:update_settings' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="settings_type" value="general">
+                                
+                                <div class="form-group">
+                                    <label for="default_time_range">Default Time Range</label>
+                                    <select class="form-control" id="default_time_range" name="default_time_range">
+                                        <option value="DAILY" {% if settings.default_time_range == 'DAILY' %}selected{% endif %}>Daily</option>
+                                        <option value="WEEKLY" {% if settings.default_time_range == 'WEEKLY' %}selected{% endif %}>Weekly</option>
+                                        <option value="MONTHLY" {% if settings.default_time_range == 'MONTHLY' %}selected{% endif %}>Monthly</option>
+                                        <option value="QUARTERLY" {% if settings.default_time_range == 'QUARTERLY' %}selected{% endif %}>Quarterly</option>
+                                        <option value="YEARLY" {% if settings.default_time_range == 'YEARLY' %}selected{% endif %}>Yearly</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="default_chart_type">Default Chart Type</label>
+                                    <select class="form-control" id="default_chart_type" name="default_chart_type">
+                                        <option value="BAR" {% if settings.default_chart_type == 'BAR' %}selected{% endif %}>Bar Chart</option>
+                                        <option value="LINE" {% if settings.default_chart_type == 'LINE' %}selected{% endif %}>Line Chart</option>
+                                        <option value="PIE" {% if settings.default_chart_type == 'PIE' %}selected{% endif %}>Pie Chart</option>
+                                        <option value="DOUGHNUT" {% if settings.default_chart_type == 'DOUGHNUT' %}selected{% endif %}>Doughnut Chart</option>
+                                        <option value="AREA" {% if settings.default_chart_type == 'AREA' %}selected{% endif %}>Area Chart</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="reports_per_page">Reports Per Page</label>
+                                    <input type="number" class="form-control" id="reports_per_page" name="reports_per_page" 
+                                           value="{{ settings.reports_per_page }}" min="5" max="50">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="enable_caching" name="enable_caching" 
+                                               {% if settings.enable_caching %}checked{% endif %}>
+                                        <label class="custom-control-label" for="enable_caching">Enable Report Caching</label>
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        Caching improves performance but may show slightly outdated data.
+                                    </small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="cache_timeout">Cache Timeout (minutes)</label>
+                                    <input type="number" class="form-control" id="cache_timeout" name="cache_timeout" 
+                                           value="{{ settings.cache_timeout }}" min="5" max="1440">
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Save Settings</button>
+                            </form>
+                        </div>
+                        
+                        <!-- Email Settings -->
+                        <div class="tab-pane fade" id="email" role="tabpanel" aria-labelledby="email-tab">
+                            <h5 class="card-title">Email Settings</h5>
+                            <form method="post" action="{% url 'reports:update_settings' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="settings_type" value="email">
+                                
+                                <div class="form-group">
+                                    <label for="email_from_name">From Name</label>
+                                    <input type="text" class="form-control" id="email_from_name" name="email_from_name" 
+                                           value="{{ settings.email_from_name }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="email_from_address">From Email Address</label>
+                                    <input type="email" class="form-control" id="email_from_address" name="email_from_address" 
+                                           value="{{ settings.email_from_address }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="email_subject_prefix">Email Subject Prefix</label>
+                                    <input type="text" class="form-control" id="email_subject_prefix" name="email_subject_prefix" 
+                                           value="{{ settings.email_subject_prefix }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="default_email_template">Default Email Template</label>
+                                    <textarea class="form-control" id="default_email_template" name="default_email_template" 
+                                              rows="5">{{ settings.default_email_template }}</textarea>
+                                    <small class="form-text text-muted">
+                                        You can use placeholders like {report_name}, {date}, {recipient_name}, etc.
+                                    </small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="include_report_in_email" name="include_report_in_email" 
+                                               {% if settings.include_report_in_email %}checked{% endif %}>
+                                        <label class="custom-control-label" for="include_report_in_email">Include Report Preview in Email</label>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Save Settings</button>
+                            </form>
+                        </div>
+                        
+                        <!-- Appearance Settings -->
+                        <div class="tab-pane fade" id="appearance" role="tabpanel" aria-labelledby="appearance-tab">
+                            <h5 class="card-title">Appearance Settings</h5>
+                            <form method="post" action="{% url 'reports:update_settings' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="settings_type" value="appearance">
+                                
+                                <div class="form-group">
+                                    <label>Chart Color Scheme</label>
+                                    <div class="color-scheme-options">
+                                        <div class="custom-control custom-radio custom-control-inline">
+                                            <input type="radio" id="color_scheme_default" name="color_scheme" value="default" 
+                                                   class="custom-control-input" {% if settings.color_scheme == 'default' %}checked{% endif %}>
+                                            <label class="custom-control-label" for="color_scheme_default">
+                                                <div class="color-preview color-preview-default"></div>
+                                                Default
+                                            </label>
+                                        </div>
+                                        <div class="custom-control custom-radio custom-control-inline">
+                                            <input type="radio" id="color_scheme_pastel" name="color_scheme" value="pastel" 
+                                                   class="custom-control-input" {% if settings.color_scheme == 'pastel' %}checked{% endif %}>
+                                            <label class="custom-control-label" for="color_scheme_pastel">
+                                                <div class="color-preview color-preview-pastel"></div>
+                                                Pastel
+                                            </label>
+                                        </div>
+                                        <div class="custom-control custom-radio custom-control-inline">
+                                            <input type="radio" id="color_scheme_vibrant" name="color_scheme" value="vibrant" 
+                                                   class="custom-control-input" {% if settings.color_scheme == 'vibrant' %}checked{% endif %}>
+                                            <label class="custom-control-label" for="color_scheme_vibrant">
+                                                <div class="color-preview color-preview-vibrant"></div>
+                                                Vibrant
+                                            </label>
+                                        </div>
+                                        <div class="custom-control custom-radio custom-control-inline">
+                                            <input type="radio" id="color_scheme_monochrome" name="color_scheme" value="monochrome" 
+                                                   class="custom-control-input" {% if settings.color_scheme == 'monochrome' %}checked{% endif %}>
+                                            <label class="custom-control-label" for="color_scheme_monochrome">
+                                                <div class="color-preview color-preview-monochrome"></div>
+                                                Monochrome
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="chart_font">Chart Font</label>
+                                    <select class="form-control" id="chart_font" name="chart_font">
+                                        <option value="Arial" {% if settings.chart_font == 'Arial' %}selected{% endif %}>Arial</option>
+                                        <option value="Helvetica" {% if settings.chart_font == 'Helvetica' %}selected{% endif %}>Helvetica</option>
+                                        <option value="Verdana" {% if settings.chart_font == 'Verdana' %}selected{% endif %}>Verdana</option>
+                                        <option value="Times New Roman" {% if settings.chart_font == 'Times New Roman' %}selected{% endif %}>Times New Roman</option>
+                                        <option value="Courier New" {% if settings.chart_font == 'Courier New' %}selected{% endif %}>Courier New</option>
+                                        <option value="Roboto" {% if settings.chart_font == 'Roboto' %}selected{% endif %}>Roboto</option>
+                                        <option value="Open Sans" {% if settings.chart_font == 'Open Sans' %}selected{% endif %}>Open Sans</option>
+                                        <option value="Lato" {% if settings.chart_font == 'Lato' %}selected{% endif %}>Lato</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="chart_title_size">Chart Title Font Size</label>
+                                    <input type="number" class="form-control" id="chart_title_size" name="chart_title_size" 
+                                           value="{{ settings.chart_title_size }}" min="12" max="24">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="chart_label_size">Chart Label Font Size</label>
+                                    <input type="number" class="form-control" id="chart_label_size" name="chart_label_size" 
+                                           value="{{ settings.chart_label_size }}" min="10" max="18">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="show_grid_lines" name="show_grid_lines" 
+                                               {% if settings.show_grid_lines %}checked{% endif %}>
+                                        <label class="custom-control-label" for="show_grid_lines">Show Grid Lines</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="show_legends" name="show_legends" 
+                                               {% if settings.show_legends %}checked{% endif %}>
+                                        <label class="custom-control-label" for="show_legends">Show Legends</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="legend_position">Legend Position</label>
+                                    <select class="form-control" id="legend_position" name="legend_position">
+                                        <option value="top" {% if settings.legend_position == 'top' %}selected{% endif %}>Top</option>
+                                        <option value="right" {% if settings.legend_position == 'right' %}selected{% endif %}>Right</option>
+                                        <option value="bottom" {% if settings.legend_position == 'bottom' %}selected{% endif %}>Bottom</option>
+                                        <option value="left" {% if settings.legend_position == 'left' %}selected{% endif %}>Left</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Chart Preview</label>
+                                    <div class="chart-preview-container">
+                                        <canvas id="appearance-preview-chart"></canvas>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Save Settings</button>
+                            </form>
+                        </div>
+                        
+                        <!-- Data Sources Settings -->
+                        <div class="tab-pane fade" id="data-sources" role="tabpanel" aria-labelledby="data-sources-tab">
+                            <h5 class="card-title">Data Sources</h5>
+                            <p class="text-muted">Configure connections to external data sources for your reports.</p>
+                            
+                            <div class="data-sources-list">
+                                {% for source in data_sources %}
+                                    <div class="card mb-3">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-database"></i> {{ source.name }}
+                                                {% if source.is_active %}
+                                                    <span class="badge badge-success">Active</span>
+                                                {% else %}
+                                                    <span class="badge badge-secondary">Inactive</span>
+                                                {% endif %}
+                                            </h6>
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-info" onclick="editDataSource({{ source.id }})">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="deleteDataSource({{ source.id }})">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>Type:</strong> {{ source.get_source_type_display }}</p>
+                                            <p><strong>Connection:</strong> {{ source.connection_string|default:"Not specified" }}</p>
+                                            <p><strong>Last Sync:</strong> {{ source.last_sync|default:"Never" }}</p>
+                                        </div>
+                                    </div>
+                                {% empty %}
+                                    <div class="alert alert-info">
+                                        No data sources configured yet. Click the button below to add one.
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <button class="btn btn-primary mt-3" onclick="addDataSource()">
+                                <i class="fas fa-plus"></i> Add Data Source
+                            </button>
+                        </div>
+                        
+                        <!-- API Settings -->
+                        <div class="tab-pane fade" id="api" role="tabpanel" aria-labelledby="api-tab">
+                            <h5 class="card-title">API Settings</h5>
+                            
+                            <div class="form-group">
+                                <label>Your API Token</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="api_token" value="{{ api_token }}" readonly>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="copyApiToken()">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted">
+                                    Use this token to authenticate API requests.
+                                </small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <form method="post" action="{% url 'reports:regenerate_api_token' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="fas fa-sync"></i> Regenerate Token
+                                    </button>
+                                </form>
+                                <small class="form-text text-muted">
+                                    Warning: Regenerating your token will invalidate the existing one.
+                                </small>
+                            </div>
+                            
+                            <hr>
+                            
+                            <h6>API Rate Limits</h6>
+                            <form method="post" action="{% url 'reports:update_settings' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="settings_type" value="api">
+                                
+                                <div class="form-group">
+                                    <label for="api_rate_limit">Requests per minute</label>
+                                    <input type="number" class="form-control" id="api_rate_limit" name="api_rate_limit" 
+                                           value="{{ settings.api_rate_limit }}" min="10" max="1000">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="enable_api_throttling" name="enable_api_throttling" 
+                                               {% if settings.enable_api_throttling %}checked{% endif %}>
+                                        <label class="custom-control-label" for="enable_api_throttling">Enable API Throttling</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="enable_api_authentication" name="enable_api_authentication" 
+                                               {% if settings.enable_api_authentication %}checked{% endif %}>
+                                        <label class="custom-control-label" for="enable_api_authentication">Require Authentication</label>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Save API Settings</button>
+                            </form>
+                            
+                            <hr>
+                            
+                            <h6>API Documentation</h6>
+                            <p>
+                                View the <a href="{% url 'reports:api_documentation' %}">API Documentation</a> for details on available endpoints and usage examples.
+                            </p>
+                        </div>
+                        
+                        <!-- Permissions Settings -->
+                        <div class="tab-pane fade" id="permissions" role="tabpanel" aria-labelledby="permissions-tab">
+                            <h5 class="card-title">Permissions</h5>
+                            
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> Configure who can access and manage reports.
+                            </div>
+                            
+                            <form method="post" action="{% url 'reports:update_settings' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="settings_type" value="permissions">
+                                
+                                <div class="form-group">
+                                    <label>Default Report Access</label>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="access_private" name="default_report_access" value="PRIVATE" 
+                                               class="custom-control-input" {% if settings.default_report_access == 'PRIVATE' %}checked{% endif %}>
+                                        <label class="custom-control-label" for="access_private">Private (creator only)</label>
+                                    </div>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="access_team" name="default_report_access" value="TEAM" 
+                                               class="custom-control-input" {% if settings.default_report_access == 'TEAM' %}checked{% endif %}>
+                                        <label class="custom-control-label" for="access_team">Team (same department)</label>
+                                    </div>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="access_public" name="default_report_access" value="PUBLIC" 
+                                               class="custom-control-input" {% if settings.default_report_access == 'PUBLIC' %}checked{% endif %}>
+                                        <label class="custom-control-label" for="access_public">Public (all users)</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Who can create reports?</label>
+                                    <select class="form-control" id="report_creation_role" name="report_creation_role">
+                                        <option value="ALL" {% if settings.report_creation_role == 'ALL' %}selected{% endif %}>All Users</option>
+                                        <option value="STAFF" {% if settings.report_creation_role == 'STAFF' %}selected{% endif %}>Staff Only</option>
+                                        <option value="MANAGERS" {% if settings.report_creation_role == 'MANAGERS' %}selected{% endif %}>Managers Only</option>
+                                        <option value="ADMINS" {% if settings.report_creation_role == 'ADMINS' %}selected{% endif %}>Admins Only</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Who can schedule reports?</label>
+                                    <select class="form-control" id="report_scheduling_role" name="report_scheduling_role">
+                                        <option value="ALL" {% if settings.report_scheduling_role == 'ALL' %}selected{% endif %}>All Users</option>
+                                        <option value="STAFF" {% if settings.report_scheduling_role == 'STAFF' %}selected{% endif %}>Staff Only</option>
+                                        <option value="MANAGERS" {% if settings.report_scheduling_role == 'MANAGERS' %}selected{% endif %}>Managers Only</option>
+                                        <option value="ADMINS" {% if settings.report_scheduling_role == 'ADMINS' %}selected{% endif %}>Admins Only</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Who can export reports?</label>
+                                    <select class="form-control" id="report_export_role" name="report_export_role">
+                                        <option value="ALL" {% if settings.report_export_role == 'ALL' %}selected{% endif %}>All Users</option>
+                                        <option value="STAFF" {% if settings.report_export_role == 'STAFF' %}selected{% endif %}>Staff Only</option>
+                                        <option value="MANAGERS" {% if settings.report_export_role == 'MANAGERS' %}selected{% endif %}>Managers Only</option>
+                                        <option value="ADMINS" {% if settings.report_export_role == 'ADMINS' %}selected{% endif %}>Admins Only</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="allow_report_sharing" name="allow_report_sharing" 
+                                               {% if settings.allow_report_sharing %}checked{% endif %}>
+                                        <label class="custom-control-label" for="allow_report_sharing">Allow Report Sharing</label>
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        Users can share reports with specific individuals.
+                                    </small>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Save Permission Settings</button>
+                            </form>
+                            
+                            <hr>
+                            
+                            <h6 class="mt-4">User Permissions</h6>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Role</th>
+                                            <th>Create</th>
+                                            <th>Schedule</th>
+                                            <th>Export</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for user_perm in user_permissions %}
+                                            <tr>
+                                                <td>{{ user_perm.user.get_full_name|default:user_perm.user.username }}</td>
+                                                <td>{{ user_perm.get_role_display }}</td>
+                                                <td>
+                                                    {% if user_perm.can_create %}
+                                                        <i class="fas fa-check text-success"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-times text-danger"></i>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if user_perm.can_schedule %}
+                                                        <i class="fas fa-check text-success"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-times text-danger"></i>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if user_perm.can_export %}
+                                                        <i class="fas fa-check text-success"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-times text-danger"></i>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-info" onclick="editUserPermission({{ user_perm.id }})">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="6" class="text-center">No custom user permissions set.</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <button class="btn btn-primary mt-3" onclick="addUserPermission()">
+                                <i class="fas fa-plus"></i> Add User Permission
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Data Source Modal -->
+<div class="modal fade" id="data-source-modal" tabindex="-1" role="dialog" aria-labelledby="dataSourceModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dataSourceModalLabel">Add Data Source</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="data-source-form" method="post" action="{% url 'reports:add_data_source' %}">
+                {% csrf_token %}
+                <input type="hidden" id="data_source_id" name="data_source_id" value="">
+                
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="source_name">Name</label>
+                        <input type="text" class="form-control" id="source_name" name="name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="source_type">Type</label>
+                        <select class="form-control" id="source_type" name="source_type" required>
+                            <option value="">Select Data Source Type</option>
+                            <option value="MYSQL">MySQL</option>
+                            <option value="POSTGRESQL">PostgreSQL</option>
+                            <option value="MSSQL">Microsoft SQL Server</option>
+                            <option value="ORACLE">Oracle</option>
+                            <option value="MONGODB">MongoDB</option>
+                            <option value="CSV">CSV File</option>
+                            <option value="API">External API</option>
+                        </select>
+                    </div>
+                    
+                    <div id="connection-fields">
+                        <div class="form-group">
+                            <label for="connection_string">Connection String</label>
+                            <input type="text" class="form-control" id="connection_string" name="connection_string">
+                            <small class="form-text text-muted">
+                                Format depends on the data source type.
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control" id="username" name="username">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" name="password">
+                        </div>
+                    </div>
+                    
+                    <div id="api-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="api_url">API URL</label>
+                            <input type="url" class="form-control" id="api_url" name="api_url">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="api_key">API Key</label>
+                            <input type="text" class="form-control" id="api_key" name="api_key">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="api_format">Response Format</label>
+                            <select class="form-control" id="api_format" name="api_format">
+                                <option value="JSON">JSON</option>
+                                <option value="XML">XML</option>
+                                <option value="CSV">CSV</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="file-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="file_path">File Path</label>
+                            <input type="text" class="form-control" id="file_path" name="file_path">
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="has_header" name="has_header" checked>
+                                <label class="custom-control-label" for="has_header">File has header row</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="is_active" name="is_active" checked>
+                            <label class="custom-control-label" for="is_active">Active</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-info" onclick="testConnection()">Test Connection</button>
+                    <button type="submit" class="btn btn-primary">Save Data Source</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit User Permission Modal -->
+<div class="modal fade" id="user-permission-modal" tabindex="-1" role="dialog" aria-labelledby="userPermissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userPermissionModalLabel">Add User Permission</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="user-permission-form" method="post" action="{% url 'reports:add_user_permission' %}">
+                {% csrf_token %}
+                <input type="hidden" id="permission_id" name="permission_id" value="">
+                
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="user">User</label>
+                        <select class="form-control" id="user" name="user" required>
+                            <option value="">Select User</option>
+                            {% for user in all_users %}
+                                <option value="{{ user.id }}">
+                                    {{ user.get_full_name|default:user.username }} ({{ user.email }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <select class="form-control" id="role" name="role" required>
+                            <option value="USER">Regular User</option>
+                            <option value="STAFF">Staff</option>
+                            <option value="MANAGER">Manager</option>
+                            <option value="ADMIN">Admin</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="can_create" name="can_create" checked>
+                            <label class="custom-control-label" for="can_create">Can Create Reports</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="can_schedule" name="can_schedule" checked>
+                            <label class="custom-control-label" for="can_schedule">Can Schedule Reports</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="can_export" name="can_export" checked>
+                            <label class="custom-control-label" for="can_export">Can Export Reports</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Permission</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize appearance preview chart
+        const ctx = document.getElementById('appearance-preview-chart').getContext('2d');
+        const previewChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Sample Data',
+                    data: [12, 19, 3, 5, 2, 3],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Handle data source type change
+        document.getElementById('source_type').addEventListener('change', function() {
+            const connectionFields = document.getElementById('connection-fields');
+            const apiFields = document.getElementById('api-fields');
+            const fileFields = document.getElementById('file-fields');
+            
+            connectionFields.style.display = 'none';
+            apiFields.style.display = 'none';
+            fileFields.style.display = 'none';
+            
+            if (this.value === 'API') {
+                apiFields.style.display = 'block';
+            } else if (this.value === 'CSV') {
+                fileFields.style.display = 'block';
+            } else if (this.value) {
+                connectionFields.style.display = 'block';
+            }
+        });
+        
+        // Update appearance preview when settings change
+        const appearanceInputs = document.querySelectorAll('#appearance input, #appearance select');
+        appearanceInputs.forEach(input => {
+            input.addEventListener('change', updateChartPreview);
+        });
+    });
+    
+    function copyApiToken() {
+        const tokenInput = document.getElementById('api_token');
+        tokenInput.select();
+        document.execCommand('copy');
+        alert('API token copied to clipboard!');
+    }
+    
+    function updateChartPreview() {
+        const colorScheme = document.querySelector('input[name="color_scheme"]:checked').value;
+        const font = document.getElementById('chart_font').value;
+        const titleSize = document.getElementById('chart_title_size').value;
+        const labelSize = document.getElementById('chart_label_size').value;
+        const showGrid = document.getElementById('show_grid_lines').checked;
+        const showLegends = document.getElementById('show_legends').checked;
+        const legendPosition = document.getElementById('legend_position').value;
+        
+        // Get the chart instance
+        const chart = Chart.getChart('appearance-preview-chart');
+        
+        // Update chart options based on settings
+        chart.options.font.family = font;
+        chart.options.plugins.title.font.size = parseInt(titleSize);
+        chart.options.scales.x.ticks.font.size = parseInt(labelSize);
+        chart.options.scales.y.ticks.font.size = parseInt(labelSize);
+        chart.options.scales.x.grid.display = showGrid;
+        chart.options.scales.y.grid.display = showGrid;
+        chart.options.plugins.legend.display = showLegends;
+        chart.options.plugins.legend.position = legendPosition;
+        
+        // Update colors based on color scheme
+        let colors = [];
+        let borderColors = [];
+        
+        switch (colorScheme) {
+            case 'pastel':
+                colors = [
+                    'rgba(255, 179, 186, 0.6)',
+                    'rgba(255, 223, 186, 0.6)',
+                    'rgba(255, 255, 186, 0.6)',
+                    'rgba(186, 255, 201, 0.6)',
+                    'rgba(186, 225, 255, 0.6)',
+                    'rgba(186, 186, 255, 0.6)'
+                ];
+                borderColors = [
+                    'rgba(255, 179, 186, 1)',
+                    'rgba(255, 223, 186, 1)',
+                    'rgba(255, 255, 186, 1)',
+                    'rgba(186, 255, 201, 1)',
+                    'rgba(186, 225, 255, 1)',
+                    'rgba(186, 186, 255, 1)'
+                ];
+                break;
+            case 'vibrant':
+                colors = [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)'
+                ];
+                borderColors = [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ];
+                break;
+            case 'monochrome':
+                colors = [
+                    'rgba(0, 0, 0, 0.9)',
+                    'rgba(0, 0, 0, 0.7)',
+                    'rgba(0, 0, 0, 0.5)',
+                    'rgba(0, 0, 0, 0.4)',
+                    'rgba(0, 0, 0, 0.3)',
+                    'rgba(0, 0, 0, 0.2)'
+                ];
+                borderColors = [
+                    'rgba(0, 0, 0, 1)',
+                    'rgba(0, 0, 0, 1)',
+                    'rgba(0, 0, 0, 1)',
+                    'rgba(0, 0, 0, 1)',
+                    'rgba(0, 0, 0, 1)',
+                    'rgba(0, 0, 0, 1)'
+                ];
+                break;
+            default:
+                colors = [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ];
+                borderColors = [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ];
+        }
+        
+        // Update dataset colors
+        chart.data.datasets[0].backgroundColor = colors;
+        chart.data.datasets[0].borderColor = borderColors;
+        
+        // Update the chart
+        chart.update();
+    }
+    
+    function addDataSource() {
+        // Reset form
+        document.getElementById('data-source-form').reset();
+        document.getElementById('data_source_id').value = '';
+        document.getElementById('dataSourceModalLabel').textContent = 'Add Data Source';
+        document.getElementById('data-source-form').action = "{% url 'reports:add_data_source' %}";
+        
+        // Show the modal
+        $('#data-source-modal').modal('show');
+    }
+    
+    function editDataSource(sourceId) {
+        // Fetch data source details via AJAX
+        fetch(`/reports/api/data_sources/${sourceId}/`)
+            .then(response => response.json())
+            .then(data => {
+                // Populate the form
+                document.getElementById('data_source_id').value = data.id;
+                document.getElementById('source_name').value = data.name;
+                document.getElementById('source_type').value = data.source_type;
+                document.getElementById('is_active').checked = data.is_active;
+                
+                // Handle different source types
+                const connectionFields = document.getElementById('connection-fields');
+                const apiFields = document.getElementById('api-fields');
+                const fileFields = document.getElementById('file-fields');
+                
+                connectionFields.style.display = 'none';
+                apiFields.style.display = 'none';
+                fileFields.style.display = 'none';
+                
+                if (data.source_type === 'API') {
+                    apiFields.style.display = 'block';
+                    document.getElementById('api_url').value = data.api_url || '';
+                    document.getElementById('api_key').value = data.api_key || '';
+                    document.getElementById('api_format').value = data.api_format || 'JSON';
+                } else if (data.source_type === 'CSV') {
+                    fileFields.style.display = 'block';
+                    document.getElementById('file_path').value = data.file_path || '';
+                    document.getElementById('has_header').checked = data.has_header !== false;
+                } else {
+                    connectionFields.style.display = 'block';
+                    document.getElementById('connection_string').value = data.connection_string || '';
+                    document.getElementById('username').value = data.username || '';
+                    // Password is not populated for security reasons
+                }
+                
+                // Update modal title and form action
+                document.getElementById('dataSourceModalLabel').textContent = 'Edit Data Source';
+                document.getElementById('data-source-form').action = `/reports/data_sources/${sourceId}/update/`;
+                
+                // Show the modal
+                $('#data-source-modal').modal('show');
+            })
+            .catch(error => {
+                console.error('Error fetching data source details:', error);
+                alert('Failed to load data source details. Please try again.');
+            });
+    }
+    
+    function deleteDataSource(sourceId) {
+        if (confirm('Are you sure you want to delete this data source? This action cannot be undone.')) {
+            window.location.href = `/reports/data_sources/${sourceId}/delete/`;
+        }
+    }
+    
+    function testConnection() {
+        const form = document.getElementById('data-source-form');
+        const formData = new FormData(form);
+        
+        fetch('/reports/test_data_source_connection/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Connection successful!');
+            } else {
+                alert('Connection failed: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error testing connection:', error);
+            alert('An error occurred while testing the connection.');
+        });
+    }
+    
+    function addUserPermission() {
+        // Reset form
+        document.getElementById('user-permission-form').reset();
+        document.getElementById('permission_id').value = '';
+        document.getElementById('userPermissionModalLabel').textContent = 'Add User Permission';
+        document.getElementById('user-permission-form').action = "{% url 'reports:add_user_permission' %}";
+        
+        // Show the modal
+        $('#user-permission-modal').modal('show');
+    }
+    
+    function editUserPermission(permissionId) {
+        // Fetch permission details via AJAX
+        fetch(`/reports/api/user_permissions/${permissionId}/`)
+            .then(response => response.json())
+            .then(data => {
+                // Populate the form
+                document.getElementById('permission_id').value = data.id;
+                document.getElementById('user').value = data.user_id;
+                document.getElementById('role').value = data.role;
+                document.getElementById('can_create').checked = data.can_create;
+                document.getElementById('can_schedule').checked = data.can_schedule;
+                document.getElementById('can_export').checked = data.can_export;
+                
+                // Update modal title and form action
+                document.getElementById('userPermissionModalLabel').textContent = 'Edit User Permission';
+                document.getElementById('user-permission-form').action = `/reports/user_permissions/${permissionId}/update/`;
+                
+                // Show the modal
+                $('#user-permission-modal').modal('show');
+            })
+            .catch(error => {
+                console.error('Error fetching permission details:', error);
+                alert('Failed to load permission details. Please try again.');
+            });
+    }
+</script>
+{% endblock %}

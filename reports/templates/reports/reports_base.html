@@ -1,0 +1,146 @@
+<!-- reports/templates/reports/reports_base.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reports & Analytics{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'reports/css/reports.css' %}">
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Include Date picker if needed -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Reports Sidebar -->
+        <div class="col-md-3 reports-sidebar">
+            <div class="report-card">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-chart-line"></i> Reports Menu</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/reports/' %}active{% endif %}" 
+                               href="{% url 'reports:dashboard' %}">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if '/reports/banking/' in request.path %}active{% endif %}" 
+                               href="{% url 'reports:banking_reports' %}">
+                                <i class="fas fa-university"></i> Banking Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if '/reports/sales/' in request.path %}active{% endif %}" 
+                               href="{% url 'reports:sales_reports' %}">
+                                <i class="fas fa-shopping-cart"></i> Sales Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if '/reports/expenses/' in request.path %}active{% endif %}" 
+                               href="{% url 'reports:expenses_reports' %}">
+                                <i class="fas fa-money-bill"></i> Expenses Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if '/reports/clients/' in request.path %}active{% endif %}" 
+                               href="{% url 'reports:clients_reports' %}">
+                                <i class="fas fa-users"></i> Client Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if '/reports/purchases/' in request.path %}active{% endif %}" 
+                               href="{% url 'reports:purchases_reports' %}">
+                                <i class="fas fa-shopping-bag"></i> Purchase Reports
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Favorite Reports -->
+            <div class="report-card">
+                <div class="card-header bg-warning">
+                    <h5><i class="fas fa-star"></i> Favorite Reports</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for config in favorite_reports %}
+                            <li class="list-group-item">
+                                <a href="{% url 'reports:'|add:config.report_type|lower|add:'_reports' %}?config_id={{ config.id }}">
+                                    <span class="report-type-badge report-type-{{ config.report_type|lower }}">
+                                        {{ config.get_report_type_display }}
+                                    </span>
+                                    {{ config.name }}
+                                </a>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item text-muted">No favorite reports yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="col-md-9">
+            {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            {% block reports_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+
+<!-- Save Report Modal -->
+<div class="modal fade" id="save-report-modal" tabindex="-1" role="dialog" aria-labelledby="saveReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="saveReportModalLabel">Save Report</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post" action="">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="name">Report Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description (Optional)</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <input type="hidden" id="report_data" name="report_data" value="">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+<script src="{% static 'reports/js/reports.js' %}"></script>
+{% endblock %}

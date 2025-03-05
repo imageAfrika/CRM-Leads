@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block app_css %}
+<link rel="stylesheet" href="{% static 'banking/css/banking.css' %}?v={% now 'U' %}">
+{% endblock %}
+
+{% block content %}
+<div class="banking-container">
+    <div class="banking-header">
+        <h1 class="page-title"><i class="fas fa-university"></i> Banking</h1>
+        <div class="banking-actions">
+            <a href="{% url 'banking:create_account' %}" class="btn primary-btn">
+                <i class="fas fa-plus-circle"></i> New Account
+            </a>
+        </div>
+    </div>
+
+    <div class="banking-layout">
+        <!-- Banking Sidebar -->
+        <div class="banking-sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Banking Menu</h3>
+                <ul class="sidebar-nav">
+                    <li>
+                        <a href="{% url 'banking:dashboard' %}" class="{% if request.path == '/banking/' %}active{% endif %}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'banking:create_account' %}" class="{% if '/create-account/' in request.path %}active{% endif %}">
+                            <i class="fas fa-plus-circle"></i> Create Account
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'banking:all_transactions' %}" class="{% if '/transactions/' in request.path and not '/account/' in request.path %}active{% endif %}">
+                            <i class="fas fa-exchange-alt"></i> All Transactions
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'reports:dashboard' %}" class="{% if '/reports/' in request.path %}active{% endif %}">
+                            <i class="fas fa-chart-bar"></i> Reports
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="banking-content">
+            {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            {% block banking_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'banking/js/banking.js' %}"></script>
+{% endblock %} 

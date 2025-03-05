@@ -1,0 +1,111 @@
+{% extends "reports/reports_base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/report_list.css' %}">
+{% endblock %}
+
+{% block reports_content %}
+<div class="reports-container">
+    <div class="reports-header">
+        <h1>Reports</h1>
+        <div class="reports-actions">
+            <a href="{% url 'reports:create_report' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Report
+            </a>
+            <a href="{% url 'reports:dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="reports-tabs">
+        <a href="{% url 'reports:report_list' %}" class="tab active">All Reports</a>
+        <a href="{% url 'reports:banking_reports' %}" class="tab">Banking</a>
+        <a href="{% url 'reports:sales_reports' %}" class="tab">Sales</a>
+        <a href="{% url 'reports:clients_reports' %}" class="tab">Clients</a>
+        <a href="{% url 'reports:scheduled_reports' %}" class="tab">Scheduled</a>
+    </div>
+
+    <div class="reports-list">
+        {% if page_obj %}
+            <table class="reports-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Created</th>
+                        <th>Last Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in page_obj %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'reports:view_report' report.id %}">
+                                {{ report.configuration.name }}
+                            </a>
+                        </td>
+                        <td>{{ report.configuration.get_report_type_display }}</td>
+                        <td>{{ report.created_at|date:"M d, Y" }}</td>
+                        <td>{{ report.updated_at|date:"M d, Y" }}</td>
+                        <td class="actions">
+                            <a href="{% url 'reports:view_report' report.id %}" class="btn btn-sm btn-info" title="View">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'reports:update_report' report.id %}" class="btn btn-sm btn-warning" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form method="post" action="{% url 'reports:delete_report' report.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this report?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'reports:toggle_favorite' report.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm {% if report.configuration.is_favorite %}btn-warning{% else %}btn-outline-warning{% endif %}" title="{% if report.configuration.is_favorite %}Remove from favorites{% else %}Add to favorites{% endif %}">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            {% if page_obj.has_other_pages %}
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1">&laquo; first</a>
+                        <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                    {% endif %}
+            
+                    <span class="current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+            
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="no-reports">
+                <p>No reports found. Create your first report to get started.</p>
+                <a href="{% url 'reports:create_report' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Create Report
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/report_list.js' %}"></script>
+{% endblock %} 

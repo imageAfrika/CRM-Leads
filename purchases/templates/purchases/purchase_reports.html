@@ -10,24 +10,25 @@
 
 {% block app_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <script src="{% static 'purchases/js/purchase_reports.js' %}" defer></script>
 {% endblock %}
 
 {% block content %}
-<div class="purchases-layout">
-    <div class="purchases-sidebar">
+<div class="expenses-layout">
+    <div class="expenses-sidebar">
         {% include 'purchases/includes/sidebar.html' %}
     </div>
     
-    <div class="purchases-content">
+    <div class="expenses-content">
         <div class="content-header">
-            <h1>Purchase Reports</h1>
+            <h1>Purchase Analytics</h1>
             
-            <div class="filter-controls">
-                <form method="get" id="report-filter-form">
-                    <div class="filter-group">
+            <div class="date-range-picker">
+                <form method="get" id="report-filter-form" class="date-form">
+                    <div class="form-group">
                         <label for="period">Time Period:</label>
-                        <select name="period" id="period">
+                        <select name="period" id="period" class="form-control">
                             <option value="month" {% if period == 'month' %}selected{% endif %}>This Month</option>
                             <option value="quarter" {% if period == 'quarter' %}selected{% endif %}>This Quarter</option>
                             <option value="year" {% if period == 'year' %}selected{% endif %}>This Year</option>
@@ -75,6 +76,17 @@
                     <p class="summary-label">{{ period_label }}</p>
                 </div>
             </div>
+            
+            <div class="summary-box">
+                <div class="summary-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="summary-info">
+                    <h3>Growth Rate</h3>
+                    <p class="summary-value" id="growth-rate">Calculating...</p>
+                    <p class="summary-label">vs. previous period</p>
+                </div>
+            </div>
         </div>
         
         <div class="reports-grid">
@@ -92,6 +104,27 @@
                 </div>
             </div>
             
+            <div class="report-card">
+                <h3>Payment Methods</h3>
+                <div class="chart-container">
+                    <canvas id="paymentMethodChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="report-card">
+                <h3>Purchase Status</h3>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="report-card full-width">
+                <h3>Purchase Timeline</h3>
+                <div class="chart-container timeline-chart">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+            
             <div class="report-card full-width">
                 <h3>Top Purchases</h3>
                 <div class="table-responsive">
@@ -100,7 +133,9 @@
                             <tr>
                                 <th>Date</th>
                                 <th>Title</th>
+                                <th>Vendor</th>
                                 <th>Category</th>
+                                <th>Status</th>
                                 <th>Amount</th>
                                 <th>Actions</th>
                             </tr>
@@ -110,7 +145,13 @@
                             <tr>
                                 <td>{{ purchase.date|date:"M d, Y" }}</td>
                                 <td>{{ purchase.title }}</td>
+                                <td>{{ purchase.vendor }}</td>
                                 <td>{{ purchase.category.name }}</td>
+                                <td>
+                                    <span class="status-badge status-{{ purchase.status|lower }}">
+                                        {{ purchase.get_status_display }}
+                                    </span>
+                                </td>
                                 <td class="amount">{{ purchase.amount|kes_format }}</td>
                                 <td>
                                     <a href="{% url 'purchases:purchase_detail' purchase.id %}" class="btn-icon" title="View">
@@ -120,7 +161,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5" class="empty-message">No purchases found for this period.</td>
+                                <td colspan="7" class="empty-message">No purchases found for this period.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -133,7 +174,13 @@
              data-categories="{{ categories_json }}" 
              data-category-amounts="{{ category_amounts_json }}"
              data-months="{{ months_json }}"
-             data-monthly-amounts="{{ monthly_amounts_json }}">
+             data-monthly-amounts="{{ monthly_amounts_json }}"
+             data-payment-methods="{{ payment_methods_json }}"
+             data-payment-method-amounts="{{ payment_method_amounts_json }}"
+             data-statuses="{{ statuses_json }}"
+             data-status-amounts="{{ status_amounts_json }}"
+             data-previous-total="{{ previous_total }}"
+             data-current-total="{{ total_amount }}">
         </div>
     </div>
 </div>

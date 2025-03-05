@@ -1,0 +1,198 @@
+{% extends 'reports/reports_base.html' %}
+{% load static %}
+
+{% block title %}Reports Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/reports_dashboard.css' %}">
+{% endblock %}
+
+{% block reports_content %}
+<div class="reports-dashboard">
+    <div class="dashboard-header">
+        <h1>Reports Dashboard</h1>
+        <div class="dashboard-actions">
+            <a href="{% url 'reports:create_report' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Report
+            </a>
+            <a href="{% url 'reports:report_list' %}" class="btn btn-secondary">
+                <i class="fas fa-list"></i> All Reports
+            </a>
+        </div>
+    </div>
+    
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card banking">
+            <div class="stat-card-header">
+                <div class="stat-card-icon">
+                    <i class="fas fa-university"></i>
+                </div>
+                <h3 class="stat-card-title">Banking Reports</h3>
+            </div>
+            <div class="stat-card-value">{{ stats.banking_count|default:"0" }}</div>
+            <div class="stat-card-trend {% if stats.banking_trend > 0 %}up{% elif stats.banking_trend < 0 %}down{% endif %}">
+                <i class="fas fa-{% if stats.banking_trend > 0 %}arrow-up{% elif stats.banking_trend < 0 %}arrow-down{% else %}minus{% endif %}"></i>
+                {{ stats.banking_trend|default:"0" }}%
+            </div>
+            <a href="{% url 'reports:banking_reports' %}" class="btn btn-primary mt-3">View Reports</a>
+        </div>
+        
+        <div class="stat-card sales">
+            <div class="stat-card-header">
+                <div class="stat-card-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="stat-card-title">Sales Reports</h3>
+            </div>
+            <div class="stat-card-value">{{ stats.sales_count|default:"0" }}</div>
+            <div class="stat-card-trend {% if stats.sales_trend > 0 %}up{% elif stats.sales_trend < 0 %}down{% endif %}">
+                <i class="fas fa-{% if stats.sales_trend > 0 %}arrow-up{% elif stats.sales_trend < 0 %}arrow-down{% else %}minus{% endif %}"></i>
+                {{ stats.sales_trend|default:"0" }}%
+            </div>
+            <a href="{% url 'reports:sales_reports' %}" class="btn btn-primary mt-3">View Reports</a>
+        </div>
+        
+        <div class="stat-card clients">
+            <div class="stat-card-header">
+                <div class="stat-card-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="stat-card-title">Client Reports</h3>
+            </div>
+            <div class="stat-card-value">{{ stats.clients_count|default:"0" }}</div>
+            <div class="stat-card-trend {% if stats.clients_trend > 0 %}up{% elif stats.clients_trend < 0 %}down{% endif %}">
+                <i class="fas fa-{% if stats.clients_trend > 0 %}arrow-up{% elif stats.clients_trend < 0 %}arrow-down{% else %}minus{% endif %}"></i>
+                {{ stats.clients_trend|default:"0" }}%
+            </div>
+            <a href="{% url 'reports:clients_reports' %}" class="btn btn-primary mt-3">View Reports</a>
+        </div>
+        
+        <div class="stat-card expenses">
+            <div class="stat-card-header">
+                <div class="stat-card-icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <h3 class="stat-card-title">Expense Reports</h3>
+            </div>
+            <div class="stat-card-value">{{ stats.expenses_count|default:"0" }}</div>
+            <div class="stat-card-trend {% if stats.expenses_trend > 0 %}up{% elif stats.expenses_trend < 0 %}down{% endif %}">
+                <i class="fas fa-{% if stats.expenses_trend > 0 %}arrow-up{% elif stats.expenses_trend < 0 %}arrow-down{% else %}minus{% endif %}"></i>
+                {{ stats.expenses_trend|default:"0" }}%
+            </div>
+            <a href="{% url 'reports:expenses_reports' %}" class="btn btn-primary mt-3">View Reports</a>
+        </div>
+        
+        <div class="stat-card scheduled">
+            <div class="stat-card-header">
+                <div class="stat-card-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <h3 class="stat-card-title">Scheduled Reports</h3>
+            </div>
+            <div class="stat-card-value">{{ stats.scheduled_count|default:"0" }}</div>
+            <div class="stat-card-trend {% if stats.scheduled_trend > 0 %}up{% elif stats.scheduled_trend < 0 %}down{% endif %}">
+                <i class="fas fa-{% if stats.scheduled_trend > 0 %}arrow-up{% elif stats.scheduled_trend < 0 %}arrow-down{% else %}minus{% endif %}"></i>
+                {{ stats.scheduled_trend|default:"0" }}%
+            </div>
+            <a href="{% url 'reports:scheduled_reports' %}" class="btn btn-primary mt-3">View Reports</a>
+        </div>
+    </div>
+    
+    <!-- Recent Reports -->
+    <div class="recent-reports">
+        <div class="recent-reports-header">
+            <h2>Recent Reports</h2>
+            <a href="{% url 'reports:report_list' %}">View All</a>
+        </div>
+        
+        <ul class="recent-reports-list">
+            {% for report in recent_reports %}
+            <li class="recent-reports-item">
+                <div class="recent-reports-item-icon report-type-{{ report.configuration.report_type|lower }}-bg">
+                    <i class="fas fa-{{ report.configuration.get_report_type_icon }}"></i>
+                </div>
+                <div class="recent-reports-item-content">
+                    <a href="{% url 'reports:view_report' report.id %}" class="recent-reports-item-title">
+                        {{ report.configuration.name }}
+                    </a>
+                    <div class="recent-reports-item-meta">
+                        <span>
+                            <i class="fas fa-tag"></i>
+                            {{ report.configuration.get_report_type_display }}
+                        </span>
+                        <span>
+                            <i class="far fa-clock"></i>
+                            {{ report.updated_at|date:"M d, Y" }}
+                        </span>
+                    </div>
+                </div>
+                <div class="recent-reports-item-actions">
+                    <a href="{% url 'reports:view_report' report.id %}" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <button class="favorite-toggle {% if report.configuration.is_favorite %}active{% endif %}" data-report-id="{{ report.id }}">
+                        <i class="{% if report.configuration.is_favorite %}fas{% else %}far{% endif %} fa-star"></i>
+                    </button>
+                </div>
+            </li>
+            {% empty %}
+            <li class="recent-reports-item">
+                <div class="no-reports">
+                    <p>No reports found. Create your first report to get started.</p>
+                    <a href="{% url 'reports:create_report' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Report
+                    </a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <!-- Favorite Reports -->
+    {% if favorite_reports %}
+    <div class="favorite-reports">
+        <div class="favorite-reports-header">
+            <h2><i class="fas fa-star"></i> Favorite Reports</h2>
+        </div>
+        
+        <ul class="favorite-reports-list">
+            {% for report in favorite_reports %}
+            <li class="recent-reports-item">
+                <div class="recent-reports-item-icon report-type-{{ report.configuration.report_type|lower }}-bg">
+                    <i class="fas fa-{{ report.configuration.get_report_type_icon }}"></i>
+                </div>
+                <div class="recent-reports-item-content">
+                    <a href="{% url 'reports:view_report' report.id %}" class="recent-reports-item-title">
+                        {{ report.configuration.name }}
+                    </a>
+                    <div class="recent-reports-item-meta">
+                        <span>
+                            <i class="fas fa-tag"></i>
+                            {{ report.configuration.get_report_type_display }}
+                        </span>
+                        <span>
+                            <i class="far fa-clock"></i>
+                            {{ report.updated_at|date:"M d, Y" }}
+                        </span>
+                    </div>
+                </div>
+                <div class="recent-reports-item-actions">
+                    <a href="{% url 'reports:view_report' report.id %}" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <button class="favorite-toggle active" data-report-id="{{ report.id }}">
+                        <i class="fas fa-star"></i>
+                    </button>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

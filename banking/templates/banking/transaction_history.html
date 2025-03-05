@@ -1,0 +1,69 @@
+{% extends 'banking/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block banking_content %}
+<div class="content-header">
+    {% if account %}
+        <h2 class="content-title">Transaction History for Account {{ account.account_number }}</h2>
+        <a href="{% url 'banking:account_detail' account.account_number %}" class="btn secondary-btn">
+            <i class="fas fa-arrow-left"></i> Back to Account
+        </a>
+    {% else %}
+        <h2 class="content-title">All Transactions</h2>
+        <a href="{% url 'banking:dashboard' %}" class="btn secondary-btn">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    {% endif %}
+</div>
+
+<div class="transactions-container">
+    <div class="transactions-header">
+        <h3><i class="fas fa-history"></i> Transaction History</h3>
+    </div>
+
+    {% if transactions %}
+        <ul class="transaction-list">
+            {% for transaction in transactions %}
+                <li class="transaction-item">
+                    {% if transaction.transaction_type == 'deposit' %}
+                        <div class="transaction-icon transaction-deposit">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                    {% elif transaction.transaction_type == 'withdrawal' %}
+                        <div class="transaction-icon transaction-withdraw">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                    {% else %}
+                        <div class="transaction-icon transaction-transfer">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="transaction-details">
+                        <div class="transaction-title">
+                            {{ transaction.get_transaction_type_display }}
+                        </div>
+                        <div class="transaction-date">
+                            {{ transaction.timestamp|date:"F j, Y, g:i a" }}
+                        </div>
+                    </div>
+                    
+                    <div class="transaction-amount {% if transaction.transaction_type == 'deposit' %}amount-positive{% elif transaction.transaction_type == 'withdrawal' %}amount-negative{% endif %}">
+                        {% if transaction.transaction_type == 'deposit' %}+{% elif transaction.transaction_type == 'withdrawal' %}-{% endif %}
+                        ${{ transaction.amount|floatformat:2|intcomma }}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-exchange-alt"></i>
+            </div>
+            <h3>No Transactions Found</h3>
+            <p>There are no transactions to display.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

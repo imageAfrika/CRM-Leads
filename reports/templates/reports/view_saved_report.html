@@ -1,0 +1,247 @@
+<!-- reports/templates/reports/view_saved_report.html -->
+{% extends 'reports/reports_base.html' %}
+{% load static %}
+
+{% block reports_content %}
+<div class="reports-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">{{ report.name }}</h1>
+        <a href="{% url 'reports:'|add:report.configuration.report_type|lower|add:'_reports' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Reports
+        </a>
+    </div>
+    
+    <div class="card report-card">
+        <div class="card-header">
+            <h5>
+                <span class="report-type-badge report-type-{{ report.configuration.report_type|lower }}">
+                    {{ report.configuration.get_report_type_display }}
+                </span>
+                {{ report.name }}
+            </h5>
+            <p class="text-muted mb-0">{{ report.description }}</p>
+            <small class="text-muted">Created on {{ report.created_at|date:"F d, Y" }}</small>
+        </div>
+        <div class="card-body">
+            <div class="chart-container" style="height: 500px;">
+                <canvas id="saved-report-chart"></canvas>
+            </div>
+            
+            <div class="mt-4">
+                <h6>Report Details</h6>
+                <table class="table table-sm">
+                    <tr>
+                        <th>Report Type:</th>
+                        <td>{{ report.configuration.get_report_type_display }}</td>
+                    </tr>
+                    <tr>
+                        <th>Time Range:</th>
+                        <td>{{ report.configuration.get_time_range_display }}</td>
+                    </tr>
+                    <tr>
+                        <th>Chart Type:</th>
+                        <td>{{ report.configuration.get_chart}}</td>
+                            
+                        <td>{{ report.configuration.get_chart_type_display }}</td>
+                    </tr>
+                    <tr>
+                        <th>Created By:</th>
+                        <td>{{ report.created_by.get_full_name|default:report.created_by.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Last Updated:</th>
+                        <td>{{ report.updated_at|date:"F d, Y H:i" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="btn-group">
+                <button class="btn btn-sm btn-outline-secondary export-image-btn" data-chart-id="saved-report-chart">
+                    <i class="fas fa-download"></i> Export Image
+                </button>
+                <button class="btn btn-sm btn-outline-secondary export-csv-btn" data-chart-id="saved-report-chart">
+                    <i class="fas fa-file-csv"></i> Export CSV
+                </button>
+                <button class="btn btn-sm btn-outline-primary" onclick="editReport({{ report.id }})">
+                    <i class="fas fa-edit"></i> Edit Report
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteReport({{ report.id }})">
+                    <i class="fas fa-trash"></i> Delete Report
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Report Data Table -->
+    <div class="card report-card mt-4">
+        <div class="card-header">
+            <h5><i class="fas fa-table"></i> Report Data</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="report-table" id="report-data-table">
+                    <thead>
+                        <tr>
+                            {% for header in report_data.headers %}
+                                <th>{{ header }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in report_data.rows %}
+                            <tr>
+                                {% for cell in row %}
+                                    <td>{{ cell }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="{{ report_data.headers|length }}" class="text-center">No data available for this report.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Report Modal -->
+<div class="modal fade" id="edit-report-modal" tabindex="-1" role="dialog" aria-labelledby="editReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editReportModalLabel">Edit Report</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post" action="{% url 'reports:update_report' report.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="name">Report Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ report.name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description (Optional)</label>
+                        <textarea class="form-control" id="description" name="description" rows="3">{{ report.description }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="time_range">Time Range</label>
+                        <select class="form-control" id="time_range" name="time_range" required>
+                            <option value="DAILY" {% if report.configuration.time_range == 'DAILY' %}selected{% endif %}>Daily</option>
+                            <option value="WEEKLY" {% if report.configuration.time_range == 'WEEKLY' %}selected{% endif %}>Weekly</option>
+                            <option value="MONTHLY" {% if report.configuration.time_range == 'MONTHLY' %}selected{% endif %}>Monthly</option>
+                            <option value="QUARTERLY" {% if report.configuration.time_range == 'QUARTERLY' %}selected{% endif %}>Quarterly</option>
+                            <option value="YEARLY" {% if report.configuration.time_range == 'YEARLY' %}selected{% endif %}>Yearly</option>
+                            <option value="CUSTOM" {% if report.configuration.time_range == 'CUSTOM' %}selected{% endif %}>Custom Range</option>
+                        </select>
+                    </div>
+                    <div id="edit-custom-date-container" {% if report.configuration.time_range != 'CUSTOM' %}style="display: none;"{% endif %}>
+                        <div class="form-group">
+                            <label for="custom_start_date">Start Date</label>
+                            <input type="date" class="form-control date-picker" id="custom_start_date" name="custom_start_date" value="{{ report.configuration.custom_start_date|date:'Y-m-d' }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="custom_end_date">End Date</label>
+                            <input type="date" class="form-control date-picker" id="custom_end_date" name="custom_end_date" value="{{ report.configuration.custom_end_date|date:'Y-m-d' }}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="chart_type">Chart Type</label>
+                        <select class="form-control" id="chart_type" name="chart_type" required>
+                            <option value="BAR" {% if report.configuration.chart_type == 'BAR' %}selected{% endif %}>Bar Chart</option>
+                            <option value="LINE" {% if report.configuration.chart_type == 'LINE' %}selected{% endif %}>Line Chart</option>
+                            <option value="PIE" {% if report.configuration.chart_type == 'PIE' %}selected{% endif %}>Pie Chart</option>
+                            <option value="DOUGHNUT" {% if report.configuration.chart_type == 'DOUGHNUT' %}selected{% endif %}>Doughnut Chart</option>
+                            <option value="AREA" {% if report.configuration.chart_type == 'AREA' %}selected{% endif %}>Area Chart</option>
+                            <option value="RADAR" {% if report.configuration.chart_type == 'RADAR' %}selected{% endif %}>Radar Chart</option>
+                            <option value="POLAR" {% if report.configuration.chart_type == 'POLAR' %}selected{% endif %}>Polar Chart</option>
+                            <option value="SCATTER" {% if report.configuration.chart_type == 'SCATTER' %}selected{% endif %}>Scatter Chart</option>
+                            <option value="TABLE" {% if report.configuration.chart_type == 'TABLE' %}selected{% endif %}>Table</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Report Confirmation Modal -->
+<div class="modal fade" id="delete-report-modal" tabindex="-1" role="dialog" aria-labelledby="deleteReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteReportModalLabel">Confirm Delete</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the report "{{ report.name }}"?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'reports:delete_report' report.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Report</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize the saved report chart
+        const ctx = document.getElementById('saved-report-chart').getContext('2d');
+        const chartData = {{ chart_data|safe }};
+        const chartType = '{{ report.configuration.chart_type }}';
+        
+        initializeChart(ctx, chartData, chartType.toLowerCase());
+        
+        // Handle time range change for edit modal
+        document.getElementById('time_range').addEventListener('change', function() {
+            const customDateContainer = document.getElementById('edit-custom-date-container');
+            if (this.value === 'CUSTOM') {
+                customDateContainer.style.display = 'block';
+            } else {
+                customDateContainer.style.display = 'none';
+            }
+        });
+        
+        // Export image buttons
+        const exportImageButtons = document.querySelectorAll('.export-image-btn');
+        exportImageButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const chartId = this.dataset.chartId;
+                exportChartAsImage(chartId);
+            });
+        });
+        
+        // Export CSV buttons
+        const exportCsvButtons = document.querySelectorAll('.export-csv-btn');
+        exportCsvButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const chartId = this.dataset.chartId;
+                exportDataAsCSV(chartId);
+            });
+        });
+    });
+    
+    function editReport(reportId) {
+        $('#edit-report-modal').modal('show');
+    }
+    
+    function deleteReport(reportId) {
+        $('#delete-report-modal').modal('show');
+    }
+</script>
+{% endblock %}

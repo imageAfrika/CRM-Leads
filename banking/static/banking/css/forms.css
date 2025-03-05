@@ -1,0 +1,177 @@
+/* Banking Forms CSS */
+
+.banking-form {
+    margin-bottom: 20px;
+}
+
+.banking-form .form-group {
+    margin-bottom: 20px;
+}
+
+.banking-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.banking-form .form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.banking-form .form-control:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    outline: none;
+}
+
+.banking-form .input-group {
+    display: flex;
+    align-items: stretch;
+}
+
+.banking-form .input-group-prepend {
+    display: flex;
+}
+
+.banking-form .input-group-text {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-right: none;
+    border-radius: 6px 0 0 6px;
+    color: #6b7280;
+}
+
+.banking-form .input-group .form-control {
+    border-radius: 0 6px 6px 0;
+}
+
+.banking-form .form-text {
+    display: block;
+    margin-top: 5px;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+/* PIN Input Styling */
+.banking-form .pin-input {
+    letter-spacing: 5px;
+    font-size: 18px;
+    text-align: center;
+    font-family: monospace;
+}
+
+/* Amount Input Styling */
+.banking-form .amount-input {
+    font-weight: 600;
+    font-size: 18px;
+}
+
+/* Form Validation */
+.banking-form .form-control.is-invalid {
+    border-color: #ef4444;
+}
+
+.banking-form .invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 5px;
+    font-size: 14px;
+    color: #ef4444;
+}
+
+/* Form Buttons */
+.banking-form .form-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+}
+
+.banking-form .btn {
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.banking-form .btn-primary {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+}
+
+.banking-form .btn-primary:hover {
+    background-color: #1d4ed8;
+}
+
+.banking-form .btn-secondary {
+    background-color: #6b7280;
+    color: white;
+    border: none;
+}
+
+.banking-form .btn-secondary:hover {
+    background-color: #4b5563;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .banking-form .form-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .banking-form .btn {
+        width: 100%;
+    }
+}
+
+/* Form Styles */
+.form-container {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    border: 1px solid #f0f0f0;
+}
+
+.banking-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.info-box {
+    background-color: #f0f7ff;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    border: 1px solid #bfdbfe;
+}
+
+.info-box i {
+    color: #2563eb;
+    margin-right: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.info-box p {
+    margin: 0;
+    color: #1e40af;
+    font-size: 0.875rem;
+}
+
+.form-actions {
+    margin-top: 2rem;
+} 

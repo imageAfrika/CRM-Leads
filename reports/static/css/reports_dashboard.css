@@ -1,0 +1,401 @@
+/* reports/static/css/dashboard.css */
+
+/* Main container styles */
+.reports-dashboard {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header styles */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.dashboard-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.dashboard-actions .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.dashboard-actions .btn-primary {
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+}
+
+.dashboard-actions .btn-primary:hover {
+    background-color: #4338ca;
+}
+
+/* Stats grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.stat-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.25rem;
+}
+
+.stat-card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+}
+
+.stat-card-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.5rem;
+}
+
+.stat-card-trend {
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.stat-card-trend.up {
+    color: #10b981;
+}
+
+.stat-card-trend.down {
+    color: #ef4444;
+}
+
+.stat-card-trend i {
+    margin-right: 0.25rem;
+}
+
+/* Report type colors */
+.stat-card.banking .stat-card-icon {
+    background-color: #dbeafe;
+    color: #3b82f6;
+}
+
+.stat-card.sales .stat-card-icon {
+    background-color: #dcfce7;
+    color: #10b981;
+}
+
+.stat-card.clients .stat-card-icon {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.stat-card.expenses .stat-card-icon {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+.stat-card.scheduled .stat-card-icon {
+    background-color: #f3e8ff;
+    color: #8b5cf6;
+}
+
+/* Recent reports section */
+.recent-reports {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.recent-reports-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.recent-reports-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+}
+
+.recent-reports-header a {
+    color: #4f46e5;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.recent-reports-header a:hover {
+    text-decoration: underline;
+}
+
+.recent-reports-list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.recent-reports-item {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+}
+
+.recent-reports-item:last-child {
+    border-bottom: none;
+}
+
+.recent-reports-item-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1rem;
+}
+
+.recent-reports-item-content {
+    flex: 1;
+}
+
+.recent-reports-item-title {
+    font-weight: 500;
+    color: #111827;
+    margin-bottom: 0.25rem;
+    display: block;
+    text-decoration: none;
+}
+
+.recent-reports-item-title:hover {
+    color: #4f46e5;
+}
+
+.recent-reports-item-meta {
+    display: flex;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.recent-reports-item-meta span {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem;
+}
+
+.recent-reports-item-meta i {
+    margin-right: 0.25rem;
+}
+
+.recent-reports-item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.recent-reports-item-actions .btn-sm {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+}
+
+/* Favorite reports section */
+.favorite-reports {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.favorite-reports-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #fffbeb;
+}
+
+.favorite-reports-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #92400e;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.favorite-reports-header h2 i {
+    color: #f59e0b;
+    margin-right: 0.5rem;
+}
+
+.favorite-reports-list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+/* Report type badges */
+.report-type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.report-type-badge i {
+    margin-right: 0.25rem;
+}
+
+.report-type-badge.banking {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.report-type-badge.sales {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.report-type-badge.clients {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.report-type-badge.expenses {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.report-type-badge.scheduled {
+    background-color: #f3e8ff;
+    color: #6d28d9;
+}
+
+/* Empty state */
+.no-reports {
+    padding: 3rem;
+    text-align: center;
+}
+
+.no-reports p {
+    margin-bottom: 1.5rem;
+    color: #6b7280;
+    font-size: 1.125rem;
+}
+
+.no-reports .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #4f46e5;
+    color: white;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.no-reports .btn-primary:hover {
+    background-color: #4338ca;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+    
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .dashboard-actions {
+        width: 100%;
+    }
+    
+    .dashboard-actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 640px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .recent-reports-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .recent-reports-item-icon {
+        margin-bottom: 0.5rem;
+    }
+    
+    .recent-reports-item-actions {
+        margin-top: 0.5rem;
+    }
+} 

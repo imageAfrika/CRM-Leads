@@ -8,22 +8,22 @@
 {% endblock %}
 
 {% block content %}
-<div class="purchases-layout">
-    <div class="purchases-sidebar">
+<div class="expenses-layout">
+    <div class="expenses-sidebar">
         {% include 'purchases/includes/sidebar.html' %}
     </div>
     
-    <div class="category-container">
+    <div class="expense-form-container">
         <div class="content-header">
             <h1>{{ title }}</h1>
         </div>
         
-        <div class="category-card">
+        <div class="expense-form-card">
             <form method="post">
                 {% csrf_token %}
                 
                 <div class="form-group">
-                    <label for="{{ form.name.id_for_label }}">Category Name*</label>
+                    <label for="{{ form.name.id_for_label }}">Category Name</label>
                     {{ form.name }}
                     {% if form.name.errors %}
                         <div class="error-message">{{ form.name.errors.0 }}</div>

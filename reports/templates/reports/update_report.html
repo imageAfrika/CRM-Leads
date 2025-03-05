@@ -1,0 +1,194 @@
+{% extends "reports/reports_base.html" %}
+{% load static %}
+
+{% block title %}Update Report{% endblock %}
+
+{% block reports_content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Update Report</h1>
+    
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Report Configuration</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="reportForm">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="id_name">Report Name</label>
+                            <input type="text" class="form-control" id="id_name" name="name" value="{{ form.name.value }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_description">Description</label>
+                            <textarea class="form-control" id="id_description" name="description" rows="3">{{ form.description.value }}</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_report_type">Report Type</label>
+                            <select class="form-control" id="id_report_type" name="report_type" required>
+                                {% for value, text in report_types %}
+                                <option value="{{ value }}" {% if value == form.report_type.value %}selected{% endif %}>{{ text }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_time_range">Time Range</label>
+                            <select class="form-control" id="id_time_range" name="time_range">
+                                {% for value, text in time_ranges %}
+                                <option value="{{ value }}" {% if value == form.time_range.value %}selected{% endif %}>{{ text }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_chart_type">Chart Type</label>
+                            <select class="form-control" id="id_chart_type" name="chart_type">
+                                {% for value, text in chart_types %}
+                                <option value="{{ value }}" {% if value == form.chart_type.value %}selected{% endif %}>{{ text }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_date_field">Date Field</label>
+                            <input type="text" class="form-control" id="id_date_field" name="date_field" value="{{ form.date_field.value }}">
+                            <small class="form-text text-muted">Field name to use for date filtering (e.g., created_at, updated_at)</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_group_by">Group By</label>
+                            <input type="text" class="form-control" id="id_group_by" name="group_by" value="{{ form.group_by.value }}">
+                            <small class="form-text text-muted">Field name to group data by (e.g., status, category)</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_aggregate_function">Aggregate Function</label>
+                            <select class="form-control" id="id_aggregate_function" name="aggregate_function">
+                                <option value="COUNT" {% if form.aggregate_function.value == 'COUNT' %}selected{% endif %}>Count</option>
+                                <option value="SUM" {% if form.aggregate_function.value == 'SUM' %}selected{% endif %}>Sum</option>
+                                <option value="AVG" {% if form.aggregate_function.value == 'AVG' %}selected{% endif %}>Average</option>
+                                <option value="MIN" {% if form.aggregate_function.value == 'MIN' %}selected{% endif %}>Minimum</option>
+                                <option value="MAX" {% if form.aggregate_function.value == 'MAX' %}selected{% endif %}>Maximum</option>
+                            </select>
+                        </div>
+                        
+                        <div id="filtersContainer" class="mb-4">
+                            <h5>Filters</h5>
+                            <div id="filtersList">
+                                <!-- Filters will be added here dynamically -->
+                            </div>
+                            <button type="button" class="btn btn-sm btn-info mt-2" id="addFilterBtn">
+                                <i class="fas fa-plus"></i> Add Filter
+                            </button>
+                            <input type="hidden" id="id_filters" name="filters" value="{{ form.filters.value|safe }}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Update Report</button>
+                            <a href="{% url 'reports:view_report' report.id %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Initialize filters
+        var filters = {{ form.filters.value|safe|default:'{}' }};
+        
+        // Load existing filters
+        for (var key in filters) {
+            if (filters.hasOwnProperty(key)) {
+                addFilterItem(key, filters[key].operator, filters[key].value);
+            }
+        }
+        
+        // Add filter button click handler
+        $('#addFilterBtn').click(function() {
+            addFilterItem('', 'eq', '');
+        });
+        
+        // Function to add a filter item
+        function addFilterItem(key, operator, value) {
+            var filterHtml = `
+                <div class="filter-item card mb-2">
+                    <div class="card-body py-2">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control filter-key" placeholder="Field name" value="${key}">
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-control filter-operator">
+                                    <option value="eq" ${operator === 'eq' ? 'selected' : ''}>Equals</option>
+                                    <option value="neq" ${operator === 'neq' ? 'selected' : ''}>Not Equals</option>
+                                    <option value="gt" ${operator === 'gt' ? 'selected' : ''}>Greater Than</option>
+                                    <option value="lt" ${operator === 'lt' ? 'selected' : ''}>Less Than</option>
+                                    <option value="gte" ${operator === 'gte' ? 'selected' : ''}>Greater Than or Equal</option>
+                                    <option value="lte" ${operator === 'lte' ? 'selected' : ''}>Less Than or Equal</option>
+                                    <option value="contains" ${operator === 'contains' ? 'selected' : ''}>Contains</option>
+                                    <option value="in" ${operator === 'in' ? 'selected' : ''}>In List</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control filter-value" placeholder="Value" value="${value}">
+                            </div>
+                            <div class="col-md-1">
+                                <button type="button" class="btn btn-danger btn-sm remove-filter">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('#filtersList').append(filterHtml);
+            
+            // Add event listener for remove button
+            $('.remove-filter').off('click').on('click', function() {
+                $(this).closest('.filter-item').remove();
+                updateFiltersJson();
+            });
+            
+            // Add event listeners for filter changes
+            $('.filter-key, .filter-operator, .filter-value').off('change keyup').on('change keyup', function() {
+                updateFiltersJson();
+            });
+        }
+        
+        // Function to update the filters JSON
+        function updateFiltersJson() {
+            filters = {};
+            $('.filter-item').each(function() {
+                var key = $(this).find('.filter-key').val();
+                var operator = $(this).find('.filter-operator').val();
+                var value = $(this).find('.filter-value').val();
+                
+                if (key && operator && value) {
+                    filters[key] = {
+                        'operator': operator,
+                        'value': value
+                    };
+                }
+            });
+            
+            $('#id_filters').val(JSON.stringify(filters));
+        }
+        
+        // Form submission
+        $('#reportForm').submit(function() {
+            updateFiltersJson();
+            return true;
+        });
+    });
+</script>
+{% endblock %} 

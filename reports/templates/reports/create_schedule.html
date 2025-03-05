@@ -1,0 +1,134 @@
+{% extends "reports/reports_base.html" %}
+{% load static %}
+
+{% block title %}Create Schedule{% endblock %}
+
+{% block reports_content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Create Report Schedule</h1>
+    
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Schedule Configuration</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="scheduleForm">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="id_report">Report</label>
+                            <select class="form-control" id="id_report" name="report" required>
+                                <option value="">Select a report</option>
+                                {% for report in form.fields.report.queryset %}
+                                <option value="{{ report.id }}">{{ report.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_frequency">Frequency</label>
+                            <select class="form-control" id="id_frequency" name="frequency" required>
+                                {% for value, text in frequency_choices %}
+                                <option value="{{ value }}">{{ text }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" id="day_of_week_group">
+                            <label for="id_day_of_week">Day of Week</label>
+                            <select class="form-control" id="id_day_of_week" name="day_of_week">
+                                {% for value, text in day_choices %}
+                                <option value="{{ value }}">{{ text }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">Required for weekly schedules</small>
+                        </div>
+                        
+                        <div class="form-group" id="day_of_month_group">
+                            <label for="id_day_of_month">Day of Month</label>
+                            <select class="form-control" id="id_day_of_month" name="day_of_month">
+                                {% for i in range_1_to_31 %}
+                                <option value="{{ i }}">{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">Required for monthly and quarterly schedules</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_time_of_day">Time of Day</label>
+                            <input type="time" class="form-control" id="id_time_of_day" name="time_of_day" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_recipients">Recipients</label>
+                            <input type="text" class="form-control" id="id_recipients" name="recipients" placeholder="email1@example.com, email2@example.com" required>
+                            <small class="form-text text-muted">Comma-separated list of email addresses</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_subject">Email Subject</label>
+                            <input type="text" class="form-control" id="id_subject" name="subject" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_message">Email Message</label>
+                            <textarea class="form-control" id="id_message" name="message" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="id_format">Export Format</label>
+                            <select class="form-control" id="id_format" name="format">
+                                {% for value, text in format_choices %}
+                                <option value="{{ value }}">{{ text }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="id_is_active" name="is_active" checked>
+                                <label class="custom-control-label" for="id_is_active">Active</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Create Schedule</button>
+                            <a href="{% url 'reports:scheduled_reports' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Show/hide day fields based on frequency
+        function updateDayFields() {
+            var frequency = $('#id_frequency').val();
+            
+            if (frequency === 'WEEKLY') {
+                $('#day_of_week_group').show();
+                $('#day_of_month_group').hide();
+            } else if (frequency === 'MONTHLY' || frequency === 'QUARTERLY') {
+                $('#day_of_week_group').hide();
+                $('#day_of_month_group').show();
+            } else {
+                $('#day_of_week_group').hide();
+                $('#day_of_month_group').hide();
+            }
+        }
+        
+        // Initial update
+        updateDayFields();
+        
+        // Update on frequency change
+        $('#id_frequency').change(updateDayFields);
+    });
+</script>
+{% endblock %} 

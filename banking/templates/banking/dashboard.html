@@ -1,0 +1,123 @@
+{% extends 'banking/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block banking_content %}
+<h2 class="content-title">Banking Dashboard</h2>
+
+<div class="dashboard-summary">
+    <div class="summary-card">
+        <div class="summary-icon">
+            <i class="fas fa-wallet"></i>
+        </div>
+        <div class="summary-details">
+            <h3 class="summary-title">Total Balance</h3>
+            <div class="summary-value">${{ total_balance|floatformat:2|intcomma }}</div>
+        </div>
+    </div>
+    
+    <div class="summary-card">
+        <div class="summary-icon">
+            <i class="fas fa-university"></i>
+        </div>
+        <div class="summary-details">
+            <h3 class="summary-title">Your Accounts</h3>
+            <div class="summary-value">{{ accounts.count }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="section-header">
+    <h3><i class="fas fa-university"></i> Your Accounts</h3>
+    <a href="{% url 'banking:create_account' %}" class="btn primary-btn">
+        <i class="fas fa-plus-circle"></i> New Account
+    </a>
+</div>
+
+<div class="accounts-grid">
+    {% if accounts %}
+        {% for account in accounts %}
+            <div class="account-card">
+                <div class="account-type">{{ account.get_account_type_display }}</div>
+                <div class="account-number">{{ account.account_number }}</div>
+                <div class="account-balance">${{ account.balance|floatformat:2|intcomma }}</div>
+                <div class="account-actions">
+                    <a href="{% url 'banking:account_detail' account.id %}" class="btn primary-btn">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                    <a href="{% url 'banking:deposit' account.id %}" class="btn secondary-btn">
+                        <i class="fas fa-arrow-down"></i> Deposit
+                    </a>
+                    <a href="{% url 'banking:withdraw' account.id %}" class="btn secondary-btn">
+                        <i class="fas fa-arrow-up"></i> Withdraw
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-university"></i>
+            </div>
+            <h3>No Accounts Found</h3>
+            <p>You don't have any bank accounts yet. Create your first account to get started.</p>
+            <a href="{% url 'banking:create_account' %}" class="btn primary-btn">
+                <i class="fas fa-plus-circle"></i> Create Account
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="section-header">
+    <h3><i class="fas fa-exchange-alt"></i> Recent Transactions</h3>
+    <a href="{% url 'banking:all_transactions' %}" class="btn secondary-btn">
+        <i class="fas fa-list"></i> View All
+    </a>
+</div>
+
+<div class="transactions-container">
+    {% if recent_transactions %}
+        <ul class="transaction-list">
+            {% for transaction in recent_transactions %}
+                <li class="transaction-item">
+                    {% if transaction.transaction_type == 'deposit' %}
+                        <div class="transaction-icon transaction-deposit">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                    {% elif transaction.transaction_type == 'withdrawal' %}
+                        <div class="transaction-icon transaction-withdraw">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                    {% else %}
+                        <div class="transaction-icon transaction-transfer">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="transaction-details">
+                        <div class="transaction-title">
+                            {{ transaction.get_transaction_type_display }}
+                        </div>
+                        <div class="transaction-date">
+                            {{ transaction.timestamp|date:"F j, Y, g:i a" }}
+                        </div>
+                    </div>
+                    
+                    <div class="transaction-amount {% if transaction.transaction_type == 'deposit' %}amount-positive{% elif transaction.transaction_type == 'withdrawal' %}amount-negative{% endif %}">
+                        {% if transaction.transaction_type == 'deposit' %}+{% elif transaction.transaction_type == 'withdrawal' %}-{% endif %}
+                        ${{ transaction.amount|floatformat:2|intcomma }}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-exchange-alt"></i>
+            </div>
+            <h3>No Transactions Yet</h3>
+            <p>You haven't made any transactions yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

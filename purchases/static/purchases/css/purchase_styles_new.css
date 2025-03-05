@@ -1,0 +1,15 @@
+/* Add a very noticeable style to test */
+.expense-form-container {
+    background-color: #f0f8ff !important; /* Light blue background */
+    border: 3px solid #4a6cf7 !important; /* Blue border */
+    padding: 2rem !important;
+}
+
+.expense-form-card {
+    background-color: #ffffff !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important; /* More pronounced shadow */
+    padding: 2rem !important;
+}
+
+/* Add more distinctive styles here */

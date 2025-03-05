@@ -1,10 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load currency_filters %}
 
 {% block app_css %}
 <link rel="stylesheet" href="{% static 'purchases/css/shared.css' %}">
 <link rel="stylesheet" href="{% static 'purchases/css/sidebar.css' %}">
 <link rel="stylesheet" href="{% static 'purchases/css/purchase_form.css' %}">
+<link rel="stylesheet" href="{% static 'purchases/css/purchase_styles_new.css' %}">
 {% endblock %}
 
 {% block app_js %}
@@ -12,23 +14,23 @@
 {% endblock %}
 
 {% block content %}
-<div class="purchases-layout">
-    <div class="purchases-sidebar">
+<div class="expenses-layout">
+    <div class="expenses-sidebar">
         {% include 'purchases/includes/sidebar.html' %}
     </div>
     
-    <div class="purchase-form-container">
+    <div class="expense-form-container">
         <div class="content-header">
             <h1>{{ title }}</h1>
         </div>
         
-        <div class="purchase-form-card">
-            <form method="post">
+        <div class="expense-form-card">
+            <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="{{ form.title.id_for_label }}">Title*</label>
+                        <label for="{{ form.title.id_for_label }}">Title</label>
                         {{ form.title }}
                         {% if form.title.errors %}
                             <div class="error-message">{{ form.title.errors.0 }}</div>
@@ -36,17 +38,35 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="{{ form.amount.id_for_label }}">Amount*</label>
-                        {{ form.amount }}
-                        {% if form.amount.errors %}
-                            <div class="error-message">{{ form.amount.errors.0 }}</div>
+                        <label for="{{ form.vendor.id_for_label }}">Vendor</label>
+                        {{ form.vendor }}
+                        {% if form.vendor.errors %}
+                            <div class="error-message">{{ form.vendor.errors.0 }}</div>
                         {% endif %}
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="{{ form.category.id_for_label }}">Category*</label>
+                        <label for="{{ form.unit_price.id_for_label }}">Unit Price</label>
+                        {{ form.unit_price }}
+                        {% if form.unit_price.errors %}
+                            <div class="error-message">{{ form.unit_price.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.quantity.id_for_label }}">Quantity</label>
+                        {{ form.quantity }}
+                        {% if form.quantity.errors %}
+                            <div class="error-message">{{ form.quantity.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.category.id_for_label }}">Category</label>
                         {{ form.category }}
                         {% if form.category.errors %}
                             <div class="error-message">{{ form.category.errors.0 }}</div>
@@ -54,10 +74,46 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="{{ form.date.id_for_label }}">Date*</label>
+                        <label for="{{ form.status.id_for_label }}">Status</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                            <div class="error-message">{{ form.status.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.date.id_for_label }}">Purchase Date</label>
                         {{ form.date }}
                         {% if form.date.errors %}
                             <div class="error-message">{{ form.date.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.due_date.id_for_label }}">Due Date</label>
+                        {{ form.due_date }}
+                        {% if form.due_date.errors %}
+                            <div class="error-message">{{ form.due_date.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.payment_method.id_for_label }}">Payment Method</label>
+                        {{ form.payment_method }}
+                        {% if form.payment_method.errors %}
+                            <div class="error-message">{{ form.payment_method.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.invoice.id_for_label }}">Invoice</label>
+                        {{ form.invoice }}
+                        {% if form.invoice.errors %}
+                            <div class="error-message">{{ form.invoice.errors.0 }}</div>
                         {% endif %}
                     </div>
                 </div>

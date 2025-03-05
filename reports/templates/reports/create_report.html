@@ -1,0 +1,161 @@
+{% extends "reports/reports_base.html" %}
+{% load static %}
+
+{% block title %}Create Report{% endblock %}
+
+{% block reports_content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Create New Report</h1>
+        <a href="{% url 'reports:report_list' %}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to Reports
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Report Configuration</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="report-form">
+                        {% csrf_token %}
+                        
+                        <div class="form-group row">
+                            <label for="report_type" class="col-sm-2 col-form-label">Report Type</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="report_type" name="report_type" required>
+                                    <option value="" selected disabled>Select Report Type</option>
+                                    <option value="BANKING">Banking Report</option>
+                                    <option value="SALES">Sales Report</option>
+                                    <option value="CLIENTS">Clients Report</option>
+                                    <option value="EXPENSES">Expenses Report</option>
+                                    <option value="PURCHASES">Purchases Report</option>
+                                    <option value="LEADS">Leads Report</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group row">
+                            <label for="name" class="col-sm-2 col-form-label">Report Name</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group row">
+                            <label for="description" class="col-sm-2 col-form-label">Description</label>
+                            <div class="col-sm-10">
+                                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group row">
+                            <label for="date_range" class="col-sm-2 col-form-label">Date Range</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="date_range" name="date_range">
+                                    <option value="LAST_7_DAYS">Last 7 Days</option>
+                                    <option value="LAST_30_DAYS">Last 30 Days</option>
+                                    <option value="THIS_MONTH">This Month</option>
+                                    <option value="LAST_MONTH">Last Month</option>
+                                    <option value="THIS_QUARTER">This Quarter</option>
+                                    <option value="LAST_QUARTER">Last Quarter</option>
+                                    <option value="THIS_YEAR">This Year</option>
+                                    <option value="LAST_YEAR">Last Year</option>
+                                    <option value="CUSTOM">Custom Range</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="custom_date_range" class="form-group row d-none">
+                            <label class="col-sm-2 col-form-label">Custom Range</label>
+                            <div class="col-sm-5">
+                                <div class="input-group date">
+                                    <input type="text" class="form-control" id="start_date" name="start_date" placeholder="Start Date">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-5">
+                                <div class="input-group date">
+                                    <input type="text" class="form-control" id="end_date" name="end_date" placeholder="End Date">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group row">
+                            <label for="is_favorite" class="col-sm-2 col-form-label">Favorite</label>
+                            <div class="col-sm-10">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="is_favorite" name="is_favorite">
+                                    <label class="custom-control-label" for="is_favorite">Add to favorites</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dynamic fields based on report type will be loaded here -->
+                        <div id="dynamic_fields"></div>
+                        
+                        <div class="form-group row">
+                            <div class="col-sm-10 offset-sm-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Create Report
+                                </button>
+                                <a href="{% url 'reports:report_list' %}" class="btn btn-secondary">
+                                    Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Initialize date pickers
+        $('.input-group.date').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true,
+            todayHighlight: true
+        });
+        
+        // Show/hide custom date range based on selection
+        $('#date_range').change(function() {
+            if ($(this).val() === 'CUSTOM') {
+                $('#custom_date_range').removeClass('d-none');
+            } else {
+                $('#custom_date_range').addClass('d-none');
+            }
+        });
+        
+        // Load dynamic fields based on report type
+        $('#report_type').change(function() {
+            var reportType = $(this).val();
+            if (reportType) {
+                $.ajax({
+                    url: '/reports/api/report-fields/',
+                    data: {
+                        'report_type': reportType
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        $('#dynamic_fields').html(data.html);
+                    }
+                });
+            } else {
+                $('#dynamic_fields').html('');
+            }
+        });
+    });
+</script>
+{% endblock %} 

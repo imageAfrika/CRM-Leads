@@ -5,61 +5,66 @@
 {% block app_css %}
 <link rel="stylesheet" href="{% static 'purchases/css/shared.css' %}">
 <link rel="stylesheet" href="{% static 'purchases/css/sidebar.css' %}">
-<link rel="stylesheet" href="{% static 'purchases/css/purchase_detail.css' %}">
+<link rel="stylesheet" href="{% static 'purchases/css/expense_detail.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="purchases-layout">
-    <div class="purchases-sidebar">
+<div class="expenses-layout">
+    <div class="expenses-sidebar">
         {% include 'purchases/includes/sidebar.html' %}
     </div>
     
-    <div class="purchase-detail-container">
-        <div class="purchase-detail">
-            <div class="purchase-detail-header">
-                <h2>Confirm Delete</h2>
+    <div class="expense-detail-container">
+        <div class="expense-detail">
+            <div class="detail-header">
+                <h1 class="detail-title">Confirm Delete</h1>
             </div>
             
             <div class="alert alert-danger">
-                <p>Are you sure you want to delete the purchase "{{ purchase.title }}"?</p>
-                <p>This action cannot be undone.</p>
+                Are you sure you want to delete the purchase "{{ purchase.title }}"? This action cannot be undone.
             </div>
             
-            <div class="purchase-info">
-                <div class="info-group">
-                    <label>Amount:</label>
-                    <span class="amount">{{ purchase.amount|kes_format }}</span>
+            <div class="expense-info">
+                <div class="info-row">
+                    <div class="info-group">
+                        <label>Amount</label>
+                        <div class="info-value amount">{{ purchase.amount|kes_format }}</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <label>Category</label>
+                        <div class="info-value">
+                            <span class="category-badge">{{ purchase.category.name }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <label>Date</label>
+                        <div class="info-value">{{ purchase.date|date:"F d, Y" }}</div>
+                    </div>
                 </div>
-                
-                <div class="info-group">
-                    <label>Category:</label>
-                    <span>{{ purchase.category.name }}</span>
-                </div>
-                
-                <div class="info-group">
-                    <label>Date:</label>
-                    <span>{{ purchase.date }}</span>
-                </div>
-                
-                {% if purchase.description %}
-                <div class="info-group">
-                    <label>Description:</label>
-                    <p class="description">{{ purchase.description|linebreaks }}</p>
-                </div>
-                {% endif %}
             </div>
             
-            <div class="form-actions">
-                <form method="post">
-                    {% csrf_token %}
+            {% if purchase.description %}
+            <div class="expense-description">
+                <h3>Description</h3>
+                <div class="description-content">
+                    {{ purchase.description|linebreaks }}
+                </div>
+            </div>
+            {% endif %}
+            
+            <form method="post" class="delete-form">
+                {% csrf_token %}
+                <div class="form-actions">
                     <a href="{% url 'purchases:purchase_detail' purchase.id %}" class="btn btn-secondary">
                         <i class="fas fa-times"></i> Cancel
                     </a>
                     <button type="submit" class="btn btn-danger">
                         <i class="fas fa-trash"></i> Delete
                     </button>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>

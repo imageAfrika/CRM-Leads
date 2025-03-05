@@ -16,8 +16,8 @@
     
     <!-- App-specific CSS -->
     {% block app_css %}
-    <link rel="stylesheet" href="{% static 'expenses/css/shared.css' %}">
-    <link rel="stylesheet" href="{% static 'expenses/css/sidebar.css' %}">
+    <link rel="stylesheet" href="{% static 'expenses/css/shared.css' %}?v={% now 'U' %}">
+    <link rel="stylesheet" href="{% static 'expenses/css/sidebar.css' %}?v={% now 'U' %}">
     {% endblock %}
     
     <!-- Page-specific CSS -->
@@ -53,6 +53,12 @@
             </a>
             <a href="{% url 'dashboard:schedule' %}">
                 <i class="fas fa-calendar"></i> Calendar
+            </a>
+            <a href="{% url 'banking:dashboard' %}" class="{% if active_tab == 'banking' %}active{% endif %}">
+                <i class="fas fa-university"></i> Banking
+            </a>
+            <a href="{% url 'reports:report_list' %}" class="{% if active_tab == 'reports' %}active{% endif %}">
+                <i class="fas fa-file-alt"></i> Reports
             </a>
         </div>
         
@@ -170,6 +176,14 @@
                         }, 300);
                     }, 3000);
                 });
+            }
+            
+            // Ensure banking link is visible
+            const bankingLink = document.querySelector('a.banking-link');
+            if (bankingLink) {
+                bankingLink.style.display = 'flex';
+                bankingLink.style.color = '#ffff00';
+                bankingLink.style.fontWeight = 'bold';
             }
         });
     </script>

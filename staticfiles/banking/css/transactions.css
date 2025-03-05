@@ -1,0 +1,234 @@
+/* Banking Transactions CSS */
+
+/* Transaction Filter */
+.transaction-filter-container {
+    margin-bottom: 20px;
+}
+
+.transaction-filter {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: #f9fafb;
+    color: #374151;
+}
+
+/* Transaction Table */
+.transaction-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+.transaction-table th {
+    background-color: #f3f4f6;
+    color: #374151;
+    font-weight: 600;
+    text-align: left;
+    padding: 12px 15px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.transaction-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #4b5563;
+}
+
+.transaction-table tr:hover {
+    background-color: #f9fafb;
+}
+
+.transaction-table .transaction-date {
+    white-space: nowrap;
+    font-size: 14px;
+}
+
+.transaction-table .transaction-type {
+    text-align: center;
+}
+
+.transaction-table .transaction-amount {
+    text-align: right;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.transaction-table .amount-positive {
+    color: #10b981;
+}
+
+.transaction-table .amount-negative {
+    color: #ef4444;
+}
+
+/* Transaction Badges */
+.transaction-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.transaction-badge-deposit {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.transaction-badge-withdrawal {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.transaction-badge-transfer-in {
+    background-color: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
+}
+
+.transaction-badge-transfer-out {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.transaction-badge-payment {
+    background-color: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+}
+
+.transaction-badge-fee {
+    background-color: rgba(124, 58, 237, 0.1);
+    color: #7c3aed;
+}
+
+.transaction-badge-interest {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.transaction-badge-tax {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* Transaction Items (Alternative to Table) */
+.transaction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #e5e7eb;
+    transition: background-color 0.2s;
+}
+
+.transaction-item:hover {
+    background-color: #f9fafb;
+}
+
+.transaction-item-left {
+    display: flex;
+    align-items: center;
+}
+
+.transaction-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: white;
+}
+
+.transaction-item-icon.deposit {
+    background-color: #10b981;
+}
+
+.transaction-item-icon.withdrawal {
+    background-color: #ef4444;
+}
+
+.transaction-item-icon.transfer-in {
+    background-color: #2563eb;
+}
+
+.transaction-item-icon.transfer-out {
+    background-color: #f59e0b;
+}
+
+.transaction-item-icon.payment {
+    background-color: #6b7280;
+}
+
+.transaction-item-details {
+    flex: 1;
+}
+
+.transaction-item-description {
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 3px;
+}
+
+.transaction-item-date {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.transaction-item-amount {
+    font-weight: 600;
+    font-size: 18px;
+}
+
+/* Pagination */
+.transaction-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.transaction-pagination .page-item {
+    margin: 0 5px;
+}
+
+.transaction-pagination .page-link {
+    display: block;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #374151;
+    background-color: #f3f4f6;
+    transition: all 0.2s;
+}
+
+.transaction-pagination .page-link:hover {
+    background-color: #e5e7eb;
+}
+
+.transaction-pagination .page-item.active .page-link {
+    background-color: #2563eb;
+    color: white;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .transaction-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .transaction-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .transaction-item-amount {
+        margin-top: 10px;
+        align-self: flex-end;
+    }
+} 

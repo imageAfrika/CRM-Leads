@@ -242,51 +242,56 @@ def category_delete(request, pk):
 
 @login_required
 def purchase_reports(request):
-    # Get the date range from request or default to last 6 months
-    end_date = datetime.now()
-    start_date = end_date - timedelta(days=180)
-    date_range = request.GET.get('date_range', '6months')
+    # Get the selected period
+    period = request.GET.get('period', 'month')
     
-    if date_range == '30days':
-        start_date = end_date - timedelta(days=30)
-    elif date_range == '90days':
-        start_date = end_date - timedelta(days=90)
-    elif date_range == '1year':
-        start_date = end_date - timedelta(days=365)
+    # Define date range based on period
+    today = timezone.now().date()
+    if period == 'month':
+        start_date = today.replace(day=1)
+        period_label = 'This Month'
+    elif period == 'quarter':
+        current_quarter = (today.month - 1) // 3 + 1
+        start_date = today.replace(month=(current_quarter - 1) * 3 + 1, day=1)
+        period_label = f'Q{current_quarter} {today.year}'
+    elif period == 'year':
+        start_date = today.replace(month=1, day=1)
+        period_label = f'Year {today.year}'
+    else:  # 'all'
+        start_date = None
+        period_label = 'All Time'
     
-    # Filter purchases by user/profile and date range
+    # Get purchases based on user and period
     if request.user.is_superuser:
-        purchases = Purchase.objects.filter(date__range=[start_date, end_date])
+        purchases_query = Purchase.objects.all()
     elif hasattr(request, 'profile') and request.profile:
-        purchases = Purchase.objects.filter(
-            profile=request.profile,
-            date__range=[start_date, end_date]
-        )
+        purchases_query = Purchase.objects.filter(profile=request.profile)
     else:
-        purchases = Purchase.objects.filter(
-            created_by=request.user,
-            date__range=[start_date, end_date]
-        )
+        purchases_query = Purchase.objects.filter(created_by=request.user)
+    
+    # Apply date filter if needed
+    if start_date:
+        purchases_query = purchases_query.filter(date__range=[start_date, today])
     
     # Monthly purchases
-    monthly_purchases = purchases.annotate(
+    monthly_purchases = purchases_query.annotate(
         month=TruncMonth('date')
     ).values('month').annotate(
         total=Sum('amount')
     ).order_by('month')
     
     # Category wise purchases
-    category_purchases = purchases.values('category__name').annotate(
+    category_purchases = purchases_query.values('category__name').annotate(
         total=Sum('amount')
     ).order_by('-total')
     
     # Status wise purchases
-    status_purchases = purchases.values('status').annotate(
+    status_purchases = purchases_query.values('status').annotate(
         total=Sum('amount')
     ).order_by('-total')
     
     # Vendor wise purchases
-    vendor_purchases = purchases.values('vendor').annotate(
+    vendor_purchases = purchases_query.values('vendor').annotate(
         total=Sum('amount'),
         count=Sum('quantity')
     ).order_by('-total')[:10]  # Top 10 vendors
@@ -296,9 +301,10 @@ def purchase_reports(request):
         'category_purchases': category_purchases,
         'status_purchases': status_purchases,
         'vendor_purchases': vendor_purchases,
-        'total_amount': purchases.aggregate(Sum('amount'))['amount__sum'] or 0,
-        'total_count': purchases.count(),
+        'total_amount': purchases_query.aggregate(Sum('amount'))['amount__sum'] or 0,
+        'total_count': purchases_query.count(),
         'start_date': start_date,
-        'end_date': end_date,
-        'date_range': date_range,
+        'end_date': today,
+        'date_range': period,
+        'period_label': period_label,
     })

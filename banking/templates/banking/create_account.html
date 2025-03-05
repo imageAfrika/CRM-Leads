@@ -1,0 +1,40 @@
+{% extends 'banking/base.html' %}
+{% load static %}
+
+{% block banking_content %}
+<div class="content-header">
+    <h2 class="content-title">Create New Account</h2>
+    <a href="{% url 'banking:dashboard' %}" class="btn secondary-btn">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<div class="form-container">
+    <form method="post" class="banking-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="account_type" class="form-label">Account Type</label>
+            <select name="account_type" id="account_type" class="form-control" required>
+                <option value="">-- Select Account Type --</option>
+                <option value="SAVINGS">Savings Account</option>
+                <option value="CHECKING">Checking Account</option>
+                <option value="CREDIT">Credit Account</option>
+                <option value="LOAN">Loan Account</option>
+            </select>
+        </div>
+        
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i> 
+            <p>When you create an account, a unique account number and PIN will be generated for you.
+            Make sure to remember your PIN as it will be required for withdrawals and transfers.</p>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn primary-btn">
+                <i class="fas fa-plus-circle"></i> Create Account
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %} 

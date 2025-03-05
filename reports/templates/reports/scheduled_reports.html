@@ -1,0 +1,209 @@
+{% extends "reports/reports_base.html" %}
+{% load static %}
+
+{% block title %}Scheduled Reports{% endblock %}
+
+{% block reports_content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Scheduled Reports</h1>
+    
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Report Schedules</h6>
+                    <div class="dropdown no-arrow">
+                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
+                            <div class="dropdown-header">Schedule Actions:</div>
+                            <a class="dropdown-item" href="{% url 'reports:create_schedule' %}">Create New Schedule</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if schedules %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Report</th>
+                                        <th>Frequency</th>
+                                        <th>Next Run</th>
+                                        <th>Last Run</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for schedule in schedules %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'reports:view_report' schedule.report.id %}">{{ schedule.report.name }}</a>
+                                        </td>
+                                        <td>{{ schedule.get_frequency_display }}</td>
+                                        <td>{{ schedule.next_run|date:"M d, Y H:i" }}</td>
+                                        <td>{{ schedule.last_run|date:"M d, Y H:i"|default:"Never" }}</td>
+                                        <td>
+                                            {% if schedule.is_active %}
+                                            <span class="badge badge-success">Active</span>
+                                            {% else %}
+                                            <span class="badge badge-secondary">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{% url 'reports:update_schedule' schedule.id %}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteModal{{ schedule.id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-{% if schedule.is_active %}warning{% else %}success{% endif %} toggle-active" data-schedule-id="{{ schedule.id }}" data-is-active="{{ schedule.is_active|lower }}">
+                                                    <i class="fas {% if schedule.is_active %}fa-pause{% else %}fa-play{% endif %}"></i>
+                                                </button>
+                                            </div>
+                                            
+                                            <!-- Delete Modal -->
+                                            <div class="modal fade" id="deleteModal{{ schedule.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ schedule.id }}" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="deleteModalLabel{{ schedule.id }}">Confirm Delete</h5>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            Are you sure you want to delete the schedule for "{{ schedule.report.name }}"?
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                            <form action="{% url 'reports:delete_schedule' schedule.id %}" method="post">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <p class="lead">No scheduled reports found.</p>
+                            <a href="{% url 'reports:create_schedule' %}" class="btn btn-primary">
+                                <i class="fas fa-plus mr-1"></i> Create New Schedule
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delivery History -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Deliveries</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="deliveryTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Report</th>
+                                    <th>Sent At</th>
+                                    <th>Status</th>
+                                    <th>Format</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for delivery in deliveries %}
+                                <tr>
+                                    <td>{{ delivery.schedule.report.name }}</td>
+                                    <td>{{ delivery.sent_at|date:"M d, Y H:i"|default:"Pending" }}</td>
+                                    <td>
+                                        {% if delivery.status == 'SENT' %}
+                                        <span class="badge badge-success">Sent</span>
+                                        {% elif delivery.status == 'FAILED' %}
+                                        <span class="badge badge-danger">Failed</span>
+                                        <span class="d-block small text-danger mt-1">{{ delivery.error_message|truncatechars:50 }}</span>
+                                        {% else %}
+                                        <span class="badge badge-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ delivery.format }}</td>
+                                    <td>
+                                        {% if delivery.status == 'FAILED' or delivery.status == 'SENT' %}
+                                        <form action="{% url 'reports:resend_report' delivery.id %}" method="post" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-redo"></i> Resend
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No delivery history found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Initialize DataTable
+        $('#dataTable').DataTable();
+        $('#deliveryTable').DataTable();
+        
+        // Toggle active status
+        $('.toggle-active').click(function() {
+            var scheduleId = $(this).data('schedule-id');
+            var isActive = $(this).data('is-active') === 'true';
+            var button = $(this);
+            
+            $.ajax({
+                url: '{% url "reports:toggle_schedule" 0 %}'.replace('0', scheduleId),
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function(data) {
+                    if (data.success) {
+                        button.data('is-active', data.is_active);
+                        
+                        if (data.is_active) {
+                            button.removeClass('btn-success').addClass('btn-warning');
+                            button.find('i').removeClass('fa-play').addClass('fa-pause');
+                            button.closest('tr').find('td:eq(4) span').removeClass('badge-secondary').addClass('badge-success').text('Active');
+                        } else {
+                            button.removeClass('btn-warning').addClass('btn-success');
+                            button.find('i').removeClass('fa-pause').addClass('fa-play');
+                            button.closest('tr').find('td:eq(4) span').removeClass('badge-success').addClass('badge-secondary').text('Inactive');
+                        }
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %} 

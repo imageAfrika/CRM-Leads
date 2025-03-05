@@ -9,163 +9,266 @@
 {% endblock %}
 
 {% block content %}
-<div class="purchases-layout">
-    <div class="purchases-sidebar">
+<div class="expenses-layout">
+    <div class="expenses-sidebar">
         {% include 'purchases/includes/sidebar.html' %}
     </div>
     
-    <div class="purchases-content">
+    <div class="expenses-content">
         <div class="content-header">
             <h1>Purchases</h1>
-            
-            <div class="action-buttons">
-                <a href="{% url 'purchases:purchase_create' %}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Add Purchase
-                </a>
-            </div>
+            <a href="{% url 'purchases:purchase_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Purchase
+            </a>
         </div>
         
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-                {{ message }}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-        
-        <div class="summary-box">
+        <div class="summary-card">
             <div class="summary-item">
-                <span class="summary-label">Total Purchases</span>
+                <span class="summary-label">Total</span>
                 <span class="summary-value">{{ total_amount|kes_format }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">This Month</span>
+                <span class="summary-value">{{ month_amount|kes_format }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Count</span>
+                <span class="summary-value">{{ purchases.count }}</span>
             </div>
         </div>
         
         <div class="filter-section">
             <form method="get" class="filter-form">
                 <div class="filter-group">
-                    <label for="category">Category:</label>
-                    <select name="category" id="category">
+                    <label for="category">Category</label>
+                    <select name="category" id="category" class="filter-select">
                         <option value="">All Categories</option>
-                        {% for cat in categories %}
-                        <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"i" %}selected{% endif %}>
-                            {{ cat.name }}
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if selected_category == category.id %}selected{% endif %}>
+                            {{ category.name }}
                         </option>
                         {% endfor %}
                     </select>
                 </div>
                 
                 <div class="filter-group">
-                    <label for="date_from">From:</label>
-                    <input type="date" name="date_from" id="date_from" value="{{ date_from|date:'Y-m-d' }}">
+                    <label for="status">Status</label>
+                    <select name="status" id="status" class="filter-select">
+                        <option value="">All Statuses</option>
+                        {% for status_value, status_name in status_choices %}
+                        <option value="{{ status_value }}" {% if selected_status == status_value %}selected{% endif %}>
+                            {{ status_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
                 </div>
                 
                 <div class="filter-group">
-                    <label for="date_to">To:</label>
-                    <input type="date" name="date_to" id="date_to" value="{{ date_to|date:'Y-m-d' }}">
+                    <label for="date_from">From</label>
+                    <input type="date" name="date_from" id="date_from" class="filter-input" value="{{ date_from|date:'Y-m-d' }}">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="date_to">To</label>
+                    <input type="date" name="date_to" id="date_to" class="filter-input" value="{{ date_to|date:'Y-m-d' }}">
                 </div>
                 
                 <div class="filter-actions">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-filter">
                         <i class="fas fa-filter"></i> Filter
                     </button>
-                    <a href="{% url 'purchases:purchase_list' %}" class="btn btn-outline-secondary">
+                    <a href="{% url 'purchases:purchase_list' %}" class="btn btn-reset">
                         <i class="fas fa-redo"></i> Reset
                     </a>
                 </div>
             </form>
         </div>
         
-        <div class="purchase-card">
-            <div class="table-responsive">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Title</th>
-                            <th>Category</th>
-                            <th>Amount</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for purchase in purchases %}
-                        <tr>
-                            <td>{{ purchase.date|date:"M d, Y" }}</td>
-                            <td>{{ purchase.title }}</td>
-                            <td>{{ purchase.category.name }}</td>
-                            <td class="amount">{{ purchase.amount|kes_format }}</td>
-                            <td class="actions">
+        <div class="purchase-list">
+            {% if purchases %}
+                {% for purchase in purchases %}
+                <div class="purchase-card">
+                    <div class="purchase-header">
+                        <h3 class="purchase-title">{{ purchase.title }}</h3>
+                        <span class="purchase-date">{{ purchase.date|date:"M d, Y" }}</span>
+                    </div>
+                    
+                    <div class="purchase-details">
+                        <div class="purchase-info">
+                            <div class="info-item">
+                                <span class="info-label">Vendor</span>
+                                <span class="info-value">{{ purchase.vendor }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Category</span>
+                                <span class="info-value category-tag">{{ purchase.category.name }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Status</span>
+                                <span class="status-badge status-{{ purchase.status|lower }}">
+                                    {{ purchase.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="purchase-actions-group">
+                            <div class="purchase-amount">
+                                {{ purchase.amount|kes_format }}
+                            </div>
+                            <div class="purchase-actions">
                                 <a href="{% url 'purchases:purchase_detail' purchase.id %}" class="btn-icon" title="View">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 <a href="{% url 'purchases:purchase_update' purchase.id %}" class="btn-icon" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="{% url 'purchases:purchase_delete' purchase.id %}" class="btn-icon text-danger" title="Delete">
+                                <button type="button" class="btn-icon btn-delete" title="Delete" 
+                                        onclick="showDeleteModal('{{ purchase.id }}', '{{ purchase.title }}', '{{ purchase.vendor }}', '{{ purchase.amount|kes_format }}')">
                                     <i class="fas fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="empty-message">No purchases found. <a href="{% url 'purchases:purchase_create' %}">Add one</a>.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            
-            {% if purchases.has_other_pages %}
-            <div class="pagination">
-                <ul>
-                    {% if purchases.has_previous %}
-                    <li>
-                        <a href="?page=1{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">&laquo; First</a>
-                    </li>
-                    <li>
-                        <a href="?page={{ purchases.previous_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">Previous</a>
-                    </li>
-                    {% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                {% if is_paginated %}
+                <div class="pagination">
+                    <span class="pagination-info">
+                        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} purchases
+                    </span>
                     
-                    {% for num in purchases.paginator.page_range %}
-                    {% if purchases.number == num %}
-                    <li class="active"><span>{{ num }}</span></li>
-                    {% elif num > purchases.number|add:'-3' and num < purchases.number|add:'3' %}
-                    <li>
-                        <a href="?page={{ num }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">{{ num }}</a>
-                    </li>
-                    {% endif %}
-                    {% endfor %}
-                    
-                    {% if purchases.has_next %}
-                    <li>
-                        <a href="?page={{ purchases.next_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">Next</a>
-                    </li>
-                    <li>
-                        <a href="?page={{ purchases.paginator.num_pages }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">Last &raquo;</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </div>
+                    <div class="pagination-controls">
+                        {% if page_obj.has_previous %}
+                        <a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page=1" class="pagination-link">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}" class="pagination-link">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                        {% endif %}
+                        
+                        <span class="pagination-current">{{ page_obj.number }}</span>
+                        
+                        {% if page_obj.has_next %}
+                        <a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.next_page_number }}" class="pagination-link">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ paginator.num_pages }}" class="pagination-link">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <h3>No purchases found</h3>
+                    <p>You haven't added any purchases yet or none match your filters.</p>
+                    <a href="{% url 'purchases:purchase_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Your First Purchase
+                    </a>
+                </div>
             {% endif %}
         </div>
     </div>
 </div>
 
-{% block app_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Auto-submit form when category changes
-        const categorySelect = document.getElementById('category');
-        if (categorySelect) {
-            categorySelect.addEventListener('change', function() {
-                this.form.submit();
-            });
-        }
-    });
-</script>
+<!-- Modern Delete Modal -->
+<div class="modal-backdrop" id="deleteModalBackdrop"></div>
+<div class="modal" id="deleteModal">
+    <div class="modal-content">
+        <div class="modal-icon">
+            <i class="fas fa-trash"></i>
+        </div>
+        <div class="modal-header">
+            <h3>Delete Purchase</h3>
+            <p>Are you sure you want to delete this purchase? This action cannot be undone.</p>
+        </div>
+        <div class="modal-body">
+            <div class="delete-item-info">
+                <div class="delete-item-title" id="deletePurchaseTitle"></div>
+                <div class="delete-item-details">
+                    <div id="deletePurchaseVendor"></div>
+                    <div id="deletePurchaseAmount"></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="modal-btn btn-cancel" onclick="hideDeleteModal()">
+                <i class="fas fa-times"></i>
+                Cancel
+            </button>
+            <form id="deleteForm" method="post" style="flex: 1;">
+                {% csrf_token %}
+                <button type="submit" class="modal-btn btn-confirm-delete">
+                    <i class="fas fa-trash"></i>
+                    Delete Purchase
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
+{% block extra_js %}
+<script>
+let currentDeleteId = null;
+
+function showDeleteModal(id, title, vendor, amount) {
+    currentDeleteId = id;
+    
+    // Update modal content
+    document.getElementById('deletePurchaseTitle').textContent = title;
+    document.getElementById('deletePurchaseVendor').textContent = `Vendor: ${vendor}`;
+    document.getElementById('deletePurchaseAmount').textContent = `Amount: ${amount}`;
+    
+    // Update form action
+    document.getElementById('deleteForm').action = `{% url 'purchases:purchase_list' %}${id}/delete/`;
+    
+    // Show modal with animation
+    const modal = document.getElementById('deleteModal');
+    const backdrop = document.getElementById('deleteModalBackdrop');
+    
+    backdrop.style.display = 'block';
+    modal.style.display = 'block';
+    
+    // Trigger reflow
+    modal.offsetHeight;
+    
+    backdrop.classList.add('show');
+    modal.classList.add('show');
+    
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
+}
+
+function hideDeleteModal() {
+    const modal = document.getElementById('deleteModal');
+    const backdrop = document.getElementById('deleteModalBackdrop');
+    
+    backdrop.classList.remove('show');
+    modal.classList.remove('show');
+    
+    // Wait for animation to finish
+    setTimeout(() => {
+        backdrop.style.display = 'none';
+        modal.style.display = 'none';
+        currentDeleteId = null;
+        document.body.style.overflow = '';
+    }, 200);
+}
+
+// Close modal on backdrop click
+document.getElementById('deleteModalBackdrop').addEventListener('click', hideDeleteModal);
+
+// Close modal on escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && currentDeleteId) {
+        hideDeleteModal();
+    }
+});
+</script>
 {% endblock %} 

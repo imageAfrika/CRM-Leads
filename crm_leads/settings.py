@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'authentication',
     'expenses.apps.ExpensesConfig',
     'purchases.apps.PurchasesConfig',
+    'banking.apps.BankingConfig',
+    'reports.apps.ReportsConfig',
 ]
 
 MIDDLEWARE = [
@@ -130,6 +132,9 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
     BASE_DIR / 'expenses' / 'static',
+    BASE_DIR / 'banking' / 'static',
+    BASE_DIR / 'reports' / 'static',
+    BASE_DIR / 'purchases' / 'static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 

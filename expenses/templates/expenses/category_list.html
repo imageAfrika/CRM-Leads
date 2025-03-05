@@ -129,7 +129,7 @@
     function confirmDelete(expenseId) {
         if (confirm("Are you sure you want to delete this expense? This action cannot be undone.")) {
             // Redirect to the delete URL
-            window.location.href = "{% url 'expenses:expense_delete' 'expenseId' %}".replace('expenseId', expenseId);
+            window.location.href = "{% url 'expenses:expense_delete' 0 %}".replace('0', expenseId);
         }
     }
 </script>

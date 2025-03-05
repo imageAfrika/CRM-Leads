@@ -1,0 +1,94 @@
+{% extends 'banking/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block banking_content %}
+<div class="content-header">
+    <h2 class="content-title">Account Details</h2>
+    <a href="{% url 'banking:dashboard' %}" class="btn secondary-btn">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<div class="account-detail-card">
+    <div class="account-header">
+        <div class="account-info">
+            <div class="account-type">{{ account.get_account_type_display }}</div>
+            <div class="account-number">{{ account.account_number }}</div>
+            <div class="account-date">Created on {{ account.created_at|date:"F d, Y" }}</div>
+        </div>
+        <div class="account-balance-container">
+            <div class="account-balance">${{ account.balance|floatformat:2|intcomma }}</div>
+            <div class="balance-label">Current Balance</div>
+        </div>
+    </div>
+    
+    <div class="account-actions-container">
+        <a href="{% url 'banking:deposit' account.account_number %}" class="btn primary-btn">
+            <i class="fas fa-arrow-down"></i> Deposit
+        </a>
+        <a href="{% url 'banking:withdraw' account.account_number %}" class="btn secondary-btn">
+            <i class="fas fa-arrow-up"></i> Withdraw
+        </a>
+        <a href="{% url 'banking:transfer' account.account_number %}" class="btn secondary-btn">
+            <i class="fas fa-exchange-alt"></i> Transfer
+        </a>
+        <a href="{% url 'banking:change_pin' account.account_number %}" class="btn secondary-btn">
+            <i class="fas fa-key"></i> Change PIN
+        </a>
+    </div>
+</div>
+
+<div class="section-header">
+    <h3><i class="fas fa-history"></i> Recent Transactions</h3>
+    <a href="{% url 'banking:transaction_history' account.account_number %}" class="btn secondary-btn">
+        <i class="fas fa-list"></i> View All
+    </a>
+</div>
+
+<div class="transactions-container">
+    {% if transactions %}
+        <ul class="transaction-list">
+            {% for transaction in transactions %}
+                <li class="transaction-item">
+                    {% if transaction.transaction_type == 'deposit' %}
+                        <div class="transaction-icon transaction-deposit">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                    {% elif transaction.transaction_type == 'withdrawal' %}
+                        <div class="transaction-icon transaction-withdraw">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                    {% else %}
+                        <div class="transaction-icon transaction-transfer">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="transaction-details">
+                        <div class="transaction-title">
+                            {{ transaction.get_transaction_type_display }}
+                        </div>
+                        <div class="transaction-date">
+                            {{ transaction.timestamp|date:"F j, Y, g:i a" }}
+                        </div>
+                    </div>
+                    
+                    <div class="transaction-amount {% if transaction.transaction_type == 'deposit' %}amount-positive{% elif transaction.transaction_type == 'withdrawal' %}amount-negative{% endif %}">
+                        {% if transaction.transaction_type == 'deposit' %}+{% elif transaction.transaction_type == 'withdrawal' %}-{% endif %}
+                        ${{ transaction.amount|floatformat:2|intcomma }}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-exchange-alt"></i>
+            </div>
+            <h3>No Transactions Yet</h3>
+            <p>This account doesn't have any transactions yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 
