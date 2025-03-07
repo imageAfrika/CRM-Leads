@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async function() {
-    // Add this at the beginning of your DOMContentLoaded handler
+    // Get the quote number from the server
     try {
         const quoteNumberUrl = document.getElementById('quote-form').dataset.quoteNumberUrl;
         const response = await fetch(quoteNumberUrl);
@@ -13,25 +13,73 @@ document.addEventListener('DOMContentLoaded', async function() {
     const quoteForm = document.getElementById('quote-form');
     const addItemBtn = document.getElementById('add-item');
     const quoteItems = document.getElementById('quote-items');
+    const taxRateInput = document.getElementById('tax_rate');
+    
+    // Format number as currency
+    function formatCurrency(number) {
+        return new Intl.NumberFormat('en-KE', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(number);
+    }
     
     // Update preview when form fields change
     function updatePreview() {
         // Update client
         const clientSelect = document.getElementById('client');
-        const clientName = clientSelect.options[clientSelect.selectedIndex].text;
-        document.getElementById('preview-client').textContent = clientName;
+        if (clientSelect.selectedIndex > 0) {
+            const clientName = clientSelect.options[clientSelect.selectedIndex].text;
+            document.getElementById('preview-client').textContent = clientName;
+            // Here you would ideally fetch client details from your backend
+            // For now we'll use placeholder data
+            document.getElementById('preview-client-address').textContent = 'Client Address';
+            document.getElementById('preview-client-contact').textContent = 'client@example.com | +254 7XX XXX XXX';
+        } else {
+            document.getElementById('preview-client').textContent = '-';
+            document.getElementById('preview-client-address').textContent = '-';
+            document.getElementById('preview-client-contact').textContent = '-';
+        }
 
         // Update quote number
         const quoteNumber = document.getElementById('quote_number').value;
         document.getElementById('preview-quote-number').textContent = quoteNumber || '-';
 
-        // Update quote title
+        // Update quote title and description
         const quoteTitle = document.getElementById('quote_title').value;
         document.getElementById('preview-title').textContent = quoteTitle || '-';
+        
+        const description = document.getElementById('description').value;
+        document.getElementById('preview-description').textContent = description || '';
+
+        // Update valid until date
+        const validUntil = document.getElementById('valid_until').value;
+        if (validUntil) {
+            const formattedDate = new Date(validUntil).toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            });
+            document.getElementById('preview-valid-until').textContent = formattedDate;
+        } else {
+            document.getElementById('preview-valid-until').textContent = '-';
+        }
+
+        // Update tax rate
+        const taxRate = parseFloat(taxRateInput.value) || 16;
+        document.getElementById('preview-tax-rate').textContent = taxRate;
 
         // Update terms
         const terms = document.getElementById('terms').value;
-        document.getElementById('preview-terms').textContent = terms || '-';
+        if (terms) {
+            // Split terms by new lines and create paragraphs
+            const termsHtml = terms.split('\n')
+                .filter(line => line.trim().length > 0)
+                .map(line => `<p>${line}</p>`)
+                .join('');
+            document.getElementById('preview-terms').innerHTML = termsHtml;
+        } else {
+            document.getElementById('preview-terms').innerHTML = '<p>-</p>';
+        }
 
         // Update items and calculations
         updateItems();
@@ -58,20 +106,33 @@ document.addEventListener('DOMContentLoaded', async function() {
             tr.innerHTML = `
                 <td>${description || '-'}</td>
                 <td>${quantity || 0}</td>
-                <td>$${unitPrice.toFixed(2)}</td>
+                <td>KES ${formatCurrency(unitPrice)}</td>
                 <td>${discount}%</td>
-                <td>$${itemTotal.toFixed(2)}</td>
+                <td>KES ${formatCurrency(itemTotal)}</td>
             `;
             tbody.appendChild(tr);
         });
 
         // Update totals
-        const tax = subtotal * 0.16;
+        const taxRate = parseFloat(taxRateInput.value) || 16;
+        const tax = subtotal * (taxRate / 100);
         const total = subtotal + tax;
 
-        document.getElementById('preview-subtotal').textContent = `$${subtotal.toFixed(2)}`;
-        document.getElementById('preview-tax').textContent = `$${tax.toFixed(2)}`;
-        document.getElementById('preview-total').textContent = `$${total.toFixed(2)}`;
+        document.getElementById('preview-subtotal').textContent = `KES ${formatCurrency(subtotal)}`;
+        document.getElementById('preview-tax').textContent = `KES ${formatCurrency(tax)}`;
+        document.getElementById('preview-total').textContent = `KES ${formatCurrency(total)}`;
+        
+        // Update hidden fields for form submission - ensure we use 2 decimal places for accuracy
+        document.getElementById('subtotal').value = subtotal.toFixed(2);
+        document.getElementById('tax_amount').value = tax.toFixed(2);
+        document.getElementById('total_amount').value = total.toFixed(2);
+        
+        console.log('Updated calculations:', {
+            subtotal: subtotal.toFixed(2),
+            taxRate: taxRate,
+            tax: tax.toFixed(2),
+            total: total.toFixed(2)
+        });
     }
 
     // Add new item row
@@ -80,26 +141,26 @@ document.addEventListener('DOMContentLoaded', async function() {
         itemDiv.className = 'quote-item';
         itemDiv.innerHTML = `
             <label>Description</label>
-            <input type="text" name="items[][description]" placeholder="Description" required>
+            <input type="text" name="items[][description]" placeholder="Item description" required>
             
             <div class="numeric-fields">
                 <div>
                     <label>Quantity</label>
-                    <input type="number" name="items[][quantity]" placeholder="Quantity" required>
+                    <input type="number" name="items[][quantity]" min="1" placeholder="Qty" required>
                 </div>
                 
                 <div>
-                    <label>Unit Price</label>
-                    <input type="number" name="items[][unit_price]" placeholder="Unit Price" required>
+                    <label>Unit Price (KES)</label>
+                    <input type="number" name="items[][unit_price]" min="0" step="0.01" placeholder="0.00" required>
                 </div>
                 
                 <div>
                     <label>Discount %</label>
-                    <input type="number" name="items[][discount]" placeholder="Discount %" required>
+                    <input type="number" name="items[][discount]" min="0" max="100" placeholder="0" value="0">
                 </div>
             </div>
             
-            <button type="button" class="remove-item">Remove</button>
+            <button type="button" class="remove-item">Remove Item</button>
         `;
         quoteItems.appendChild(itemDiv);
 
@@ -107,13 +168,24 @@ document.addEventListener('DOMContentLoaded', async function() {
         itemDiv.querySelectorAll('input').forEach(input => {
             input.addEventListener('input', updatePreview);
         });
+        
+        // Focus on the new description field
+        itemDiv.querySelector('[name="items[][description]"]').focus();
+        
+        // Update preview
+        updatePreview();
     });
     
     // Remove item row
     quoteItems.addEventListener('click', function(e) {
         if (e.target.classList.contains('remove-item')) {
-            e.target.parentElement.remove();
-            updatePreview();
+            // Don't remove if it's the last item
+            if (document.querySelectorAll('.quote-item').length > 1) {
+                e.target.closest('.quote-item').remove();
+                updatePreview();
+            } else {
+                alert('At least one item is required.');
+            }
         }
     });
 
@@ -129,21 +201,66 @@ document.addEventListener('DOMContentLoaded', async function() {
     quoteForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
+        // Validate form
+        const formValid = this.checkValidity();
+        if (!formValid) {
+            this.reportValidity();
+            return;
+        }
+        
+        console.log("Form validated successfully, preparing data...");
+        
+        // Collect items
+        const items = [];
+        document.querySelectorAll('.quote-item').forEach((item, index) => {
+            const itemData = {
+                description: item.querySelector('[name="items[][description]"]').value,
+                quantity: parseFloat(item.querySelector('[name="items[][quantity]"]').value),
+                unit_price: parseFloat(item.querySelector('[name="items[][unit_price]"]').value),
+                discount: parseFloat(item.querySelector('[name="items[][discount]"]').value) || 0
+            };
+            console.log(`Item ${index + 1}:`, itemData);
+            items.push(itemData);
+        });
+        
+        // Get hidden field values
+        const subtotal = document.getElementById('subtotal').value;
+        const taxAmount = document.getElementById('tax_amount').value;
+        const totalAmount = document.getElementById('total_amount').value;
+        
+        console.log("Calculated values:", {
+            subtotal,
+            taxAmount,
+            totalAmount
+        });
+        
         // Collect form data
         const formData = {
             client_id: document.getElementById('client').value,
             quote_number: document.getElementById('quote_number').value,
-            title: document.getElementById('title').value,
+            title: document.getElementById('quote_title').value,
             description: document.getElementById('description').value,
-            subtotal: document.getElementById('subtotal').value,
-            tax_rate: document.getElementById('tax_rate').value,
-            tax_amount: document.getElementById('tax_amount').value,
-            total_amount: document.getElementById('total_amount').value,
             valid_until: document.getElementById('valid_until').value,
-            terms: document.getElementById('terms').value
+            terms: document.getElementById('terms').value,
+            tax_rate: document.getElementById('tax_rate').value,
+            subtotal: subtotal,
+            tax_amount: taxAmount,
+            total_amount: totalAmount,
+            items: items
         };
+        
+        console.log("Form data prepared:", formData);
 
         try {
+            // Show loading state
+            const submitButton = quoteForm.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+            submitButton.textContent = 'Processing...';
+            submitButton.disabled = true;
+            
+            console.log("Submitting form data to server...");
+            
+            // Submit the form data
             const response = await fetch('/documents/quote/create/', {
                 method: 'POST',
                 headers: {
@@ -153,16 +270,30 @@ document.addEventListener('DOMContentLoaded', async function() {
                 body: JSON.stringify(formData)
             });
 
+            console.log("Response received:", response.status);
             const data = await response.json();
+            console.log("Response data:", data);
             
             if (data.success) {
+                console.log("Quote created successfully, redirecting to:", data.redirect_url);
                 window.location.href = data.redirect_url;
             } else {
+                // Reset button state
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+                
+                // Show error message
+                console.error("Server error:", data.error);
                 alert('Error creating quote: ' + data.error);
             }
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error submitting form:', error);
             alert('Failed to create quote. Please try again.');
+            
+            // Reset button state
+            const submitButton = quoteForm.querySelector('button[type="submit"]');
+            submitButton.textContent = 'Generate Quote';
+            submitButton.disabled = false;
         }
     });
 }); 

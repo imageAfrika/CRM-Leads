@@ -78,7 +78,7 @@
                     <input type="text" id="searchFilter" placeholder="Search...">
                 </div>
                 <div class="total-amount">
-                    Total: $<span id="totalAmount">{{ total_amount|floatformat:2 }}</span>
+                    Total: KES <span id="totalAmount">{{ total_amount|floatformat:2 }}</span>
                 </div>
             </div>
 
@@ -99,7 +99,7 @@
                         <td data-value="{{ expense.date|date:'Y-m-d' }}">{{ expense.date|date:"d/m/Y" }}</td>
                         <td>{{ expense.title }}</td>
                         <td data-value="{{ expense.category }}">{{ expense.get_category_display }}</td>
-                        <td>${{ expense.amount|floatformat:2 }}</td>
+                        <td>KES {{ expense.amount|floatformat:2 }}</td>
                         <td>{{ expense.description|truncatechars:50 }}</td>
                         <td class="actions">
                             <button class="btn-icon edit-expense" data-id="{{ expense.id }}">

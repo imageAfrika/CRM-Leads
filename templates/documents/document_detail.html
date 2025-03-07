@@ -2,82 +2,272 @@
 {% load static %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard/dashboard.css' %}">
 <style>
-/* Include the CSS directly in the template for PDF generation */
 .document-container {
-    padding: 20px;
-    max-width: 800px;
+    padding: 24px;
+    max-width: 1000px;
     margin: 0 auto;
+    background: #f8fafc;
+    min-height: calc(100vh - 64px);
+}
+
+.document-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
 }
 
 .document-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 30px;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .company-info h1 {
-    font-size: 24px;
+    font-size: 1.5rem;
+    font-weight: 600;
     color: #1e293b;
-    margin: 0 0 10px 0;
+    margin: 0 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.company-info h1 i {
+    color: #3b82f6;
+}
+
+.document-meta {
+    font-size: 0.875rem;
+    color: #64748b;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.document-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.document-meta i {
+    width: 16px;
 }
 
 .client-info {
     text-align: right;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.client-info h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 12px 0;
+}
+
+.client-info p {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0.25rem 0;
+}
+
+.items-section {
+    margin: 24px 0;
 }
 
 .items-table {
     width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-}
-
-.items-table th,
-.items-table td {
-    padding: 10px;
-    border: 1px solid #e2e8f0;
-    text-align: left;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 16px 0;
 }
 
 .items-table th {
     background: #f8fafc;
-    font-weight: bold;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.items-table td {
+    padding: 12px 16px;
+    font-size: 0.875rem;
+    color: #1e293b;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.items-table tr:last-child td {
+    border-bottom: none;
 }
 
 .totals-section {
-    margin-top: 20px;
-    text-align: right;
+    margin-top: 24px;
+    padding: 24px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.totals {
+    width: 300px;
+    margin-left: auto;
 }
 
 .total-row {
-    margin: 5px 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 0.875rem;
+    color: #64748b;
 }
 
-.grand-total {
-    font-weight: bold;
-    font-size: 18px;
-    margin-top: 10px;
+.total-row.grand-total {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    border-top: 2px solid #e2e8f0;
+    margin-top: 8px;
+    padding-top: 16px;
 }
 
 .terms-section {
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid #e2e8f0;
+    margin-top: 24px;
+    padding: 24px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.terms-section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 16px 0;
+}
+
+.terms-section p {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 8px 0;
+}
+
+.document-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+}
+
+.btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.btn-secondary:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-draft {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.status-pending {
+    background: #fef9c3;
+    color: #854d0e;
+}
+
+.status-approved {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-rejected {
+    background: #fee2e2;
+    color: #991b1b;
 }
 
 @media print {
+    .document-container {
+        padding: 0;
+        max-width: none;
+        background: white;
+    }
+    
+    .document-card {
+        box-shadow: none;
+        border: none;
+    }
+    
     .document-actions {
         display: none;
     }
     
-    .document-container {
-        padding: 0;
-        max-width: none;
-    }
-    
-    /* Add any other print-specific styles */
     @page {
         margin: 0.75in;
+    }
+}
+
+@media (max-width: 768px) {
+    .document-container {
+        padding: 16px;
+    }
+    
+    .document-header {
+        flex-direction: column;
+        gap: 24px;
+    }
+    
+    .client-info {
+        text-align: left;
+    }
+    
+    .totals {
+        width: 100%;
     }
 }
 </style>
@@ -85,107 +275,128 @@
 
 {% block content %}
 <div class="document-container">
-    <div class="document-header">
-        <div class="company-info">
-            <h1>{{ document.title }}</h1>
-            <p>{{ document.document_type }}</p>
-            <p>Date: {{ document.document_date|date:"d/m/Y" }}</p>
-        </div>
-        
-        <div class="client-info">
-            <h2>Client Information</h2>
-            <p>{{ document.client.name }}</p>
-            <p>{{ document.client.email }}</p>
-            <p>{{ document.client.phone }}</p>
-            <p>{{ document.client.address }}</p>
-        </div>
-    </div>
-
-    {% if document.document_type == 'QUOTE' and document.quote %}
-    <div class="items-section">
-        <table class="items-table">
-            <thead>
-                <tr>
-                    <th>Description</th>
-                    <th>Quantity</th>
-                    <th>Unit Price</th>
-                    <th>Discount</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in document.quote.items.all %}
-                <tr>
-                    <td>{{ item.description }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>${{ item.unit_price|floatformat:2 }}</td>
-                    <td>{{ item.discount }}%</td>
-                    <td>${{ item.total|floatformat:2 }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <div class="totals-section">
-        <div class="totals">
-            <div class="total-row">
-                <span>Subtotal:</span>
-                <span>${{ document.quote.subtotal|floatformat:2 }}</span>
+    <div class="document-card">
+        <div class="document-header">
+            <div class="company-info">
+                <h1>
+                    {% if document.document_type == 'QUOTE' %}
+                        <i class="fas fa-file-invoice"></i>
+                    {% elif document.document_type == 'INVOICE' %}
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    {% elif document.document_type == 'EXPENSE' %}
+                        <i class="fas fa-receipt"></i>
+                    {% endif %}
+                    {{ document.title|default:document.get_document_number }}
+                </h1>
+                <div class="document-meta">
+                    <span>
+                        <i class="fas fa-tag"></i>
+                        {{ document.get_document_type_display }}
+                    </span>
+                    <span>
+                        <i class="fas fa-calendar"></i>
+                        {{ document.document_date|date:"d M Y" }}
+                    </span>
+                    <span>
+                        <i class="fas fa-clock"></i>
+                        Created: {{ document.created_at|date:"d M Y" }}
+                    </span>
+                    <span class="status-badge status-{{ document.status|lower }}">
+                        {{ document.get_status_display }}
+                    </span>
+                </div>
             </div>
-            <div class="total-row">
-                <span>Tax ({{ document.quote.tax_rate }}%):</span>
-                <span>${{ document.quote.tax_amount|floatformat:2 }}</span>
-            </div>
-            <div class="total-row grand-total">
-                <span>Total:</span>
-                <span>${{ document.quote.total_amount|floatformat:2 }}</span>
+            
+            <div class="client-info">
+                <h2>Client Information</h2>
+                <p>{{ document.client.name }}</p>
+                <p>{{ document.client.email }}</p>
+                <p>{{ document.client.phone }}</p>
+                <p>{{ document.client.address }}</p>
             </div>
         </div>
-    </div>
 
-    <div class="terms-section">
-        <h3>Terms and Conditions</h3>
-        <p>{{ document.quote.terms }}</p>
-        <p>Valid until: {{ document.quote.valid_until|date:"d/m/Y" }}</p>
-    </div>
-    {% endif %}
+        {% if document.document_type == 'QUOTE' and document.quote %}
+        <div class="items-section">
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Discount</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in document.quote.items.all %}
+                    <tr>
+                        <td>{{ item.description }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>KES {{ item.unit_price|floatformat:2 }}</td>
+                        <td>{{ item.discount }}%</td>
+                        <td>KES {{ item.total|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-    {% if not is_download_view %}
-    <div class="document-actions">
-        <a href="{% url 'documents:document_list' %}" class="btn btn-secondary">Back to List</a>
-        <button onclick="window.print()" class="btn btn-primary">Print/Save as PDF</button>
-        {% if document.document_type == 'QUOTE' %}
-        <button class="btn btn-success generate-invoice" data-quote-id="{{ document.quote.id }}">Generate Invoice</button>
+        <div class="totals-section">
+            <div class="totals">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span>KES {{ document.quote.subtotal|floatformat:2 }}</span>
+                </div>
+                <div class="total-row">
+                    <span>Tax ({{ document.quote.tax_rate }}%):</span>
+                    <span>KES {{ document.quote.tax_amount|floatformat:2 }}</span>
+                </div>
+                <div class="total-row grand-total">
+                    <span>Total:</span>
+                    <span>KES {{ document.quote.total_amount|floatformat:2 }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="terms-section">
+            <h3>Terms and Conditions</h3>
+            <p>{{ document.quote.terms }}</p>
+            <p>Valid until: {{ document.quote.valid_until|date:"d/m/Y" }}</p>
+        </div>
         {% endif %}
+
+        <div class="document-actions">
+            <a href="{% url 'documents:document_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+            <a href="{% url 'documents:document_edit' document.pk %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit Document
+            </a>
+            <a href="#" class="btn btn-secondary download-document" data-id="{{ document.pk }}">
+                <i class="fas fa-download"></i> Download
+            </a>
+            {% if document.document_type == 'QUOTE' and document.status == 'APPROVED' %}
+            <a href="{% url 'documents:generate_invoice_from_quote' document.quote.pk %}" class="btn btn-primary">
+                <i class="fas fa-file-invoice-dollar"></i> Generate Invoice
+            </a>
+            {% endif %}
+        </div>
     </div>
-    {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const generateInvoiceBtn = document.querySelector('.generate-invoice');
-    if (generateInvoiceBtn) {
-        generateInvoiceBtn.addEventListener('click', function() {
-            const quoteId = this.dataset.quoteId;
-            fetch(`/documents/quote/${quoteId}/generate-invoice/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = '/documents/';
-                } else {
-                    alert('Error generating invoice: ' + data.error);
-                }
-            });
+    const downloadButtons = document.querySelectorAll('.download-document');
+    downloadButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const documentId = this.dataset.id;
+            window.location.href = `/documents/${documentId}/download/`;
         });
-    }
+    });
 });
 </script>
 {% endblock %} 

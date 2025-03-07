@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/products/form.css' %}">
+<link rel="stylesheet" href="{% static 'css/products/purchase_form.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h1>
+                <i class="fas fa-shopping-cart"></i>
+                {% if object %}Edit{% else %}New{% endif %} Purchase Order
+            </h1>
+        </div>
+
+        <form method="post" id="purchaseForm">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h2>Purchase Details</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.reference_number.id_for_label }}">
+                            Reference Number *
+                        </label>
+                        {{ form.reference_number }}
+                        {% if form.reference_number.errors %}
+                        <div class="error-message">
+                            {{ form.reference_number.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.supplier.id_for_label }}">
+                            Supplier *
+                        </label>
+                        {{ form.supplier }}
+                        {% if form.supplier.errors %}
+                        <div class="error-message">
+                            {{ form.supplier.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.purchase_date.id_for_label }}">
+                            Purchase Date *
+                        </label>
+                        {{ form.purchase_date }}
+                        {% if form.purchase_date.errors %}
+                        <div class="error-message">
+                            {{ form.purchase_date.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.expected_delivery_date.id_for_label }}">
+                            Expected Delivery Date
+                        </label>
+                        {{ form.expected_delivery_date }}
+                        {% if form.expected_delivery_date.errors %}
+                        <div class="error-message">
+                            {{ form.expected_delivery_date.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.status.id_for_label }}">
+                            Status *
+                        </label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                        <div class="error-message">
+                            {{ form.status.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.payment_terms.id_for_label }}">
+                            Payment Terms
+                        </label>
+                        {{ form.payment_terms }}
+                        {% if form.payment_terms.errors %}
+                        <div class="error-message">
+                            {{ form.payment_terms.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.notes.id_for_label }}">
+                        Notes (Optional)
+                    </label>
+                    {{ form.notes }}
+                    {% if form.notes.errors %}
+                    <div class="error-message">
+                        {{ form.notes.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2>Purchase Items</h2>
+                
+                <div id="purchase-items">
+                    {{ formset.management_form }}
+                    
+                    <div class="purchase-item-headers">
+                        <div class="item-col product-col">Product</div>
+                        <div class="item-col qty-col">Quantity</div>
+                        <div class="item-col price-col">Unit Price</div>
+                        <div class="item-col total-col">Total</div>
+                        <div class="item-col action-col"></div>
+                    </div>
+                    
+                    {% for item_form in formset %}
+                    <div class="purchase-item-row">
+                        {{ item_form.id }}
+                        
+                        <div class="item-col product-col">
+                            {{ item_form.product }}
+                            {% if item_form.product.errors %}
+                            <div class="error-message">
+                                {{ item_form.product.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="item-col qty-col">
+                            {{ item_form.quantity }}
+                            {% if item_form.quantity.errors %}
+                            <div class="error-message">
+                                {{ item_form.quantity.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="item-col price-col">
+                            {{ item_form.unit_price }}
+                            {% if item_form.unit_price.errors %}
+                            <div class="error-message">
+                                {{ item_form.unit_price.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="item-col total-col">
+                            <div class="line-total">$0.00</div>
+                        </div>
+                        
+                        <div class="item-col action-col">
+                            {% if forloop.first %}
+                            <button type="button" class="btn-icon add-item">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            {% else %}
+                            <button type="button" class="btn-icon remove-item">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                        
+                        {{ item_form.DELETE.as_hidden }}
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="purchase-totals">
+                    <div class="total-row">
+                        <div class="total-label">Subtotal:</div>
+                        <div class="total-value" id="subtotal">$0.00</div>
+                    </div>
+                    
+                    <div class="total-row">
+                        <div class="total-label">Tax ({{ form.tax_rate.value|default:0 }}%):</div>
+                        <div class="total-value" id="tax">$0.00</div>
+                    </div>
+                    
+                    <div class="total-row grand-total">
+                        <div class="total-label">Total:</div>
+                        <div class="total-value" id="grand-total">$0.00</div>
+                    </div>
+                    
+                    {{ form.tax_rate.as_hidden }}
+                    {{ form.total_amount.as_hidden }}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'products:purchase_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Purchase Order
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const purchaseItems = document.getElementById('purchase-items');
+    const taxRateInput = document.getElementById('{{ form.tax_rate.id_for_label }}');
+    const totalInput = document.getElementById('{{ form.total_amount.id_for_label }}');
+    const addItemBtn = document.querySelector('.add-item');
+    
+    // Set up event handlers for calculating line totals
+    setupLineItemCalculations();
+    
+    // Handle adding new items
+    addItemBtn.addEventListener('click', function() {
+        const totalForms = document.getElementById('id_items-TOTAL_FORMS');
+        const currentFormCount = parseInt(totalForms.value);
+        
+        // Clone the first form row
+        const newRow = purchaseItems.querySelector('.purchase-item-row').cloneNode(true);
+        
+        // Update IDs and names for the new form
+        const formRegex = RegExp(`items-(\\d+)-`, 'g');
+        newRow.innerHTML = newRow.innerHTML.replace(formRegex, `items-${currentFormCount}-`);
+        
+        // Clear values
+        const inputs = newRow.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            if (input.type !== 'hidden' || !input.name.includes('DELETE')) {
+                input.value = '';
+            }
+        });
+        
+        // Replace add button with remove button
+        const addBtn = newRow.querySelector('.add-item');
+        if (addBtn) {
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn-icon remove-item';
+            removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            addBtn.parentNode.replaceChild(removeBtn, addBtn);
+            
+            // Add event listener to the new remove button
+            removeBtn.addEventListener('click', handleRemoveItem);
+        }
+        
+        // Append the new row
+        purchaseItems.appendChild(newRow);
+        
+        // Update form count
+        totalForms.value = currentFormCount + 1;
+        
+        // Setup calculation for the new row
+        setupLineItemCalculations(newRow);
+    });
+    
+    // Handle removing items
+    document.querySelectorAll('.remove-item').forEach(btn => {
+        btn.addEventListener('click', handleRemoveItem);
+    });
+    
+    function handleRemoveItem() {
+        const row = this.closest('.purchase-item-row');
+        const deleteInput = row.querySelector('input[name$="-DELETE"]');
+        
+        // Mark for deletion and hide
+        deleteInput.value = 'on';
+        row.style.display = 'none';
+        
+        // Recalculate totals
+        calculateTotals();
+    }
+    
+    function setupLineItemCalculations(container = document) {
+        const rows = container.querySelectorAll('.purchase-item-row');
+        
+        rows.forEach(row => {
+            const qtyInput = row.querySelector('input[name$="-quantity"]');
+            const priceInput = row.querySelector('input[name$="-unit_price"]');
+            const totalElement = row.querySelector('.line-total');
+            
+            // Calculate line total on change
+            [qtyInput, priceInput].forEach(input => {
+                input.addEventListener('input', function() {
+                    const qty = parseFloat(qtyInput.value) || 0;
+                    const price = parseFloat(priceInput.value) || 0;
+                    const total = qty * price;
+                    
+                    totalElement.textContent = '$' + total.toFixed(2);
+                    
+                    // Recalculate order totals
+                    calculateTotals();
+                });
+            });
+        });
+    }
+    
+    function calculateTotals() {
+        let subtotal = 0;
+        
+        // Calculate subtotal from visible rows
+        document.querySelectorAll('.purchase-item-row').forEach(row => {
+            if (row.style.display !== 'none') {
+                const qtyInput = row.querySelector('input[name$="-quantity"]');
+                const priceInput = row.querySelector('input[name$="-unit_price"]');
+                
+                const qty = parseFloat(qtyInput.value) || 0;
+                const price = parseFloat(priceInput.value) || 0;
+                
+                subtotal += qty * price;
+            }
+        });
+        
+        // Calculate tax and total
+        const taxRate = parseFloat(taxRateInput.value) || 0;
+        const taxAmount = subtotal * (taxRate / 100);
+        const grandTotal = subtotal + taxAmount;
+        
+        // Update display
+        document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+        document.getElementById('tax').textContent = '$' + taxAmount.toFixed(2);
+        document.getElementById('grand-total').textContent = '$' + grandTotal.toFixed(2);
+        
+        // Update hidden total amount field
+        totalInput.value = grandTotal.toFixed(2);
+    }
+    
+    // Initial calculation
+    calculateTotals();
+});
+</script>
+{% endblock %} 

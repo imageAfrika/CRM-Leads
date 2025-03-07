@@ -30,7 +30,7 @@
         </div>
         <div class="stat-card-body">
             <div class="stat-value">
-                ${{ total_expenses|floatformat:2 }}
+                KES {{ total_expenses|floatformat:2 }}
             </div>
             <div class="stat-label">
                 Total Expenses This Month
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             label: function(context) {
                                 let label = context.label || '';
                                 if (label) {
-                                    label += ': $';
+                                    label += ': KES ';
                                 }
                                 label += context.parsed.toLocaleString();
                                 return label;

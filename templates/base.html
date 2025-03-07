@@ -39,6 +39,9 @@
             <a href="{% url 'clients:client_list' %}">
                 <i class="fas fa-users"></i> Clients
             </a>
+            <a href="{% url 'products:product_list' %}">
+                <i class="fas fa-box"></i> Products
+            </a>
             <a href="{% url 'purchases:purchase_list' %}">
                 <i class="fas fa-chart-line"></i> Purchases
             </a>
@@ -59,6 +62,9 @@
             </a>
             <a href="{% url 'reports:report_list' %}" class="{% if active_tab == 'reports' %}active{% endif %}">
                 <i class="fas fa-file-alt"></i> Reports
+            </a>
+            <a href="{% url 'access_control:dashboard' %}" class="{% if active_tab == 'access_control' %}active{% endif %}">
+                <i class="fas fa-user-shield"></i> Access Control
             </a>
         </div>
         

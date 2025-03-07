@@ -52,7 +52,7 @@ def generate_chart_data(report_config):
             'borderWidth': 1
         }]
     }
-    
+
     # Process data based on report type
     if report_type == 'BANKING':
         data = generate_banking_report_data(report_config)

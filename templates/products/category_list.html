@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/products/list.css' %}">
+<link rel="stylesheet" href="{% static 'css/products/category_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="list-container">
+    <div class="list-header">
+        <h1><i class="fas fa-tags"></i> Product Categories</h1>
+        <div class="list-actions">
+            <a href="{% url 'products:category_create' %}" class="action-button">
+                <i class="fas fa-plus"></i> New Category
+            </a>
+        </div>
+    </div>
+
+    <div class="filters-bar">
+        <div class="filter-group search-filter">
+            <label class="filter-label" for="search">Search Categories</label>
+            <input type="text" id="search" name="search" class="filter-input" placeholder="Search by name...">
+        </div>
+    </div>
+
+    <div class="item-list">
+        {% for category in categories %}
+        <div class="item-card">
+            <div class="item-icon">
+                <i class="fas fa-tag"></i>
+            </div>
+            <div class="item-content">
+                <div class="item-title">{{ category.name }}</div>
+                <div class="item-details">
+                    <div class="item-detail">
+                        <i class="fas fa-boxes"></i>
+                        {{ category.products.count }} Products
+                    </div>
+                    {% if category.description %}
+                    <div class="item-detail">
+                        <i class="fas fa-info-circle"></i>
+                        {{ category.description|truncatechars:100 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="item-actions">
+                <a href="{% url 'products:category_update' category.id %}" class="btn-icon" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="#" class="btn-icon delete-item" data-id="{{ category.id }}" data-type="category" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-items">
+            <i class="fas fa-tag"></i>
+            <p>No categories found</p>
+            <a href="{% url 'products:category_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create First Category
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="deleteModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirm Delete</h3>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete this category? This action cannot be undone.</p>
+            <p class="warning">Note: Deleting a category will not delete associated products.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="cancelDelete">Cancel</button>
+            <form method="post" id="deleteForm" action="">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/products/list.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up delete confirmation
+    setupDeleteConfirmation('products:category_delete');
+    
+    // Setup search functionality
+    const searchInput = document.getElementById('search');
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const items = document.querySelectorAll('.item-card');
+        
+        items.forEach(item => {
+            const title = item.querySelector('.item-title').textContent.toLowerCase();
+            const details = item.querySelector('.item-details').textContent.toLowerCase();
+            
+            if (title.includes(searchTerm) || details.includes(searchTerm)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

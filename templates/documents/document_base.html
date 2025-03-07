@@ -1,0 +1,251 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ document_type|default:"QUOTATION" }} - {{ document.get_document_number }}</title>
+    <style>
+        @page {
+            size: a4 portrait;
+            margin: 1.5cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            font-size: 12px;
+        }
+        .header {
+            position: relative;
+            padding-bottom: 10px;
+        }
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, 
+                #ff6b6b 0%, #ff6b6b 50%, 
+                #4a90e2 50%, #4a90e2 100%
+            );
+        }
+        .company-info {
+            margin-bottom: 15px;
+        }
+        .company-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0;
+        }
+        .company-details {
+            font-size: 12px;
+            margin: 3px 0;
+        }
+        .document-meta {
+            margin: 20px 0;
+        }
+        .meta-row {
+            margin: 3px 0;
+            display: flex;
+        }
+        .meta-label {
+            font-weight: normal;
+            color: #666;
+            width: 100px;
+        }
+        .meta-value {
+            flex: 1;
+        }
+        .quotation-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+        }
+        th {
+            background-color: #fff;
+            font-weight: bold;
+        }
+        .totals-section {
+            margin-top: 10px;
+            border-collapse: collapse;
+            width: 300px;
+            float: right;
+        }
+        .totals-row td {
+            border: none;
+            text-align: right;
+            padding: 4px;
+        }
+        .grand-total {
+            font-weight: bold;
+        }
+        .terms-section {
+            margin-top: 30px;
+            clear: both;
+        }
+        .terms-section h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .terms-list {
+            list-style-type: decimal;
+            padding-left: 20px;
+            margin: 0;
+        }
+        .terms-list li {
+            margin-bottom: 5px;
+        }
+        .bank-details {
+            margin-top: 20px;
+        }
+        .bank-details h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .signatures {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature-block {
+            width: 45%;
+        }
+        .signature-line {
+            border-top: 1px solid #000;
+            margin-top: 40px;
+            padding-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="company-info">
+            <div class="company-name">Crescent Controls</div>
+            <div class="company-details">Dam Estate</div>
+            <div class="company-details">Langata Road, Nairobi Kenya</div>
+            <div class="company-details">Tel: +254777223, +254784628/1</div>
+            <div class="company-details">crescentcontrols@gmail.com</div>
+        </div>
+    </div>
+
+    <div class="document-meta">
+        <div class="meta-row">
+            <span class="meta-label">Revision:</span>
+            <span class="meta-value">{{ document.revision|default:"" }}</span>
+        </div>
+        <div class="meta-row">
+            <span class="meta-label">Modified:</span>
+            <span class="meta-value">{{ document.modified_date|date:"d/m/Y"|default:"" }}</span>
+        </div>
+        <div class="meta-row">
+            <span class="meta-label">To:</span>
+            <span class="meta-value">{{ document.client.name }}</span>
+        </div>
+        <div class="meta-row">
+            <span class="meta-label">C/o:</span>
+            <span class="meta-value">{{ document.care_of|default:"" }}</span>
+        </div>
+        <div class="meta-row">
+            <span class="meta-label">Project:</span>
+            <span class="meta-value">{{ document.project|default:"" }}</span>
+        </div>
+        <div class="meta-row">
+            <span class="meta-label">Prepared by:</span>
+            <span class="meta-value">{{ document.prepared_by|default:"" }}</span>
+        </div>
+    </div>
+
+    <div class="quotation-title">QUOTATION</div>
+
+    <div class="quote-numbers" style="text-align: right; margin: 10px 0;">
+        <div>Quote No: {{ document.quote_number }}</div>
+        <div>REF No: {{ document.ref_number|default:"" }}</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 50%">DESCRIPTION</th>
+                <th style="width: 15%">QTY</th>
+                <th style="width: 15%">RATES</th>
+                <th style="width: 20%">TOTAL</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in document.items.all %}
+            <tr>
+                <td>{{ item.description }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>KES {{ item.unit_price|floatformat:2 }}</td>
+                <td>KES {{ item.total|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="totals-section">
+        <tr class="totals-row">
+            <td>GRAND TOTAL</td>
+            <td>KES {{ document.subtotal|floatformat:2 }}</td>
+        </tr>
+        <tr class="totals-row">
+            <td>VAT (16%)</td>
+            <td>KES {{ document.tax_amount|floatformat:2 }}</td>
+        </tr>
+        <tr class="totals-row grand-total">
+            <td>GRAND TOTAL</td>
+            <td>KES {{ document.total_amount|floatformat:2 }}</td>
+        </tr>
+    </table>
+
+    <div class="terms-section">
+        <h3>Terms and Conditions:</h3>
+        <ol class="terms-list">
+            <li>All prices are in Kenya Shillings (KES)</li>
+            <li>Payment Terms: 50% deposit with order, balance before delivery</li>
+            <li>Delivery: 2-3 weeks from receipt of order and deposit</li>
+            <li>Validity: This quotation is valid for 30 days</li>
+            <li>Warranty: 12 months against manufacturing defects</li>
+        </ol>
+    </div>
+
+    <div class="bank-details">
+        <h3>Bank Details:</h3>
+        <p>
+            Bank Name: NCBA Bank Kenya<br>
+            Account Name: Crescent Controls<br>
+            Account Number: 1234567890<br>
+            Branch: Westlands<br>
+            Swift Code: CBAFKENX
+        </p>
+    </div>
+
+    <div class="signatures">
+        <div class="signature-block">
+            <div class="signature-line">
+                For Crescent Controls
+            </div>
+        </div>
+        <div class="signature-block">
+            <div class="signature-line">
+                Customer Acceptance
+            </div>
+        </div>
+    </div>
+</body>
+</html>

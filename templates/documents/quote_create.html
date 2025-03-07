@@ -14,67 +14,92 @@
         <form id="quote-form" method="post" action="{% url 'documents:quote_create_function' %}" data-quote-number-url="{% url 'documents:get_quote_number' %}">
             {% csrf_token %}
             
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="client">Select Client</label>
+                    <select name="client" id="client" required>
+                        <option value="">-- Select a client --</option>
+                        {% for client in clients %}
+                            <option value="{{ client.id }}">{{ client.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group quote-title-field">
+                    <label for="quote_title">Quote Title</label>
+                    <input type="text" name="title" id="quote_title" placeholder="Enter a title for this quote" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group quote-number-field">
+                    <label for="quote_number">Quote Number</label>
+                    <input type="text" name="quote_number" id="quote_number" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="valid_until">Valid Until</label>
+                    <input type="date" name="valid_until" id="valid_until" required>
+                </div>
+            </div>
+            
             <div class="form-group">
-                <label for="client">Client</label>
-                <select name="client" id="client" required>
-                    {% for client in clients %}
-                        <option value="{{ client.id }}">{{ client.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            
-            <div class="form-group quote-title-field">
-                <label for="quote_title">Quote Title</label>
-                <input type="text" name="quote_title" id="quote_title" required>
-            </div>
-            
-            <div class="form-group quote-number-field">
-                <label for="quote_number">Quote Number</label>
-                <input type="text" name="quote_number" id="quote_number" readonly>
+                <label for="description">Description (Optional)</label>
+                <textarea name="description" id="description" placeholder="Enter a brief description of this quote"></textarea>
             </div>
             
             <!-- Quote items section -->
             <div id="quote-items">
-                <h3>Items</h3>
+                <h3>Quote Items</h3>
                 <div class="quote-item">
                     <label>Description</label>
-                    <input type="text" name="items[][description]" placeholder="Description" required>
+                    <input type="text" name="items[][description]" placeholder="Item description" required>
                     
                     <div class="numeric-fields">
                         <div>
                             <label>Quantity</label>
-                            <input type="number" name="items[][quantity]" placeholder="Quantity" required>
+                            <input type="number" name="items[][quantity]" min="1" placeholder="Qty" required>
                         </div>
                         
                         <div>
-                            <label>Unit Price</label>
-                            <input type="number" name="items[][unit_price]" placeholder="Unit Price" required>
+                            <label>Unit Price (KES)</label>
+                            <input type="number" name="items[][unit_price]" min="0" step="0.01" placeholder="0.00" required>
                         </div>
                         
                         <div>
                             <label>Discount %</label>
-                            <input type="number" name="items[][discount]" placeholder="Discount %" required>
+                            <input type="number" name="items[][discount]" min="0" max="100" placeholder="0" value="0">
                         </div>
                     </div>
                     
-                    <button type="button" class="remove-item">Remove</button>
+                    <button type="button" class="remove-item">Remove Item</button>
                 </div>
             </div>
-            <button type="button" id="add-item">Add Item</button>
+            <button type="button" id="add-item">+ Add Another Item</button>
             
-            <div class="form-group">
-                <label for="valid_until">Valid Until</label>
-                <input type="date" name="valid_until" id="valid_until" required>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tax_rate">Tax Rate (%)</label>
+                    <input type="number" name="tax_rate" id="tax_rate" min="0" max="100" value="16" required>
+                </div>
             </div>
             
             <div class="form-group">
                 <label for="terms">Terms and Conditions</label>
-                <textarea name="terms" id="terms"></textarea>
+                <textarea name="terms" id="terms" placeholder="Enter terms and conditions for this quote">1. This quote is valid for 30 days from the date of issue.
+2. Payment terms: 50% advance, balance upon completion.
+3. Delivery timeline: 2-3 weeks after confirmation.</textarea>
             </div>
             
+            <!-- Hidden fields for calculations -->
+            <input type="hidden" name="subtotal" id="subtotal" value="0">
+            <input type="hidden" name="tax_amount" id="tax_amount" value="0">
+            <input type="hidden" name="total_amount" id="total_amount" value="0">
+            
             <div class="form-actions">
+                <a href="{% url 'documents:document_list' %}" class="btn btn-secondary">Cancel</a>
                 <button type="submit" class="btn btn-primary">Generate Quote</button>
-                <a href="{% url 'dashboard:dashboard' %}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </div>
@@ -83,26 +108,36 @@
     <div class="preview-section">
         <div class="quote-wrapper">
             <div class="quote-card">
-                <hr>
-                <header class="quote-header">
-                    <div class="logo-container">
-                        <div class="logo-img">
-                            <img src="{% static 'img/logo.jpg' %}" alt="Logo" class="logo">
-                        </div>
-                        <p>Revision: <span id="preview-revision">-</span></p>
-                        <p>Modified: <span id="preview-modified">-</span></p>
-                        <p>To: <span id="preview-client">-</span></p>
-                        <p>C/o: <span id="preview-co">-</span></p>
-                        <p>Quote Type: <span id="preview-type">-</span></p>
-                        <p>Quote Title: <span id="preview-title">-</span></p>
-                        <p>Prepared by: <span id="preview-preparer">-</span></p>
-                    </div>
-
-                    <div class="logo-container-2">
-                        <p class="quote-title">QUOTATION</p>
+                <div class="quote-preview-header">
+                    <h2>QUOTATION</h2>
+                    <div class="quote-info">
                         <p>Quote No: <span id="preview-quote-number">-</span></p>
+                        <p>Date: <span id="preview-date">{% now "F d, Y" %}</span></p>
+                        <p>Valid until: <span id="preview-valid-until">-</span></p>
                     </div>
-                </header>
+                </div>
+
+                <div class="company-client-details">
+                    <div class="company-details">
+                        <h3>FROM</h3>
+                        <p class="company-name">Your Company Name</p>
+                        <p>123 Business Street</p>
+                        <p>Nairobi, Kenya</p>
+                        <p>Email: info@yourcompany.co.ke</p>
+                        <p>Tel: +254 123 456 789</p>
+                    </div>
+                    <div class="client-details">
+                        <h3>TO</h3>
+                        <p class="client-name" id="preview-client">-</p>
+                        <p class="client-address" id="preview-client-address">-</p>
+                        <p class="client-contact" id="preview-client-contact">-</p>
+                    </div>
+                </div>
+
+                <div class="quote-title-section">
+                    <h3 id="preview-title">-</h3>
+                    <p id="preview-description">-</p>
+                </div>
 
                 <div class="quote-content">
                     <table class="quote-table">
@@ -121,15 +156,15 @@
                         <tfoot>
                             <tr>
                                 <td colspan="4">Subtotal</td>
-                                <td id="preview-subtotal">$0.00</td>
+                                <td id="preview-subtotal">KES 0.00</td>
                             </tr>
                             <tr>
-                                <td colspan="4">Tax (16%)</td>
-                                <td id="preview-tax">$0.00</td>
+                                <td colspan="4">Tax (<span id="preview-tax-rate">16</span>%)</td>
+                                <td id="preview-tax">KES 0.00</td>
                             </tr>
                             <tr class="total-row">
-                                <td colspan="4">Total Amount Due</td>
-                                <td id="preview-total">$0.00</td>
+                                <td colspan="4">Total Amount</td>
+                                <td id="preview-total">KES 0.00</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -138,7 +173,7 @@
                 <footer class="quote-footer">
                     <div class="terms">
                         <h3>Terms & Conditions</h3>
-                        <p id="preview-terms">-</p>
+                        <div id="preview-terms">-</div>
                     </div>
                     <div class="thank-you">Thank you for your business!</div>
                 </footer>

@@ -1,0 +1,205 @@
+{% extends 'products/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block products_content %}
+<div class="content-header">
+    <h1>Products</h1>
+    <a href="{% url 'products:product_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add Product
+    </a>
+</div>
+
+<!-- Search and Filters -->
+<div class="card">
+    <div class="card-body">
+        <form method="get" class="search-form">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="search" class="form-label">Search</label>
+                        <div class="input-group">
+                            <input type="text" name="search" id="search" class="form-control" placeholder="Search by name, code or description" value="{{ search_query }}">
+                            <button type="button" class="clear-search" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="category" class="form-label">Category</label>
+                        <select name="category" id="category" class="form-control filter-dropdown">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="status" class="form-label">Status</label>
+                        <select name="status" id="status" class="form-control filter-dropdown">
+                            <option value="">All Statuses</option>
+                            {% for status_value, status_label in status_choices %}
+                            <option value="{{ status_value }}" {% if selected_status == status_value %}selected{% endif %}>
+                                {{ status_label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Products List -->
+{% if page_obj %}
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Item Code</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Stock</th>
+                <th>Buying Price</th>
+                <th>Selling Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in page_obj %}
+            <tr {% if product.is_low_stock %}class="bg-warning-subtle"{% endif %}>
+                <td>{{ product.item_code }}</td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.category.name|default:"Uncategorized" }}</td>
+                <td>
+                    {{ product.current_stock }}
+                    {% if product.is_low_stock %}
+                    <span class="badge badge-warning">Low Stock</span>
+                    {% endif %}
+                </td>
+                <td>{{ product.buying_price|floatformat:2 }}</td>
+                <td>{{ product.selling_price|floatformat:2 }}</td>
+                <td>
+                    {% if product.status == 'active' %}
+                    <span class="badge badge-success">Active</span>
+                    {% elif product.status == 'discontinued' %}
+                    <span class="badge badge-danger">Discontinued</span>
+                    {% elif product.status == 'out_of_stock' %}
+                    <span class="badge badge-warning">Out of Stock</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="btn-group">
+                        <a href="{% url 'products:product_detail' product.id %}" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'products:product_update' product.id %}" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-danger" data-toggle="delete-modal" data-id="{{ product.id }}" data-name="{{ product.name }}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}" aria-label="First">
+                <span aria-hidden="true">&laquo;&laquo;</span>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}" aria-label="Last">
+                <span aria-hidden="true">&raquo;&raquo;</span>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="card">
+    <div class="card-body text-center py-5">
+        <h3 class="mb-3">No products found</h3>
+        <p class="text-muted">No products match your search criteria or there are no products in the system yet.</p>
+        <a href="{% url 'products:product_create' %}" class="btn btn-primary mt-3">
+            <i class="fas fa-plus"></i> Add Your First Product
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Product</h5>
+                <button type="button" class="close btn-cancel">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the product "<span class="item-name"></span>"?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-cancel">Cancel</button>
+                <form method="post" data-base-url="{% url 'products:product_delete' 0 %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

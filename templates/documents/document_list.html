@@ -2,42 +2,105 @@
 {% load static %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard/dashboard.css' %}">
 <style>
     .document-list-container {
-        padding: 2rem;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 24px;
+        background: #f8fafc;
+        min-height: calc(100vh - 64px);
     }
 
     .document-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #eee;
+        margin-bottom: 24px;
+        background: white;
+        padding: 16px 24px;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .document-header h1 {
-        font-size: 1.875rem;
+        font-size: 1.5rem;
         font-weight: 600;
         color: #1e293b;
         margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
-    .document-filters {
+    .document-header h1 i {
+        color: #3b82f6;
+    }
+
+    .document-actions {
         display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
+        gap: 12px;
+    }
+
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: white;
+        background: #3b82f6;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .action-button:hover {
+        background: #2563eb;
+    }
+
+    .filters-bar {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+        background: white;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        align-items: flex-end;
+    }
+
+    .filter-group {
+        flex: 0 0 auto;
+    }
+
+    .filter-group.type-filter {
+        width: 180px;
+    }
+
+    .filter-group.search-filter {
+        width: 240px;
+    }
+
+    .filter-group.date-filter {
+        width: 160px;
+    }
+
+    .filter-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #64748b;
+        margin-bottom: 0.5rem;
     }
 
     .filter-input {
+        width: 100%;
         padding: 0.5rem 1rem;
         border: 1px solid #e2e8f0;
         border-radius: 6px;
         font-size: 0.875rem;
-        color: #475569;
+        color: #1e293b;
         background: white;
         transition: all 0.2s;
     }
@@ -48,38 +111,98 @@
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
-    .document-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        margin-bottom: 2rem;
+    .document-list {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
     }
 
-    .document-table th {
-        background: #f8fafc;
-        color: #475569;
-        font-weight: 600;
-        font-size: 0.875rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        padding: 1rem;
-        text-align: left;
-        border-bottom: 2px solid #e2e8f0;
-    }
-
-    .document-table td {
-        padding: 1rem;
-        color: #1e293b;
+    .document-item {
+        display: flex;
+        align-items: center;
+        padding: 16px 24px;
         border-bottom: 1px solid #e2e8f0;
         transition: background-color 0.2s;
     }
 
-    .document-table tr:hover td {
+    .document-item:hover {
         background-color: #f8fafc;
     }
 
-    .document-table tr:last-child td {
+    .document-item:last-child {
         border-bottom: none;
+    }
+
+    .document-icon {
+        flex: 0 0 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f5f9;
+        border-radius: 8px;
+        margin-right: 16px;
+    }
+
+    .document-icon i {
+        font-size: 1.25rem;
+    }
+
+    .document-icon.quote i { color: #3b82f6; }
+    .document-icon.invoice i { color: #16a34a; }
+    .document-icon.expense i { color: #dc2626; }
+    .document-icon.purchase i { color: #9333ea; }
+    .document-icon.delivery i { color: #ea580c; }
+    .document-icon.jobcard i { color: #0284c7; }
+    .document-icon.receipt i { color: #4f46e5; }
+
+    .document-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .document-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 4px;
+        text-decoration: none;
+    }
+
+    .document-title:hover {
+        color: #3b82f6;
+    }
+
+    .document-details {
+        display: flex;
+        gap: 24px;
+        font-size: 0.875rem;
+        color: #64748b;
+    }
+
+    .document-detail {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .document-detail i {
+        font-size: 0.875rem;
+        width: 16px;
+    }
+
+    .document-amount {
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .document-meta {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        margin-left: 24px;
     }
 
     .status-badge {
@@ -91,29 +214,16 @@
         font-weight: 500;
     }
 
-    .status-draft {
-        background: #f1f5f9;
-        color: #475569;
-    }
+    .status-draft { background: #f1f5f9; color: #475569; }
+    .status-pending { background: #fef9c3; color: #854d0e; }
+    .status-approved { background: #dcfce7; color: #166534; }
+    .status-rejected { background: #fee2e2; color: #991b1b; }
+    .status-completed { background: #e0e7ff; color: #3730a3; }
+    .status-delivered { background: #ddd6fe; color: #5b21b6; }
 
-    .status-pending {
-        background: #fef9c3;
-        color: #854d0e;
-    }
-
-    .status-approved {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .status-rejected {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .actions {
+    .document-actions {
         display: flex;
-        gap: 0.5rem;
+        gap: 8px;
     }
 
     .btn-icon {
@@ -123,43 +233,61 @@
         width: 2rem;
         height: 2rem;
         border-radius: 6px;
-        color: #475569;
-        background: transparent;
+        color: #64748b;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
         transition: all 0.2s;
     }
 
     .btn-icon:hover {
         background: #f1f5f9;
         color: #1e293b;
-    }
-
-    .document-type {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-weight: 500;
-    }
-
-    .document-type i {
-        width: 1.5rem;
-        text-align: center;
+        border-color: #cbd5e1;
     }
 
     .no-documents {
         text-align: center;
-        padding: 3rem;
+        padding: 48px 24px;
         color: #64748b;
-        font-size: 0.875rem;
+    }
+
+    .no-documents i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #cbd5e1;
+    }
+
+    @media (max-width: 1024px) {
+        .document-details {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .document-meta {
+            margin-left: 16px;
+        }
     }
 
     @media (max-width: 768px) {
-        .document-filters {
+        .filters-bar {
             flex-direction: column;
+            gap: 12px;
         }
-        
-        .document-table {
-            display: block;
-            overflow-x: auto;
+
+        .filter-group {
+            width: 100% !important;
+        }
+
+        .document-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .document-meta {
+            margin-left: 0;
+            width: 100%;
+            justify-content: space-between;
         }
     }
 </style>
@@ -168,119 +296,143 @@
 {% block content %}
 <div class="document-list-container">
     <div class="document-header">
-        <h1>{{ title|default:"Documents" }}</h1>
+        <h1><i class="fas fa-file-alt"></i> {{ title|default:"Documents" }}</h1>
+        <div class="document-actions">
+            <a href="{% url 'documents:quote_create' %}" class="action-button">
+                <i class="fas fa-plus"></i> New Quote
+            </a>
+            <a href="{% url 'expenses:expense_create' %}" class="action-button">
+                <i class="fas fa-plus"></i> New Expense
+            </a>
+            <a href="{% url 'purchases:purchase_create' %}" class="action-button">
+                <i class="fas fa-plus"></i> New Purchase
+            </a>
+        </div>
     </div>
 
-    <div class="document-filters">
-        <select id="typeFilter" class="filter-input">
-            <option value="">All Types</option>
-            <option value="QUOTE" {% if current_type == 'QUOTE' %}selected{% endif %}>Quotes</option>
-            <option value="INVOICE" {% if current_type == 'INVOICE' %}selected{% endif %}>Invoices</option>
-            <option value="RECEIPT" {% if current_type == 'RECEIPT' %}selected{% endif %}>Receipts</option>
-        </select>
-        <input type="date" id="dateFilter" class="filter-input" placeholder="Filter by date">
-        <input type="text" id="searchFilter" class="filter-input" placeholder="Search documents...">
+    <div class="filters-bar">
+        <div class="filter-group type-filter">
+            <label class="filter-label" for="type">Document Type</label>
+            <select id="type" name="type" class="filter-input">
+                <option value="">All Types</option>
+                <option value="QUOTE" {% if current_type == 'QUOTE' %}selected{% endif %}>Quotes</option>
+                <option value="INVOICE" {% if current_type == 'INVOICE' %}selected{% endif %}>Invoices</option>
+                <option value="EXPENSE" {% if current_type == 'EXPENSE' %}selected{% endif %}>Expenses</option>
+                <option value="PURCHASE" {% if current_type == 'PURCHASE' %}selected{% endif %}>Purchases</option>
+                <option value="DELIVERY" {% if current_type == 'DELIVERY' %}selected{% endif %}>Delivery Notes</option>
+                <option value="JOBCARD" {% if current_type == 'JOBCARD' %}selected{% endif %}>Job Cards</option>
+                <option value="RECEIPT" {% if current_type == 'RECEIPT' %}selected{% endif %}>Receipts</option>
+            </select>
+        </div>
+        <div class="filter-group search-filter">
+            <label class="filter-label" for="search">Search</label>
+            <input type="text" id="search" name="search" class="filter-input" placeholder="Search documents...">
+        </div>
+        <div class="filter-group date-filter">
+            <label class="filter-label" for="date">Date</label>
+            <input type="date" id="date" name="date" class="filter-input">
+        </div>
     </div>
 
-    <table class="document-table">
-        <thead>
-            <tr>
-                <th>Type</th>
-                <th>Number</th>
-                <th>Client</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for document in documents %}
-            <tr>
-                <td>
-                    <span class="document-type">
-                        {% if document.document_type == 'QUOTE' %}
-                            <i class="fas fa-file-invoice text-blue-500"></i>
-                        {% elif document.document_type == 'INVOICE' %}
-                            <i class="fas fa-file-invoice-dollar text-green-500"></i>
-                        {% elif document.document_type == 'RECEIPT' %}
-                            <i class="fas fa-receipt text-purple-500"></i>
-                        {% endif %}
+    <div class="document-list">
+        {% for document in documents %}
+        <div class="document-item">
+            <div class="document-icon {{ document.document_type|lower }}">
+                {% if document.document_type == 'QUOTE' %}
+                    <i class="fas fa-file-invoice"></i>
+                {% elif document.document_type == 'INVOICE' %}
+                    <i class="fas fa-file-invoice-dollar"></i>
+                {% elif document.document_type == 'EXPENSE' %}
+                    <i class="fas fa-receipt"></i>
+                {% elif document.document_type == 'PURCHASE' %}
+                    <i class="fas fa-shopping-cart"></i>
+                {% elif document.document_type == 'DELIVERY' %}
+                    <i class="fas fa-truck"></i>
+                {% elif document.document_type == 'JOBCARD' %}
+                    <i class="fas fa-tools"></i>
+                {% elif document.document_type == 'RECEIPT' %}
+                    <i class="fas fa-file-alt"></i>
+                {% endif %}
+            </div>
+            <div class="document-content">
+                <a href="{% url 'documents:document_detail' document.pk %}" class="document-title">
+                    {{ document.title|default:document.get_document_number }}
+                </a>
+                <div class="document-details">
+                    <div class="document-detail">
+                        <i class="fas fa-tag"></i>
                         {{ document.get_document_type_display }}
-                    </span>
-                </td>
-                <td>{{ document.get_document_number }}</td>
-                <td>{{ document.client.name }}</td>
-                <td>{{ document.created_at|date:"d M Y" }}</td>
-                <td>${{ document.total_amount|floatformat:2 }}</td>
-                <td>
-                    <span class="status-badge status-{{ document.status|lower }}">
-                        {{ document.get_status_display }}
-                    </span>
-                </td>
-                <td class="actions">
+                    </div>
+                    <div class="document-detail">
+                        <i class="fas fa-user"></i>
+                        {{ document.client.name }}
+                    </div>
+                    <div class="document-detail">
+                        <i class="fas fa-calendar"></i>
+                        {{ document.created_at|date:"d M Y" }}
+                    </div>
+                    <div class="document-detail">
+                        <i class="fas fa-money-bill"></i>
+                        <span class="document-amount">KES {{ document.total_amount|floatformat:2 }}</span>
+                    </div>
+                    {% if document.project %}
+                    <div class="document-detail">
+                        <i class="fas fa-project-diagram"></i>
+                        {{ document.project.name }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="document-meta">
+                <span class="status-badge status-{{ document.status|lower }}">
+                    {{ document.get_status_display }}
+                </span>
+                <div class="document-actions">
                     <a href="{% url 'documents:document_detail' document.pk %}" class="btn-icon" title="View">
                         <i class="fas fa-eye"></i>
                     </a>
                     <a href="#" class="btn-icon download-document" data-id="{{ document.pk }}" title="Download">
                         <i class="fas fa-download"></i>
                     </a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7" class="no-documents">
-                    <i class="fas fa-folder-open"></i>
-                    <p>No documents found</p>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                    <a href="{% url 'documents:document_edit' document.pk %}" class="btn-icon" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-documents">
+            <i class="fas fa-folder-open"></i>
+            <p>No documents found</p>
+        </div>
+        {% endfor %}
+    </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
-    // Your existing JavaScript for filtering
-    document.addEventListener('DOMContentLoaded', function() {
-        const typeFilter = document.getElementById('typeFilter');
-        const dateFilter = document.getElementById('dateFilter');
-        const searchFilter = document.getElementById('searchFilter');
+document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.getElementById('type');
+    const searchInput = document.getElementById('search');
+    const dateInput = document.getElementById('date');
 
-        function updateFilters() {
-            const type = typeFilter.value;
-            const date = dateFilter.value;
-            const search = searchFilter.value;
-
-            let url = new URL(window.location.href);
-            if (type) url.searchParams.set('type', type);
-            else url.searchParams.delete('type');
-            if (date) url.searchParams.set('date', date);
-            else url.searchParams.delete('date');
-            if (search) url.searchParams.set('search', search);
-            else url.searchParams.delete('search');
-
-            window.location.href = url.toString();
-        }
-
-        typeFilter.addEventListener('change', updateFilters);
-        dateFilter.addEventListener('change', updateFilters);
-        searchFilter.addEventListener('input', debounce(updateFilters, 500));
-    });
-
-    function debounce(func, wait) {
-        let timeout;
-        return function() {
-            const context = this;
-            const args = arguments;
-            const later = function() {
-                timeout = null;
-                func.apply(context, args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
+    function updateFilters() {
+        const params = new URLSearchParams(window.location.search);
+        if (typeSelect.value) params.set('type', typeSelect.value);
+        if (searchInput.value) params.set('search', searchInput.value);
+        if (dateInput.value) params.set('date', dateInput.value);
+        window.location.href = `${window.location.pathname}?${params.toString()}`;
     }
+
+    typeSelect.addEventListener('change', updateFilters);
+    searchInput.addEventListener('change', updateFilters);
+    dateInput.addEventListener('change', updateFilters);
+
+    // Initialize filter values from URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('search')) searchInput.value = urlParams.get('search');
+    if (urlParams.has('date')) dateInput.value = urlParams.get('date');
+});
 </script>
-{% endblock %}
 {% endblock %} 

@@ -1,0 +1,237 @@
+{% extends 'access_control/base.html' %}
+{% load static %}
+
+{% block title %}Access Control - Group Permissions{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>Group Permissions</h1>
+    <div class="header-actions">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#grantPermissionModal">
+            <i class="fas fa-plus"></i> Grant Permission
+        </button>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="form-card">
+    <h2>Filter Permissions</h2>
+    <form method="get" class="filter-form">
+        <div class="filter-row">
+            <div class="form-group">
+                <label for="group" class="form-label">Group</label>
+                <select name="group" id="group" class="form-control">
+                    <option value="">All Groups</option>
+                    {% for group in groups %}
+                    <option value="{{ group.id }}" {% if selected_group == group.id %}selected{% endif %}>{{ group.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="permission" class="form-label">Permission</label>
+                <select name="permission" id="permission" class="form-control">
+                    <option value="">All Permissions</option>
+                    {% for perm in permissions %}
+                    <option value="{{ perm.id }}" {% if selected_permission == perm.id %}selected{% endif %}>{{ perm.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{% url 'access_control:group_permission_list' %}" class="btn btn-secondary">Reset</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Group Permissions Table -->
+<div class="dashboard-section">
+    <div class="section-header">
+        <h2>Group Permissions</h2>
+        <div class="header-actions">
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleSelectAll(this)">
+                <i class="fas fa-check-square"></i> Select All
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="handleBulkOperation('revoke_group_permissions')">
+                <i class="fas fa-trash"></i> Revoke Selected
+            </button>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th width="40">
+                        <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)">
+                    </th>
+                    <th>Group</th>
+                    <th>Permission</th>
+                    <th>Granted On</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for group_perm in page_obj %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name="selected_items" value="{{ group_perm.id }}">
+                    </td>
+                    <td>
+                        <div class="group-info">
+                            <i class="fas fa-users"></i>
+                            <span>{{ group_perm.group.name }}</span>
+                        </div>
+                    </td>
+                    <td>{{ group_perm.permission.name }}</td>
+                    <td>{{ group_perm.granted_at|date:"M d, Y H:i" }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button type="button" class="btn btn-sm btn-danger" 
+                                    onclick="confirmAction('Are you sure you want to revoke this permission?', function() { 
+                                        window.location.href = '{% url 'access_control:group_permission_revoke' group_perm.id %}'; 
+                                    })">
+                                <i class="fas fa-trash"></i> Revoke
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No group permissions found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        <ul class="pagination-list">
+            {% if page_obj.has_previous %}
+            <li>
+                <a href="?page=1{% if request.GET.group %}&group={{ request.GET.group }}{% endif %}{% if request.GET.permission %}&permission={{ request.GET.permission }}{% endif %}" class="pagination-link">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            <li>
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.group %}&group={{ request.GET.group }}{% endif %}{% if request.GET.permission %}&permission={{ request.GET.permission }}{% endif %}" class="pagination-link">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li>
+                    <a href="#" class="pagination-link active">{{ num }}</a>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li>
+                    <a href="?page={{ num }}{% if request.GET.group %}&group={{ request.GET.group }}{% endif %}{% if request.GET.permission %}&permission={{ request.GET.permission }}{% endif %}" class="pagination-link">
+                        {{ num }}
+                    </a>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <li>
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.group %}&group={{ request.GET.group }}{% endif %}{% if request.GET.permission %}&permission={{ request.GET.permission }}{% endif %}" class="pagination-link">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+            <li>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.group %}&group={{ request.GET.group }}{% endif %}{% if request.GET.permission %}&permission={{ request.GET.permission }}{% endif %}" class="pagination-link">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Grant Permission Modal -->
+<div class="modal" id="grantPermissionModal" tabindex="-1" role="dialog">
+    <div class="modal-backdrop" onclick="document.getElementById('grantPermissionModal').classList.remove('show')"></div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Grant Group Permission</h3>
+                <button type="button" class="close" onclick="document.getElementById('grantPermissionModal').classList.remove('show')">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="group-permission-form" method="post" action="{% url 'access_control:group_permission_create' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="modal-group" class="form-label">Group</label>
+                        <select name="group" id="modal-group" class="form-control" required>
+                            <option value="">Select Group</option>
+                            {% for group in groups %}
+                            <option value="{{ group.id }}">{{ group.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text">Select the group to grant permission to</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modal-permission" class="form-label">Permission</label>
+                        <select name="permission" id="modal-permission" class="form-control" required>
+                            <option value="">Select Permission</option>
+                            {% for perm in permissions %}
+                            <option value="{{ perm.id }}">{{ perm.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text">Select the permission to grant</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('grantPermissionModal').classList.remove('show')">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">Grant Permission</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show modal if there's an error
+        {% if form_errors %}
+        document.getElementById('grantPermissionModal').classList.add('show');
+        {% endif %}
+        
+        // Modal toggle
+        const modalToggles = document.querySelectorAll('[data-toggle="modal"]');
+        modalToggles.forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const modal = document.querySelector(targetId);
+                if (modal) {
+                    modal.classList.add('show');
+                }
+            });
+        });
+        
+        // Close modal on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const openModals = document.querySelectorAll('.modal.show');
+                openModals.forEach(modal => {
+                    modal.classList.remove('show');
+                });
+            }
+        });
+    });
+</script>
+{% endblock %} 

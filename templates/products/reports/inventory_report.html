@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/products/report.css' %}">
+<link rel="stylesheet" href="{% static 'css/products/inventory_report.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="report-container">
+    <div class="report-header">
+        <h1><i class="fas fa-warehouse"></i> Inventory Report</h1>
+        <div class="report-actions">
+            <button id="printReport" class="action-button">
+                <i class="fas fa-print"></i> Print Report
+            </button>
+            <button id="exportCSV" class="action-button">
+                <i class="fas fa-file-csv"></i> Export CSV
+            </button>
+        </div>
+    </div>
+
+    <div class="report-filters">
+        <div class="filter-group">
+            <label class="filter-label" for="categoryFilter">Category</label>
+            <select id="categoryFilter" class="filter-input">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label" for="stockFilter">Stock Level</label>
+            <select id="stockFilter" class="filter-input">
+                <option value="">All Levels</option>
+                <option value="low">Low Stock</option>
+                <option value="out">Out of Stock</option>
+                <option value="overstocked">Overstocked</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label" for="searchFilter">Search</label>
+            <input type="text" id="searchFilter" class="filter-input" placeholder="Search products...">
+        </div>
+    </div>
+
+    <div class="report-content">
+        <div class="report-summary">
+            <div class="summary-card">
+                <div class="summary-value">{{ total_products }}</div>
+                <div class="summary-label">Total Products</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value">{{ products_in_stock }}</div>
+                <div class="summary-label">Products In Stock</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value">{{ low_stock_products }}</div>
+                <div class="summary-label">Low Stock Products</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value">{{ out_of_stock_products }}</div>
+                <div class="summary-label">Out of Stock Products</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value">${{ total_inventory_value|floatformat:2 }}</div>
+                <div class="summary-label">Total Inventory Value</div>
+            </div>
+        </div>
+
+        <div class="inventory-table-container">
+            <table class="inventory-table" id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th data-sort="name">Product Name</th>
+                        <th data-sort="sku">SKU</th>
+                        <th data-sort="category">Category</th>
+                        <th data-sort="current_stock">Current Stock</th>
+                        <th data-sort="reorder_level">Reorder Level</th>
+                        <th data-sort="unit_price">Unit Price</th>
+                        <th data-sort="inventory_value">Inventory Value</th>
+                        <th data-sort="status">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr data-category="{{ product.category.id }}" data-stock-level="{% if product.current_stock <= 0 %}out{% elif product.current_stock <= product.reorder_level %}low{% elif product.current_stock >= product.reorder_level|add:10 %}overstocked{% else %}normal{% endif %}">
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.sku }}</td>
+                        <td>{{ product.category.name }}</td>
+                        <td class="text-right">{{ product.current_stock }}</td>
+                        <td class="text-right">{{ product.reorder_level }}</td>
+                        <td class="text-right">${{ product.unit_price|floatformat:2 }}</td>
+                        <td class="text-right">${{ product.inventory_value|floatformat:2 }}</td>
+                        <td>
+                            <span class="status-badge status-{% if product.current_stock <= 0 %}out{% elif product.current_stock <= product.reorder_level %}low{% elif product.current_stock >= product.reorder_level|add:10 %}high{% else %}normal{% endif %}">
+                                {% if product.current_stock <= 0 %}
+                                    Out of Stock
+                                {% elif product.current_stock <= product.reorder_level %}
+                                    Low Stock
+                                {% elif product.current_stock >= product.reorder_level|add:10 %}
+                                    Overstocked
+                                {% else %}
+                                    Normal
+                                {% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="no-data">No inventory data available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filter functionality
+    const categoryFilter = document.getElementById('categoryFilter');
+    const stockFilter = document.getElementById('stockFilter');
+    const searchFilter = document.getElementById('searchFilter');
+    const tableRows = document.querySelectorAll('#inventoryTable tbody tr');
+    
+    function applyFilters() {
+        const categoryValue = categoryFilter.value;
+        const stockValue = stockFilter.value;
+        const searchValue = searchFilter.value.toLowerCase();
+        
+        tableRows.forEach(row => {
+            // Skip the "no data" row
+            if (row.querySelector('.no-data')) return;
+            
+            const categoryMatch = !categoryValue || row.dataset.category === categoryValue;
+            const stockMatch = !stockValue || row.dataset.stockLevel === stockValue;
+            const searchMatch = !searchValue || 
+                row.textContent.toLowerCase().includes(searchValue);
+            
+            if (categoryMatch && stockMatch && searchMatch) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    
+    categoryFilter.addEventListener('change', applyFilters);
+    stockFilter.addEventListener('change', applyFilters);
+    searchFilter.addEventListener('input', applyFilters);
+    
+    // Sorting functionality
+    const tableHeaders = document.querySelectorAll('#inventoryTable th[data-sort]');
+    
+    tableHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const sortKey = this.dataset.sort;
+            const currentDirection = this.dataset.direction || 'asc';
+            const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+            
+            // Reset all headers
+            tableHeaders.forEach(h => h.dataset.direction = '');
+            
+            // Set direction on current header
+            this.dataset.direction = newDirection;
+            
+            // Get all rows except the "no data" row
+            const rows = Array.from(tableRows).filter(row => !row.querySelector('.no-data'));
+            
+            // Sort rows
+            rows.sort((a, b) => {
+                let aValue = getCellValue(a, sortKey);
+                let bValue = getCellValue(b, sortKey);
+                
+                // Compare based on the sort key
+                if (sortKey === 'current_stock' || sortKey === 'reorder_level' || 
+                    sortKey === 'unit_price' || sortKey === 'inventory_value') {
+                    aValue = parseFloat(aValue.replace(/[^0-9.-]+/g, '')) || 0;
+                    bValue = parseFloat(bValue.replace(/[^0-9.-]+/g, '')) || 0;
+                }
+                
+                if (aValue === bValue) return 0;
+                
+                const comparison = aValue > bValue ? 1 : -1;
+                return newDirection === 'asc' ? comparison : -comparison;
+            });
+            
+            // Reorder rows in the table
+            const tbody = document.querySelector('#inventoryTable tbody');
+            rows.forEach(row => tbody.appendChild(row));
+        });
+    });
+    
+    function getCellValue(row, key) {
+        let index = 0;
+        
+        switch (key) {
+            case 'name': index = 0; break;
+            case 'sku': index = 1; break;
+            case 'category': index = 2; break;
+            case 'current_stock': index = 3; break;
+            case 'reorder_level': index = 4; break;
+            case 'unit_price': index = 5; break;
+            case 'inventory_value': index = 6; break;
+            case 'status': index = 7; break;
+        }
+        
+        return row.cells[index].textContent;
+    }
+    
+    // Export to CSV
+    document.getElementById('exportCSV').addEventListener('click', function() {
+        const table = document.getElementById('inventoryTable');
+        let csv = [];
+        
+        // Get headers
+        const headers = [];
+        const headerCells = table.querySelectorAll('thead th');
+        headerCells.forEach(cell => {
+            headers.push(cell.textContent);
+        });
+        csv.push(headers.join(','));
+        
+        // Get visible rows
+        const visibleRows = Array.from(tableRows).filter(row => 
+            row.style.display !== 'none' && !row.querySelector('.no-data'));
+        
+        // Get data from visible rows
+        visibleRows.forEach(row => {
+            const rowData = [];
+            const cells = row.querySelectorAll('td');
+            cells.forEach(cell => {
+                // Format the data to avoid CSV issues
+                let text = cell.textContent.trim().replace(/"/g, '""');
+                if (text.includes(',') || text.includes('"') || text.includes('\n')) {
+                    text = `"${text}"`;
+                }
+                rowData.push(text);
+            });
+            csv.push(rowData.join(','));
+        });
+        
+        // Download the CSV
+        const csvContent = csv.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'inventory_report.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+    
+    // Print report
+    document.getElementById('printReport').addEventListener('click', function() {
+        window.print();
+    });
+});
+</script>
+{% endblock %} 

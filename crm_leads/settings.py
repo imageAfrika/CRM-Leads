@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'purchases.apps.PurchasesConfig',
     'banking.apps.BankingConfig',
     'reports.apps.ReportsConfig',
+    'products.apps.ProductsConfig',
+    'access_control.apps.AccessControlConfig',
 ]
 
 MIDDLEWARE = [
@@ -135,6 +137,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'banking' / 'static',
     BASE_DIR / 'reports' / 'static',
     BASE_DIR / 'purchases' / 'static',
+    BASE_DIR / 'access_control' / 'static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 

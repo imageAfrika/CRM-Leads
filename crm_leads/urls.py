@@ -37,5 +37,7 @@ urlpatterns = [
     path('purchases/', include('purchases.urls')),  # Add purchases URLs
     path('banking/', include('banking.urls')),  # Add banking URLs
     path('reports/', include('reports.urls')),  # Add reports URLs
+    path('products/', include('products.urls')),  # Add products URLs
+    path('access-control/', include('access_control.urls')),  # Add access control URLs
     # path('documents/quote/', include('documents.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

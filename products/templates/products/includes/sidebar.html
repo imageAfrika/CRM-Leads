@@ -1,0 +1,71 @@
+<div class="sidebar-container">
+    <div class="sidebar-header">
+        <h2>Inventory Management</h2>
+    </div>
+    
+    <div class="sidebar-section">
+        <h3>Products</h3>
+        <ul class="sidebar-menu">
+            <li><a href="{% url 'products:product_list' %}" class="{% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">
+                <i class="fas fa-box"></i> All Products
+            </a></li>
+            <li><a href="{% url 'products:product_create' %}" class="{% if request.resolver_match.url_name == 'product_create' %}active{% endif %}">
+                <i class="fas fa-plus-circle"></i> Add Product
+            </a></li>
+            <li><a href="{% url 'products:category_list' %}" class="{% if request.resolver_match.url_name == 'category_list' %}active{% endif %}">
+                <i class="fas fa-tags"></i> Categories
+            </a></li>
+        </ul>
+    </div>
+    
+    <div class="sidebar-section">
+        <h3>Inventory</h3>
+        <ul class="sidebar-menu">
+            <li><a href="{% url 'products:transaction_list' %}" class="{% if request.resolver_match.url_name == 'transaction_list' %}active{% endif %}">
+                <i class="fas fa-exchange-alt"></i> Transactions
+            </a></li>
+            <li><a href="{% url 'products:transaction_create' %}" class="{% if request.resolver_match.url_name == 'transaction_create' %}active{% endif %}">
+                <i class="fas fa-plus-circle"></i> Record Transaction
+            </a></li>
+        </ul>
+    </div>
+    
+    <div class="sidebar-section">
+        <h3>Suppliers</h3>
+        <ul class="sidebar-menu">
+            <li><a href="{% url 'products:supplier_list' %}" class="{% if request.resolver_match.url_name == 'supplier_list' %}active{% endif %}">
+                <i class="fas fa-truck"></i> All Suppliers
+            </a></li>
+            <li><a href="{% url 'products:supplier_create' %}" class="{% if request.resolver_match.url_name == 'supplier_create' %}active{% endif %}">
+                <i class="fas fa-plus-circle"></i> Add Supplier
+            </a></li>
+        </ul>
+    </div>
+    
+    <div class="sidebar-section">
+        <h3>Purchases</h3>
+        <ul class="sidebar-menu">
+            <li><a href="{% url 'products:purchase_list' %}" class="{% if request.resolver_match.url_name == 'purchase_list' %}active{% endif %}">
+                <i class="fas fa-shopping-cart"></i> All Purchases
+            </a></li>
+            <li><a href="{% url 'products:purchase_create' %}" class="{% if request.resolver_match.url_name == 'purchase_create' %}active{% endif %}">
+                <i class="fas fa-plus-circle"></i> Create Purchase
+            </a></li>
+        </ul>
+    </div>
+    
+    <div class="sidebar-section">
+        <h3>Reports</h3>
+        <ul class="sidebar-menu">
+            <li><a href="{% url 'products:inventory_report' %}" class="{% if request.resolver_match.url_name == 'inventory_report' %}active{% endif %}">
+                <i class="fas fa-chart-bar"></i> Inventory Report
+            </a></li>
+            <li><a href="{% url 'products:sales_report' %}" class="{% if request.resolver_match.url_name == 'sales_report' %}active{% endif %}">
+                <i class="fas fa-chart-line"></i> Sales Report
+            </a></li>
+            <li><a href="{% url 'products:purchases_report' %}" class="{% if request.resolver_match.url_name == 'purchases_report' %}active{% endif %}">
+                <i class="fas fa-chart-pie"></i> Purchases Report
+            </a></li>
+        </ul>
+    </div>
+</div> 

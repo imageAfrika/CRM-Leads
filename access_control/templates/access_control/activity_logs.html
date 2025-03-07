@@ -1,0 +1,263 @@
+{% extends 'access_control/base.html' %}
+{% load static %}
+
+{% block title %}Access Control - Activity Logs{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>Activity Logs</h1>
+    <div class="header-actions">
+        <a href="{% url 'access_control:export_activity_logs' %}{% if request.GET.start_date %}?start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}{% endif %}" class="btn btn-primary">
+            <i class="fas fa-download"></i> Export Logs
+        </a>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="form-card">
+    <h2>Filter Activity Logs</h2>
+    <form id="date-filter-form" method="get" class="filter-form">
+        <div class="filter-row">
+            <div class="form-group">
+                <label for="start_date" class="form-label">Start Date</label>
+                <input type="date" id="start_date" name="start_date" class="form-control" value="{{ start_date|date:'Y-m-d' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="end_date" class="form-label">End Date</label>
+                <input type="date" id="end_date" name="end_date" class="form-control" value="{{ end_date|date:'Y-m-d' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="action_type" class="form-label">Action Type</label>
+                <select name="action_type" id="action_type" class="form-control">
+                    <option value="">All Actions</option>
+                    <option value="grant" {% if request.GET.action_type == 'grant' %}selected{% endif %}>Grant</option>
+                    <option value="revoke" {% if request.GET.action_type == 'revoke' %}selected{% endif %}>Revoke</option>
+                    <option value="modify" {% if request.GET.action_type == 'modify' %}selected{% endif %}>Modify</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="target_type" class="form-label">Target Type</label>
+                <select name="target_type" id="target_type" class="form-control">
+                    <option value="">All Targets</option>
+                    <option value="user" {% if request.GET.target_type == 'user' %}selected{% endif %}>User</option>
+                    <option value="group" {% if request.GET.target_type == 'group' %}selected{% endif %}>Group</option>
+                    <option value="permission" {% if request.GET.target_type == 'permission' %}selected{% endif %}>Permission</option>
+                </select>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{% url 'access_control:activity_logs' %}" class="btn btn-secondary">Reset</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Activity Chart -->
+<div class="dashboard-section">
+    <div class="section-header">
+        <h2>Activity Visualization</h2>
+    </div>
+    <div class="section-content">
+        <div class="chart-container">
+            <canvas id="activity-chart" data-activities="{{ activities_json }}"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Logs Table -->
+<div class="dashboard-section">
+    <div class="section-header">
+        <h2>Activity Logs</h2>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Action</th>
+                    <th>User</th>
+                    <th>Target</th>
+                    <th>Permission</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for activity in activities %}
+                <tr>
+                    <td>{{ activity.timestamp|date:"M d, Y H:i" }}</td>
+                    <td>
+                        <span class="badge {% if activity.action_type == 'grant' %}badge-success{% elif activity.action_type == 'revoke' %}badge-danger{% else %}badge-info{% endif %}">
+                            {{ activity.action_type|title }}
+                        </span>
+                    </td>
+                    <td>{{ activity.user.username }}</td>
+                    <td>
+                        {% if activity.target_type == 'user' %}
+                            <i class="fas fa-user"></i> {{ activity.target_name }}
+                        {% elif activity.target_type == 'group' %}
+                            <i class="fas fa-users"></i> {{ activity.target_name }}
+                        {% else %}
+                            <i class="fas fa-key"></i> {{ activity.target_name }}
+                        {% endif %}
+                    </td>
+                    <td>{{ activity.permission_name }}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-primary" 
+                                data-toggle="modal" 
+                                data-target="#activityDetailModal" 
+                                data-activity-id="{{ activity.id }}"
+                                data-activity-time="{{ activity.timestamp|date:'M d, Y H:i' }}"
+                                data-activity-action="{{ activity.action_type|title }}"
+                                data-activity-user="{{ activity.user.username }}"
+                                data-activity-target="{{ activity.target_name }}"
+                                data-activity-target-type="{{ activity.target_type }}"
+                                data-activity-permission="{{ activity.permission_name }}"
+                                data-activity-details="{{ activity.details }}">
+                            <i class="fas fa-info-circle"></i> Details
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No activity logs found for the selected filters.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if activities.has_other_pages %}
+    <div class="pagination">
+        <ul class="pagination-list">
+            {% if activities.has_previous %}
+            <li>
+                <a href="?page=1{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.action_type %}&action_type={{ request.GET.action_type }}{% endif %}{% if request.GET.target_type %}&target_type={{ request.GET.target_type }}{% endif %}" class="pagination-link">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            <li>
+                <a href="?page={{ activities.previous_page_number }}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.action_type %}&action_type={{ request.GET.action_type }}{% endif %}{% if request.GET.target_type %}&target_type={{ request.GET.target_type }}{% endif %}" class="pagination-link">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+            {% endif %}
+            
+            {% for num in activities.paginator.page_range %}
+                {% if activities.number == num %}
+                <li>
+                    <a href="#" class="pagination-link active">{{ num }}</a>
+                </li>
+                {% elif num > activities.number|add:'-3' and num < activities.number|add:'3' %}
+                <li>
+                    <a href="?page={{ num }}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.action_type %}&action_type={{ request.GET.action_type }}{% endif %}{% if request.GET.target_type %}&target_type={{ request.GET.target_type }}{% endif %}" class="pagination-link">
+                        {{ num }}
+                    </a>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if activities.has_next %}
+            <li>
+                <a href="?page={{ activities.next_page_number }}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.action_type %}&action_type={{ request.GET.action_type }}{% endif %}{% if request.GET.target_type %}&target_type={{ request.GET.target_type }}{% endif %}" class="pagination-link">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+            <li>
+                <a href="?page={{ activities.paginator.num_pages }}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.action_type %}&action_type={{ request.GET.action_type }}{% endif %}{% if request.GET.target_type %}&target_type={{ request.GET.target_type }}{% endif %}" class="pagination-link">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Activity Detail Modal -->
+<div class="modal" id="activityDetailModal" tabindex="-1" role="dialog">
+    <div class="modal-backdrop" onclick="document.getElementById('activityDetailModal').classList.remove('show')"></div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Activity Details</h3>
+                <button type="button" class="close" onclick="document.getElementById('activityDetailModal').classList.remove('show')">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="activity-detail-item">
+                    <strong>Time:</strong>
+                    <span id="activity-time"></span>
+                </div>
+                <div class="activity-detail-item">
+                    <strong>Action:</strong>
+                    <span id="activity-action"></span>
+                </div>
+                <div class="activity-detail-item">
+                    <strong>User:</strong>
+                    <span id="activity-user"></span>
+                </div>
+                <div class="activity-detail-item">
+                    <strong>Target:</strong>
+                    <span id="activity-target"></span>
+                </div>
+                <div class="activity-detail-item">
+                    <strong>Permission:</strong>
+                    <span id="activity-permission"></span>
+                </div>
+                <div class="activity-detail-item">
+                    <strong>Details:</strong>
+                    <div id="activity-details" class="activity-details-text"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('activityDetailModal').classList.remove('show')">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Activity detail modal
+        const detailButtons = document.querySelectorAll('[data-toggle="modal"][data-target="#activityDetailModal"]');
+        detailButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const modal = document.getElementById('activityDetailModal');
+                
+                // Set modal content
+                document.getElementById('activity-time').textContent = this.getAttribute('data-activity-time');
+                document.getElementById('activity-action').textContent = this.getAttribute('data-activity-action');
+                document.getElementById('activity-user').textContent = this.getAttribute('data-activity-user');
+                
+                const targetType = this.getAttribute('data-activity-target-type');
+                let targetIcon = '';
+                if (targetType === 'user') {
+                    targetIcon = '<i class="fas fa-user"></i> ';
+                } else if (targetType === 'group') {
+                    targetIcon = '<i class="fas fa-users"></i> ';
+                } else {
+                    targetIcon = '<i class="fas fa-key"></i> ';
+                }
+                
+                document.getElementById('activity-target').innerHTML = targetIcon + this.getAttribute('data-activity-target');
+                document.getElementById('activity-permission').textContent = this.getAttribute('data-activity-permission');
+                document.getElementById('activity-details').textContent = this.getAttribute('data-activity-details') || 'No additional details available.';
+                
+                // Show modal
+                modal.classList.add('show');
+            });
+        });
+    });
+</script>
+{% endblock %} 

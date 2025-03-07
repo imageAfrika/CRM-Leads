@@ -9,7 +9,7 @@ from decimal import Decimal
 from clients.models import Client
 import json
 from django.utils import timezone
-from datetime import timedelta
+from datetime import datetime, timedelta
 from django.db.models import Q, Sum
 from django.template.loader import render_to_string
 from django.conf import settings
@@ -42,31 +42,72 @@ def quote_create(request):
     try:
         data = json.loads(request.body)
         
+        # Parse the valid_until date
+        try:
+            valid_until = datetime.strptime(data['valid_until'], '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid date format for valid_until'
+            }, status=400)
+        
         # Create the quote
         quote = Quote.objects.create(
             client_id=data['client_id'],
             quote_number=data['quote_number'],
             title=data['title'],
             description=data.get('description', ''),
-            subtotal=Decimal(data['subtotal']),
-            tax_rate=Decimal(data['tax_rate']),
-            tax_amount=Decimal(data['tax_amount']),
-            total_amount=Decimal(data['total_amount']),
-            valid_until=parse_date(data['valid_until']),
+            subtotal=Decimal(str(data['subtotal'])),
+            tax_rate=Decimal(str(data['tax_rate'])),
+            tax_amount=Decimal(str(data['tax_amount'])),
+            total_amount=Decimal(str(data['total_amount'])),
+            valid_until=valid_until,
             terms=data.get('terms', '')
         )
         
-        # Generate PDF for the quote
-        pdf_file = quote.generate_pdf()
-        quote.pdf_file = pdf_file
+        # Create items if they exist
+        if 'items' in data and isinstance(data['items'], list):
+            for item_data in data['items']:
+                QuoteItem.objects.create(
+                    quote=quote,
+                    description=item_data['description'],
+                    quantity=Decimal(str(item_data['quantity'])),
+                    unit_price=Decimal(str(item_data['unit_price'])),
+                    discount=Decimal(str(item_data.get('discount', 0))),
+                    total=Decimal(str(item_data['quantity'])) * Decimal(str(item_data['unit_price'])) * (1 - Decimal(str(item_data.get('discount', 0))) / 100)
+                )
+        
+        # Create a document record for this quote
+        document = Document.objects.create(
+            title=quote.title,
+            document_type='QUOTE',
+            client_id=quote.client_id,
+            total_amount=quote.total_amount,
+            document_date=timezone.now().date(),
+            status='DRAFT'
+        )
+        
+        # Link the quote to the document
+        quote.document = document
         quote.save()
         
         return JsonResponse({
             'success': True,
             'quote_id': quote.id,
-            'redirect_url': reverse('documents:quote_detail', args=[quote.id])
+            'document_id': document.id,
+            'redirect_url': reverse('documents:document_detail', args=[document.id])
         })
         
+    except KeyError as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Missing required field: {str(e)}'
+        }, status=400)
+    except ValueError as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Invalid value: {str(e)}'
+        }, status=400)
     except Exception as e:
         import traceback
         print(traceback.format_exc())

@@ -54,4 +54,5 @@ INSTALLED_APPS = [
     'purchases.apps.PurchasesConfig',
     'banking.apps.BankingConfig',
     'reports.apps.ReportsConfig',
+    'access_control.apps.AccessControlConfig',
 ]

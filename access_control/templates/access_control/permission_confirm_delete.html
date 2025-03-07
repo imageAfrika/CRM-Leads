@@ -1,0 +1,53 @@
+{% extends 'access_control/base.html' %}
+{% load static %}
+
+{% block title %}Access Control - Delete Permission{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>Delete Permission</h1>
+    <div class="header-actions">
+        <a href="{% url 'access_control:permission_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Permissions
+        </a>
+    </div>
+</div>
+
+<div class="form-card">
+    <div class="alert alert-warning">
+        <h3>Are you sure you want to delete this permission?</h3>
+        <p>This action cannot be undone. Deleting this permission will remove it from all users and groups.</p>
+    </div>
+    
+    <div class="permission-details">
+        <div class="detail-item">
+            <strong>Name:</strong>
+            <span>{{ permission.name }}</span>
+        </div>
+        <div class="detail-item">
+            <strong>App:</strong>
+            <span>{{ permission.app_name }}</span>
+        </div>
+        <div class="detail-item">
+            <strong>Feature:</strong>
+            <span>{{ permission.feature|default:"-" }}</span>
+        </div>
+        <div class="detail-item">
+            <strong>Type:</strong>
+            <span>{{ permission.get_permission_type_display }}</span>
+        </div>
+        <div class="detail-item">
+            <strong>Description:</strong>
+            <span>{{ permission.description|default:"No description provided." }}</span>
+        </div>
+    </div>
+    
+    <form method="post" class="delete-form">
+        {% csrf_token %}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-danger">Delete Permission</button>
+            <a href="{% url 'access_control:permission_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %} 

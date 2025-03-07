@@ -114,9 +114,9 @@
                     <tr>
                         <td>{{ item.description }}</td>
                         <td>{{ item.quantity }}</td>
-                        <td>${{ item.unit_price|floatformat:2 }}</td>
+                        <td>KES {{ item.unit_price|floatformat:2 }}</td>
                         <td>{{ item.discount }}%</td>
-                        <td>${{ item.total|floatformat:2 }}</td>
+                        <td>KES {{ item.total|floatformat:2 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -127,15 +127,15 @@
             <div class="totals">
                 <div class="total-row">
                     <span>Subtotal:</span>
-                    <span>${{ document.quote.subtotal|floatformat:2 }}</span>
+                    <span>KES {{ document.quote.subtotal|floatformat:2 }}</span>
                 </div>
                 <div class="total-row">
                     <span>Tax ({{ document.quote.tax_rate }}%):</span>
-                    <span>${{ document.quote.tax_amount|floatformat:2 }}</span>
+                    <span>KES {{ document.quote.tax_amount|floatformat:2 }}</span>
                 </div>
                 <div class="total-row grand-total">
                     <span>Total:</span>
-                    <span>${{ document.quote.total_amount|floatformat:2 }}</span>
+                    <span>KES {{ document.quote.total_amount|floatformat:2 }}</span>
                 </div>
             </div>
         </div>

@@ -220,8 +220,8 @@ def create_report(request):
             
             messages.success(request, 'Report created successfully.')
             return redirect('reports:view_report', report_id=report.id)
-    else:
-        form = ReportConfigurationForm()
+        else:
+            form = ReportConfigurationForm()
     
     context = {
         'form': form,

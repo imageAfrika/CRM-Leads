@@ -185,6 +185,10 @@ def category_list(request):
     else:
         categories = ExpenseCategory.objects.filter(created_by=request.user)
     
+    # Calculate total amount for each category
+    for category in categories:
+        category.total_amount = Expense.objects.filter(category=category).aggregate(Sum('amount'))['amount__sum'] or 0
+    
     return render(request, 'expenses/category_list.html', {'categories': categories})
 
 @login_required

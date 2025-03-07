@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/products/form.css' %}">
+<link rel="stylesheet" href="{% static 'css/products/supplier_form.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h1>
+                <i class="fas fa-truck"></i>
+                {% if object %}Edit{% else %}New{% endif %} Supplier
+            </h1>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h2>Basic Information</h2>
+                
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.name.id_for_label }}">
+                        Supplier Name *
+                    </label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                    <div class="error-message">
+                        {{ form.name.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.email.id_for_label }}">
+                            Email
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <div class="error-message">
+                            {{ form.email.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.phone.id_for_label }}">
+                            Phone
+                        </label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                        <div class="error-message">
+                            {{ form.phone.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2>Contact Information</h2>
+                
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.contact_person.id_for_label }}">
+                        Contact Person
+                    </label>
+                    {{ form.contact_person }}
+                    {% if form.contact_person.errors %}
+                    <div class="error-message">
+                        {{ form.contact_person.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.address.id_for_label }}">
+                        Address
+                    </label>
+                    {{ form.address }}
+                    {% if form.address.errors %}
+                    <div class="error-message">
+                        {{ form.address.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'products:supplier_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Supplier
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 
