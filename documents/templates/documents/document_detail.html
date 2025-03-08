@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .document-detail-container {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    .document-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    .document-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    .document-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .document-info {
+        margin-bottom: 2rem;
+    }
+    .document-info p {
+        margin-bottom: 0.5rem;
+    }
+    .document-items {
+        margin-bottom: 2rem;
+    }
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1rem;
+    }
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .table th {
+        background-color: #f8fafc;
+        font-weight: 600;
+        text-align: left;
+    }
+    .table tfoot td {
+        font-weight: 600;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    .status-draft { background: #f1f5f9; color: #64748b; }
+    .status-sent { background: #dbeafe; color: #2563eb; }
+    .status-paid { background: #dcfce7; color: #16a34a; }
+    .status-overdue { background: #fee2e2; color: #dc2626; }
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-primary {
+        background-color: #2563eb;
+        color: white;
+    }
+    .btn-secondary {
+        background-color: #64748b;
+        color: white;
+    }
+    .btn:hover {
+        opacity: 0.9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="document-detail-container">
+    <div class="document-header">
+        <h1>
+            {% if document.document_type == 'QUOTE' %}
+                Quote #{{ document.get_document_number }}
+            {% elif document.document_type == 'INVOICE' %}
+                Invoice #{{ document.invoice_number }}
+            {% endif %}
+        </h1>
+        <div class="document-actions">
+            <button class="btn btn-secondary" onclick="window.print()">
+                <i class="fas fa-print"></i> Print
+            </button>
+            <a href="{% url 'documents:document_download' document.id %}" class="btn btn-secondary">
+                <i class="fas fa-download"></i> Download PDF
+            </a>
+            {% if document.document_type == 'QUOTE' and document.status == 'SENT' %}
+            <button class="btn btn-primary" id="generateInvoiceBtn" data-quote-id="{{ document.quote.id }}">
+                <i class="fas fa-file-invoice"></i> Generate Invoice
+            </button>
+            {% endif %}
+            {% if document.status == 'DRAFT' %}
+            <a href="{% url 'documents:document_edit' document.id %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="document-content">
+        <div class="document-info">
+            <p><strong>Client:</strong> {{ document.client.name }}</p>
+            <p><strong>Date:</strong> {{ document.document_date|date:"d/m/Y" }}</p>
+            {% if document.document_type == 'INVOICE' %}
+                <p><strong>Due Date:</strong> {{ document.due_date|date:"d/m/Y" }}</p>
+            {% endif %}
+            <p><strong>Status:</strong> <span class="status-badge status-{{ document.status|lower }}">{{ document.get_status_display }}</span></p>
+            {% if document.description %}
+                <p><strong>Description:</strong> {{ document.description }}</p>
+            {% endif %}
+        </div>
+
+        <div class="document-items">
+            <h3>Items</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        {% if document.document_type == 'QUOTE' %}
+                            <th>Discount</th>
+                        {% endif %}
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if document.document_type == 'QUOTE' %}
+                        {% for item in document.quote.items.all %}
+                        <tr>
+                            <td>{{ item.description }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>KES {{ item.unit_price|floatformat:2 }}</td>
+                            <td>{{ item.discount }}%</td>
+                            <td>KES {{ item.get_total|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        {% for item in document.items.all %}
+                        <tr>
+                            <td>{{ item.description }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>KES {{ item.unit_price|floatformat:2 }}</td>
+                            <td>KES {{ item.total|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="{% if document.document_type == 'QUOTE' %}4{% else %}3{% endif %}" class="text-right">
+                            <strong>Subtotal:</strong>
+                        </td>
+                        <td>KES {{ document.subtotal|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="{% if document.document_type == 'QUOTE' %}4{% else %}3{% endif %}" class="text-right">
+                            <strong>Tax ({{ document.tax_rate }}%):</strong>
+                        </td>
+                        <td>KES {{ document.tax_amount|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="{% if document.document_type == 'QUOTE' %}4{% else %}3{% endif %}" class="text-right">
+                            <strong>Total:</strong>
+                        </td>
+                        <td>KES {{ document.total_amount|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const generateInvoiceBtn = document.getElementById('generateInvoiceBtn');
+    if (generateInvoiceBtn) {
+        generateInvoiceBtn.addEventListener('click', async function() {
+            try {
+                const quoteId = this.dataset.quoteId;
+                const response = await fetch(`/documents/quote/${quoteId}/generate-invoice/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert('Error generating invoice: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to generate invoice. Please try again.');
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

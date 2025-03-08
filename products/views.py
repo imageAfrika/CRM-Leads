@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from datetime import datetime, timedelta
+from django.db import transaction
 import json
 
 from .models import (
@@ -85,12 +86,20 @@ def product_create(request):
     if request.method == 'POST':
         form = ProductForm(request.POST)
         if form.is_valid():
-            product = form.save(commit=False)
-            product.created_by = request.user
-            product.updated_by = request.user
-            product.save()
-            messages.success(request, 'Product created successfully!')
-            return redirect('products:product_detail', pk=product.pk)
+            try:
+                with transaction.atomic():
+                    product = form.save(commit=False)
+                    product.created_by = request.user
+                    product.updated_by = request.user
+                    product.save()
+                    messages.success(request, 'Product created successfully!')
+                    return redirect('products:product_list')
+            except Exception as e:
+                messages.error(request, f'Error saving product: {str(e)}')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = ProductForm()
     
@@ -107,11 +116,16 @@ def product_update(request, pk):
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=product)
         if form.is_valid():
-            product = form.save(commit=False)
-            product.updated_by = request.user
-            product.save()
-            messages.success(request, 'Product updated successfully!')
-            return redirect('products:product_detail', pk=product.pk)
+            try:
+                product = form.save(commit=False)
+                product.updated_by = request.user
+                product.save()
+                messages.success(request, 'Product updated successfully!')
+                return redirect('products:product_list')
+            except Exception as e:
+                messages.error(request, f'Error updating product: {str(e)}')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = ProductForm(instance=product)
     
@@ -160,11 +174,19 @@ def category_create(request):
     if request.method == 'POST':
         form = CategoryForm(request.POST)
         if form.is_valid():
-            category = form.save(commit=False)
-            category.created_by = request.user
-            category.save()
-            messages.success(request, 'Category created successfully!')
-            return redirect('products:category_list')
+            try:
+                with transaction.atomic():
+                    category = form.save(commit=False)
+                    category.created_by = request.user
+                    category.save()
+                    messages.success(request, 'Category created successfully!')
+                    return redirect('products:category_list')
+            except Exception as e:
+                messages.error(request, f'Error saving category: {str(e)}')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = CategoryForm()
     
@@ -181,9 +203,14 @@ def category_update(request, pk):
     if request.method == 'POST':
         form = CategoryForm(request.POST, instance=category)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Category updated successfully!')
-            return redirect('products:category_list')
+            try:
+                form.save()
+                messages.success(request, 'Category updated successfully!')
+                return redirect('products:category_list')
+            except Exception as e:
+                messages.error(request, f'Error updating category: {str(e)}')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = CategoryForm(instance=category)
     
@@ -317,11 +344,16 @@ def supplier_create(request):
     if request.method == 'POST':
         form = SupplierForm(request.POST)
         if form.is_valid():
-            supplier = form.save(commit=False)
-            supplier.created_by = request.user
-            supplier.save()
-            messages.success(request, 'Supplier created successfully!')
-            return redirect('products:supplier_detail', pk=supplier.pk)
+            try:
+                supplier = form.save(commit=False)
+                supplier.created_by = request.user
+                supplier.save()
+                messages.success(request, 'Supplier created successfully!')
+                return redirect('products:supplier_list')
+            except Exception as e:
+                messages.error(request, f'Error saving supplier: {str(e)}')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = SupplierForm()
     
@@ -338,9 +370,14 @@ def supplier_update(request, pk):
     if request.method == 'POST':
         form = SupplierForm(request.POST, instance=supplier)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Supplier updated successfully!')
-            return redirect('products:supplier_detail', pk=supplier.pk)
+            try:
+                supplier = form.save()
+                messages.success(request, 'Supplier updated successfully!')
+                return redirect('products:supplier_list')
+            except Exception as e:
+                messages.error(request, f'Error updating supplier: {str(e)}')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = SupplierForm(instance=supplier)
     
@@ -428,14 +465,16 @@ def purchase_detail(request, pk):
 def purchase_create(request):
     if request.method == 'POST':
         form = PurchaseForm(request.POST)
-        if form.is_valid():
-            purchase = form.save(commit=False)
-            purchase.created_by = request.user
-            purchase.updated_by = request.user
-            purchase.save()
-            
-            formset = PurchaseItemFormSet(request.POST, instance=purchase)
-            if formset.is_valid():
+        formset = PurchaseItemFormSet(request.POST)
+        
+        if form.is_valid() and formset.is_valid():
+            try:
+                purchase = form.save(commit=False)
+                purchase.created_by = request.user
+                purchase.updated_by = request.user
+                purchase.save()
+                
+                formset.instance = purchase
                 formset.save()
                 
                 # Calculate total amount
@@ -457,7 +496,11 @@ def purchase_create(request):
                         )
                 
                 messages.success(request, 'Purchase created successfully!')
-                return redirect('products:purchase_detail', pk=purchase.pk)
+                return redirect('products:purchase_list')
+            except Exception as e:
+                messages.error(request, f'Error saving purchase: {str(e)}')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = PurchaseForm()
         formset = PurchaseItemFormSet()
@@ -475,13 +518,14 @@ def purchase_update(request, pk):
     
     if request.method == 'POST':
         form = PurchaseForm(request.POST, instance=purchase)
-        if form.is_valid():
-            purchase = form.save(commit=False)
-            purchase.updated_by = request.user
-            purchase.save()
-            
-            formset = PurchaseItemFormSet(request.POST, instance=purchase)
-            if formset.is_valid():
+        formset = PurchaseItemFormSet(request.POST, instance=purchase)
+        
+        if form.is_valid() and formset.is_valid():
+            try:
+                purchase = form.save(commit=False)
+                purchase.updated_by = request.user
+                purchase.save()
+                
                 formset.save()
                 
                 # Calculate total amount
@@ -490,7 +534,11 @@ def purchase_update(request, pk):
                 purchase.save()
                 
                 messages.success(request, 'Purchase updated successfully!')
-                return redirect('products:purchase_detail', pk=purchase.pk)
+                return redirect('products:purchase_list')
+            except Exception as e:
+                messages.error(request, f'Error updating purchase: {str(e)}')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = PurchaseForm(instance=purchase)
         formset = PurchaseItemFormSet(instance=purchase)

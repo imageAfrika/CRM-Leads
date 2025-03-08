@@ -10,6 +10,8 @@ from reportlab.lib.pagesizes import letter
 from io import BytesIO
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
+from django.utils import timezone
+from datetime import timedelta
 
 class Document(models.Model):
     DOCUMENT_TYPES = (
@@ -49,7 +51,7 @@ class Document(models.Model):
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    quote = models.OneToOneField('Quote', on_delete=models.CASCADE, null=True, blank=True)
+    quote = models.OneToOneField('Quote', on_delete=models.CASCADE, null=True, blank=True, related_name='document')
 
     # Add number fields for different document types
     quote_number = models.IntegerField(null=True, blank=True)
@@ -59,6 +61,8 @@ class Document(models.Model):
         """Calculate subtotal based on document type"""
         if self.document_type == 'QUOTE' and self.quote:
             return self.quote.total_amount
+        elif self.document_type == 'INVOICE':
+            return sum(item.total for item in self.items.all())
         return self.total_amount / (1 + self.tax_rate/100) if self.total_amount else 0
 
     def calculate_tax(self):
@@ -78,7 +82,7 @@ class Document(models.Model):
                 # Get the last receipt number
                 last_receipt = Document.objects.filter(
                     document_type__in=['RECEIPT', 'SALES_RECEIPT'],
-                    receipt_number__isnull=False  # Only get records with non-null receipt numbers
+                    receipt_number__isnull=False
                 ).order_by('-receipt_number').first()
                 
                 # Safely get the next receipt number
@@ -204,20 +208,54 @@ class Quote(models.Model):
 
     def convert_to_invoice(self):
         """Convert this quote to an invoice"""
-        if self.status != 'ACCEPTED':
-            raise ValueError("Only accepted quotes can be converted to invoices")
+        if self.status not in ['SENT', 'ACCEPTED']:
+            raise ValueError(f"Only sent or accepted quotes can be converted to invoices. Current status: {self.status}")
+        
+        if Document.objects.filter(quote=self, document_type='INVOICE').exists():
+            raise ValueError("This quote has already been converted to an invoice")
+        
+        # Generate invoice number
+        today = timezone.now().strftime('%Y%m%d')
+        last_invoice = Document.objects.filter(
+            document_type='INVOICE',
+            invoice_number__startswith=f'INV{today}'
+        ).order_by('-invoice_number').first()
+        
+        if last_invoice:
+            try:
+                last_number = int(last_invoice.invoice_number[-3:])
+                new_number = last_number + 1
+            except ValueError:
+                new_number = 1
+        else:
+            new_number = 1
+            
+        invoice_number = f'INV{today}{new_number:03d}'
         
         document = Document.objects.create(
             client=self.client,
             document_type='INVOICE',
+            invoice_number=invoice_number,
             description=self.description,
             subtotal=self.subtotal,
             tax_rate=self.tax_rate,
             tax_amount=self.tax_amount,
             total_amount=self.total_amount,
-            document_date=self.created_at.date(),
+            document_date=timezone.now().date(),
+            due_date=timezone.now().date() + timedelta(days=30),
             status='DRAFT'
         )
+        
+        # Copy items
+        for item in self.items.all():
+            total = item.quantity * item.unit_price * (1 - item.discount/100)
+            InvoiceItem.objects.create(
+                invoice=document,
+                description=item.description,
+                quantity=item.quantity,
+                unit_price=item.unit_price,
+                total=total
+            )
         
         self.status = 'INVOICED'
         self.save()
@@ -315,3 +353,18 @@ class Expenditure(models.Model):
 
     def __str__(self):
         return f"{self.title} - ${self.amount}"
+
+class InvoiceItem(models.Model):
+    invoice = models.ForeignKey(Document, related_name='items', on_delete=models.CASCADE)
+    description = models.CharField(max_length=255)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def save(self, *args, **kwargs):
+        if not self.total:
+            self.total = self.quantity * self.unit_price
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.description} - {self.quantity} x ${self.unit_price}"

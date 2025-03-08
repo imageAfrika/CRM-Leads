@@ -1,7 +1,7 @@
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
-from .models import Quote, Document, QuoteItem, Client, Expenditure
+from .models import Quote, Document, QuoteItem, Client, Expenditure, InvoiceItem
 from .forms import QuoteForm
 from django.http import JsonResponse, FileResponse, HttpResponse
 from django.views.decorators.http import require_POST
@@ -30,7 +30,10 @@ def generate_quote_number():
     
     if last_quote:
         # Extract the sequence number and increment it
-        seq_num = int(last_quote.quote_number[-3:]) + 1
+        try:
+            seq_num = int(last_quote.quote_number[-3:]) + 1
+        except ValueError:
+            seq_num = 1
     else:
         seq_num = 1
     
@@ -41,6 +44,9 @@ def generate_quote_number():
 def quote_create(request):
     try:
         data = json.loads(request.body)
+        
+        # Generate a new quote number if not provided
+        quote_number = data.get('quote_number') or generate_quote_number()
         
         # Parse the valid_until date
         try:
@@ -54,7 +60,7 @@ def quote_create(request):
         # Create the quote
         quote = Quote.objects.create(
             client_id=data['client_id'],
-            quote_number=data['quote_number'],
+            quote_number=quote_number,
             title=data['title'],
             description=data.get('description', ''),
             subtotal=Decimal(str(data['subtotal'])),
@@ -73,23 +79,22 @@ def quote_create(request):
                     description=item_data['description'],
                     quantity=Decimal(str(item_data['quantity'])),
                     unit_price=Decimal(str(item_data['unit_price'])),
-                    discount=Decimal(str(item_data.get('discount', 0))),
-                    total=Decimal(str(item_data['quantity'])) * Decimal(str(item_data['unit_price'])) * (1 - Decimal(str(item_data.get('discount', 0))) / 100)
+                    discount=Decimal(str(item_data.get('discount', 0)))
                 )
         
         # Create a document record for this quote
         document = Document.objects.create(
-            title=quote.title,
             document_type='QUOTE',
             client_id=quote.client_id,
+            description=quote.description,
+            subtotal=quote.subtotal,
+            tax_rate=quote.tax_rate,
+            tax_amount=quote.tax_amount,
             total_amount=quote.total_amount,
             document_date=timezone.now().date(),
-            status='DRAFT'
+            status='DRAFT',
+            quote=quote
         )
-        
-        # Link the quote to the document
-        quote.document = document
-        quote.save()
         
         return JsonResponse({
             'success': True,
@@ -234,62 +239,44 @@ def get_quote_number(request):
 def generate_invoice_from_quote(request, quote_id):
     try:
         quote = get_object_or_404(Quote, pk=quote_id)
+        print(f"Found quote {quote.quote_number} with status {quote.status}")
         
-        # Check if quote can be converted to invoice
-        if quote.status not in ['DRAFT', 'SENT']:
-            raise ValueError('This quote cannot be converted to an invoice')
-            
-        # Generate invoice number
-        today = timezone.now().strftime('%Y%m%d')
-        last_invoice = Document.objects.filter(
-            document_type='INVOICE',
-            invoice_number__startswith=f'INV-{today}'
-        ).order_by('-invoice_number').first()
+        # Convert quote to invoice using the model method
+        invoice = quote.convert_to_invoice()
+        print(f"Successfully created invoice {invoice.invoice_number}")
         
-        if last_invoice:
-            last_number = int(last_invoice.invoice_number.split('-')[-1])
-            new_number = last_number + 1
-        else:
-            new_number = 1
-            
-        invoice_number = f'INV-{today}-{new_number:04d}'
-        
-        # Create new invoice
-        invoice = Document.objects.create(
-            client=quote.client,
-            title=f"Invoice for {quote.quote_number}",
-            document_type='INVOICE',
-            invoice_number=invoice_number,
-            description=quote.description,
-            subtotal=quote.subtotal,
-            tax_rate=quote.tax_rate,
-            tax_amount=quote.tax_amount,
-            total_amount=quote.total_amount,
-            status='DRAFT',
-            quote=quote  # Link back to original quote
-        )
-        
-        # Update quote status
-        quote.status = 'INVOICED'
-        quote.save()
-        
+        # Return success response with redirect URL
         return JsonResponse({
             'success': True,
-            'redirect_url': reverse('documents:document_detail', args=[invoice.pk])
+            'invoice_id': invoice.id,
+            'redirect_url': reverse('documents:document_detail', args=[invoice.id])
         })
         
-    except Exception as e:
-        import traceback
-        print(traceback.format_exc())  # For debugging
+    except Quote.DoesNotExist:
+        print(f"Quote not found: {quote_id}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Quote not found'
+        }, status=404)
+    except ValueError as e:
+        print(f"Validation error: {str(e)}")
         return JsonResponse({
             'success': False,
             'error': str(e)
         }, status=400)
+    except Exception as e:
+        import traceback
+        print("Unexpected error during invoice generation:")
+        print(traceback.format_exc())
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 class DocumentUpdateView(UpdateView):
     model = Document
     template_name = 'documents/document_form.html'
-    fields = ['title', 'description', 'client', 'document_type', 'status', 'total_amount']
+    fields = ['description', 'client', 'document_type', 'status', 'total_amount', 'tax_rate', 'due_date']
     
     def get_success_url(self):
         return reverse_lazy('documents:document_list')

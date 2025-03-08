@@ -86,88 +86,69 @@
         width: 160px;
     }
 
-    .filter-label {
-        display: block;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #64748b;
-        margin-bottom: 0.5rem;
-    }
-
-    .filter-input {
-        width: 100%;
-        padding: 0.5rem 1rem;
-        border: 1px solid #e2e8f0;
-        border-radius: 6px;
-        font-size: 0.875rem;
-        color: #1e293b;
-        background: white;
-        transition: all 0.2s;
-    }
-
-    .filter-input:focus {
-        outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
     .document-list {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
     }
 
     .document-item {
         display: flex;
         align-items: center;
-        padding: 16px 24px;
-        border-bottom: 1px solid #e2e8f0;
-        transition: background-color 0.2s;
+        gap: 24px;
+        background: white;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s;
     }
 
     .document-item:hover {
-        background-color: #f8fafc;
-    }
-
-    .document-item:last-child {
-        border-bottom: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .document-icon {
-        flex: 0 0 48px;
+        width: 48px;
         height: 48px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #f1f5f9;
-        border-radius: 8px;
-        margin-right: 16px;
+        font-size: 1.5rem;
     }
 
-    .document-icon i {
-        font-size: 1.25rem;
+    .document-icon.quote {
+        background: #dbeafe;
+        color: #3b82f6;
     }
 
-    .document-icon.quote i { color: #3b82f6; }
-    .document-icon.invoice i { color: #16a34a; }
-    .document-icon.expense i { color: #dc2626; }
-    .document-icon.purchase i { color: #9333ea; }
-    .document-icon.delivery i { color: #ea580c; }
-    .document-icon.jobcard i { color: #0284c7; }
-    .document-icon.receipt i { color: #4f46e5; }
+    .document-icon.invoice {
+        background: #dcfce7;
+        color: #22c55e;
+    }
+
+    .document-icon.expense {
+        background: #fee2e2;
+        color: #ef4444;
+    }
+
+    .document-icon.purchase {
+        background: #f3e8ff;
+        color: #a855f7;
+    }
 
     .document-content {
         flex: 1;
-        min-width: 0;
     }
 
     .document-title {
         font-size: 1rem;
-        font-weight: 600;
+        font-weight: 500;
         color: #1e293b;
-        margin-bottom: 4px;
         text-decoration: none;
+        margin-bottom: 8px;
+        display: block;
     }
 
     .document-title:hover {
@@ -177,8 +158,8 @@
     .document-details {
         display: flex;
         gap: 24px;
-        font-size: 0.875rem;
         color: #64748b;
+        font-size: 0.875rem;
     }
 
     .document-detail {
@@ -188,61 +169,64 @@
     }
 
     .document-detail i {
-        font-size: 0.875rem;
-        width: 16px;
+        color: #94a3b8;
     }
 
     .document-amount {
-        font-weight: 600;
+        font-weight: 500;
         color: #1e293b;
     }
 
     .document-meta {
-        flex: 0 0 auto;
         display: flex;
         align-items: center;
         gap: 24px;
-        margin-left: 24px;
     }
 
     .status-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.25rem 0.75rem;
+        padding: 4px 12px;
         border-radius: 9999px;
         font-size: 0.75rem;
         font-weight: 500;
+        text-transform: uppercase;
     }
 
-    .status-draft { background: #f1f5f9; color: #475569; }
-    .status-pending { background: #fef9c3; color: #854d0e; }
-    .status-approved { background: #dcfce7; color: #166534; }
-    .status-rejected { background: #fee2e2; color: #991b1b; }
-    .status-completed { background: #e0e7ff; color: #3730a3; }
-    .status-delivered { background: #ddd6fe; color: #5b21b6; }
+    .status-badge.status-draft {
+        background: #f1f5f9;
+        color: #64748b;
+    }
 
-    .document-actions {
-        display: flex;
-        gap: 8px;
+    .status-badge.status-pending {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .status-badge.status-approved {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .status-badge.status-rejected {
+        background: #fee2e2;
+        color: #dc2626;
     }
 
     .btn-icon {
-        display: inline-flex;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        display: flex;
         align-items: center;
         justify-content: center;
-        width: 2rem;
-        height: 2rem;
-        border-radius: 6px;
         color: #64748b;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
+        background: #f1f5f9;
+        text-decoration: none;
         transition: all 0.2s;
     }
 
     .btn-icon:hover {
-        background: #f1f5f9;
+        background: #e2e8f0;
         color: #1e293b;
-        border-color: #cbd5e1;
     }
 
     .no-documents {
@@ -312,25 +296,22 @@
 
     <div class="filters-bar">
         <div class="filter-group type-filter">
-            <label class="filter-label" for="type">Document Type</label>
-            <select id="type" name="type" class="filter-input">
+            <label for="type">Document Type</label>
+            <select id="type" name="type" class="form-control">
                 <option value="">All Types</option>
                 <option value="QUOTE" {% if current_type == 'QUOTE' %}selected{% endif %}>Quotes</option>
                 <option value="INVOICE" {% if current_type == 'INVOICE' %}selected{% endif %}>Invoices</option>
                 <option value="EXPENSE" {% if current_type == 'EXPENSE' %}selected{% endif %}>Expenses</option>
                 <option value="PURCHASE" {% if current_type == 'PURCHASE' %}selected{% endif %}>Purchases</option>
-                <option value="DELIVERY" {% if current_type == 'DELIVERY' %}selected{% endif %}>Delivery Notes</option>
-                <option value="JOBCARD" {% if current_type == 'JOBCARD' %}selected{% endif %}>Job Cards</option>
-                <option value="RECEIPT" {% if current_type == 'RECEIPT' %}selected{% endif %}>Receipts</option>
             </select>
         </div>
         <div class="filter-group search-filter">
-            <label class="filter-label" for="search">Search</label>
-            <input type="text" id="search" name="search" class="filter-input" placeholder="Search documents...">
+            <label for="search">Search</label>
+            <input type="text" id="search" name="search" class="form-control" placeholder="Search documents..." value="{{ request.GET.search }}">
         </div>
         <div class="filter-group date-filter">
-            <label class="filter-label" for="date">Date</label>
-            <input type="date" id="date" name="date" class="filter-input">
+            <label for="date">Date</label>
+            <input type="date" id="date" name="date" class="form-control" value="{{ request.GET.date }}">
         </div>
     </div>
 
@@ -428,11 +409,7 @@ document.addEventListener('DOMContentLoaded', function() {
     typeSelect.addEventListener('change', updateFilters);
     searchInput.addEventListener('change', updateFilters);
     dateInput.addEventListener('change', updateFilters);
-
-    // Initialize filter values from URL params
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('search')) searchInput.value = urlParams.get('search');
-    if (urlParams.has('date')) dateInput.value = urlParams.get('date');
 });
 </script>
-{% endblock %} 
+{% endblock %}
+</rewritten_file>

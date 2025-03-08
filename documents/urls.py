@@ -19,4 +19,5 @@ urlpatterns = [
     path('expenditure/<int:pk>/edit/', views.expenditure_edit, name='expenditure_edit'),
     path('expenditure/<int:pk>/delete/', views.expenditure_delete, name='expenditure_delete'),
     path('invoices/', views.invoice_list, name='invoice_list'),
+    path('<int:pk>/generate-pdf/', views.generate_document_pdf, name='generate_document_pdf'),
 ] 

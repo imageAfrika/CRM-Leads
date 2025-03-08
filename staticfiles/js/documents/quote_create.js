@@ -122,17 +122,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('preview-tax').textContent = `KES ${formatCurrency(tax)}`;
         document.getElementById('preview-total').textContent = `KES ${formatCurrency(total)}`;
         
-        // Update hidden fields for form submission - ensure we use 2 decimal places for accuracy
+        // Update hidden fields for form submission
         document.getElementById('subtotal').value = subtotal.toFixed(2);
         document.getElementById('tax_amount').value = tax.toFixed(2);
         document.getElementById('total_amount').value = total.toFixed(2);
-        
-        console.log('Updated calculations:', {
-            subtotal: subtotal.toFixed(2),
-            taxRate: taxRate,
-            tax: tax.toFixed(2),
-            total: total.toFixed(2)
-        });
     }
 
     // Add new item row
@@ -208,30 +201,15 @@ document.addEventListener('DOMContentLoaded', async function() {
             return;
         }
         
-        console.log("Form validated successfully, preparing data...");
-        
         // Collect items
         const items = [];
-        document.querySelectorAll('.quote-item').forEach((item, index) => {
-            const itemData = {
+        document.querySelectorAll('.quote-item').forEach(item => {
+            items.push({
                 description: item.querySelector('[name="items[][description]"]').value,
                 quantity: parseFloat(item.querySelector('[name="items[][quantity]"]').value),
                 unit_price: parseFloat(item.querySelector('[name="items[][unit_price]"]').value),
                 discount: parseFloat(item.querySelector('[name="items[][discount]"]').value) || 0
-            };
-            console.log(`Item ${index + 1}:`, itemData);
-            items.push(itemData);
-        });
-        
-        // Get hidden field values
-        const subtotal = document.getElementById('subtotal').value;
-        const taxAmount = document.getElementById('tax_amount').value;
-        const totalAmount = document.getElementById('total_amount').value;
-        
-        console.log("Calculated values:", {
-            subtotal,
-            taxAmount,
-            totalAmount
+            });
         });
         
         // Collect form data
@@ -243,13 +221,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             valid_until: document.getElementById('valid_until').value,
             terms: document.getElementById('terms').value,
             tax_rate: document.getElementById('tax_rate').value,
-            subtotal: subtotal,
-            tax_amount: taxAmount,
-            total_amount: totalAmount,
+            subtotal: document.getElementById('subtotal').value,
+            tax_amount: document.getElementById('tax_amount').value,
+            total_amount: document.getElementById('total_amount').value,
             items: items
         };
-        
-        console.log("Form data prepared:", formData);
 
         try {
             // Show loading state
@@ -257,8 +233,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             const originalText = submitButton.textContent;
             submitButton.textContent = 'Processing...';
             submitButton.disabled = true;
-            
-            console.log("Submitting form data to server...");
             
             // Submit the form data
             const response = await fetch('/documents/quote/create/', {
@@ -270,12 +244,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 body: JSON.stringify(formData)
             });
 
-            console.log("Response received:", response.status);
             const data = await response.json();
-            console.log("Response data:", data);
             
             if (data.success) {
-                console.log("Quote created successfully, redirecting to:", data.redirect_url);
                 window.location.href = data.redirect_url;
             } else {
                 // Reset button state
@@ -283,11 +254,10 @@ document.addEventListener('DOMContentLoaded', async function() {
                 submitButton.disabled = false;
                 
                 // Show error message
-                console.error("Server error:", data.error);
                 alert('Error creating quote: ' + data.error);
             }
         } catch (error) {
-            console.error('Error submitting form:', error);
+            console.error('Error:', error);
             alert('Failed to create quote. Please try again.');
             
             // Reset button state

@@ -285,8 +285,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const periodSelector = document.getElementById('timePeriod');
     if (periodSelector) {
         periodSelector.addEventListener('change', function(e) {
-            updateCharts(e.target.value);
-        });
+        updateCharts(e.target.value);
+    });
     }
 
     // Initial data load

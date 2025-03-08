@@ -120,7 +120,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Nairobi'
 
 USE_I18N = True
 
@@ -138,6 +138,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'reports' / 'static',
     BASE_DIR / 'purchases' / 'static',
     BASE_DIR / 'access_control' / 'static',
+    BASE_DIR / 'products' / 'static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
