@@ -13,11 +13,12 @@ urlpatterns = [
     
     # Report types
     path('banking/', views.banking_reports, name='banking_reports'),
-    path('sales/', views.sales_reports, name='sales_reports'),
+    path('sales/', views.sales_reports, name='sales'),
     path('clients/', views.client_reports, name='clients_reports'),
-    path('expenses/', views.expenses_reports, name='expenses_reports'),
+    path('expenses/', views.expenses_reports, name='expenses'),
     path('purchases/', views.purchases_reports, name='purchases_reports'),
-    path('leads/', views.leads_reports, name='leads_reports'),
+    path('leads/', views.leads_reports, name='leads'),
+    path('projects/', views.projects_reports, name='projects'),
     
     # Report management
     path('view/<int:report_id>/', views.view_report, name='view_report'),

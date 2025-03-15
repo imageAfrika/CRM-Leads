@@ -1,0 +1,387 @@
+{% extends 'project_management/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ project.name }} | Project Details{% endblock %}
+
+{% block header_title %}Project Details{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/project_detail.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="detail-header">
+    <h1 class="project-name">{{ project.name }}</h1>
+    <div class="detail-actions">
+        <a href="{% url 'project_management:project_finances' project.pk %}" class="button button-primary">
+            <i class="fas fa-chart-line"></i> Financial Overview
+        </a>
+        <a href="{% url 'project_management:project_update' project.pk %}" class="button button-outline">
+            <i class="fas fa-edit"></i> Edit Project
+        </a>
+        <a href="{% url 'project_management:project_list' %}" class="button button-outline">
+            <i class="fas fa-arrow-left"></i> Back to Projects
+        </a>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <!-- Project Overview Card -->
+    <div class="dashboard-card overview-card">
+        <div class="card-header">
+            <h2 class="card-title">Project Overview</h2>
+            <div class="card-icon icon-primary">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+        </div>
+        <div class="project-meta">
+            <div class="meta-item">
+                <div class="meta-label">Project Code</div>
+                <div class="meta-value">{{ project.code }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Client</div>
+                <div class="meta-value">{{ project.client }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Start Date</div>
+                <div class="meta-value">{{ project.start_date|date:"M d, Y" }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">End Date</div>
+                <div class="meta-value">{{ project.end_date|date:"M d, Y" }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Status</div>
+                <div class="meta-value">
+                    <span class="status-badge status-{{ project.status|lower }}">
+                        {{ project.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Priority</div>
+                <div class="meta-value">
+                    <span class="priority-badge priority-{{ project.priority|lower }}">
+                        {{ project.get_priority_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Manager</div>
+                <div class="meta-value">{{ project.manager }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Budget</div>
+                <div class="meta-value">{{ project.budget|default:0|floatformat:2|intcomma }}</div>
+            </div>
+        </div>
+        
+        <div class="project-description">
+            <div class="description-label">Description</div>
+            <div class="description-content">{{ project.description|default:"No description provided."|linebreaks }}</div>
+            
+            {% if project.tags.all %}
+            <div class="tag-container">
+                {% for tag in project.tags.all %}
+                <span class="tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Project Progress Card -->
+    <div class="dashboard-card progress-card">
+        <div class="card-header">
+            <h2 class="card-title">Project Progress</h2>
+            <div class="card-icon icon-success">
+                <i class="fas fa-tasks"></i>
+            </div>
+        </div>
+        
+        <div class="progress-percentage">{{ project.completion_percentage }}%</div>
+        <div class="progress-label">Completion Percentage</div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" style="width: {{ project.completion_percentage }}%;"></div>
+        </div>
+        
+        <div class="timeline-markers">
+            <div class="timeline-date">
+                <div class="date-value">{{ project.start_date|date:"M d" }}</div>
+                <div class="date-label">Start Date</div>
+            </div>
+            <div class="timeline-date">
+                <div class="date-value">{{ today|date:"M d" }}</div>
+                <div class="date-label">Today</div>
+            </div>
+            <div class="timeline-date">
+                <div class="date-value">{{ project.end_date|date:"M d" }}</div>
+                <div class="date-label">End Date</div>
+            </div>
+        </div>
+        
+        {% if project.is_overdue %}
+        <div class="overdue-alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>This project is overdue!</span>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Team Members Card -->
+    <div class="dashboard-card team-card">
+        <div class="card-header">
+            <h2 class="card-title">Team Members</h2>
+            <div class="card-icon icon-info">
+                <i class="fas fa-users"></i>
+            </div>
+        </div>
+        
+        {% if project.team_members.all %}
+        <div class="team-list">
+            {% for member in project.team_members.all %}
+            <div class="team-member">
+                <div class="member-avatar">
+                    {{ member.get_full_name|slice:":1" }}
+                </div>
+                <div class="member-info">
+                    <div class="member-name">{{ member.get_full_name }}</div>
+                    <div class="member-email">{{ member.email }}</div>
+                </div>
+                {% if member == project.manager %}
+                <div class="member-role">Project Manager</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No team members assigned to this project.</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Financial Summary Card -->
+    <div class="dashboard-card finance-card">
+        <div class="card-header">
+            <h2 class="card-title">Financial Summary</h2>
+            <div class="card-icon icon-warning">
+                <i class="fas fa-coins"></i>
+            </div>
+        </div>
+        
+        <div class="finance-summary">
+            <div class="finance-item">
+                <div class="finance-value">{{ project.budget|default:0|floatformat:2|intcomma }}</div>
+                <div class="finance-label">Budget</div>
+            </div>
+            <div class="finance-item">
+                <div class="finance-value">{{ project.actual_cost|default:0|floatformat:2|intcomma }}</div>
+                <div class="finance-label">Actual Cost</div>
+            </div>
+            <div class="finance-item">
+                {% with profit=project.get_profit_margin %}
+                <div class="finance-value {% if profit < 0 %}negative{% else %}positive{% endif %}">
+                    {{ profit|floatformat:2 }}%
+                </div>
+                <div class="finance-label">Profit Margin</div>
+                {% endwith %}
+            </div>
+        </div>
+        
+        {% if project.budget %}
+        <div class="budget-utilization">
+            <div class="budget-title">Budget Utilization</div>
+            <div class="utilization-container">
+                {% with utilization=project.get_budget_utilization %}
+                <div class="utilization-progress {% if utilization > 90 %}utilization-danger{% elif utilization > 70 %}utilization-warning{% else %}utilization-safe{% endif %}" 
+                     style="width: {% if utilization > 100 %}100{% else %}{{ utilization }}{% endif %}%;">
+                </div>
+                {% endwith %}
+            </div>
+            <div class="utilization-markers">
+                <span>0%</span>
+                <span>{{ project.get_budget_utilization|floatformat:1 }}%</span>
+                <span>100%</span>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="card-footer-actions">
+            <a href="{% url 'project_management:project_finances' project.pk %}" class="button button-sm button-outline">
+                View Detailed Report
+            </a>
+        </div>
+    </div>
+    
+    <!-- Tabs -->
+    <div class="dashboard-card project-tabs">
+        <div class="tab-navigation">
+            <div class="tab-link active" data-tab="milestones">
+                <i class="fas fa-flag"></i> Milestones
+            </div>
+            <div class="tab-link" data-tab="notes">
+                <i class="fas fa-sticky-note"></i> Notes
+            </div>
+            <div class="tab-link" data-tab="documents">
+                <i class="fas fa-file-alt"></i> Documents
+            </div>
+        </div>
+        
+        <!-- Milestones Tab -->
+        <div class="tab-content active" id="milestones">
+            <div class="tab-header">
+                <h3>Project Milestones</h3>
+                <a href="{% url 'project_management:milestone_create' project.pk %}" class="button button-sm button-primary">
+                    <i class="fas fa-plus"></i> Add Milestone
+                </a>
+            </div>
+            
+            {% if project.milestones.all %}
+            <div class="milestone-list">
+                {% for milestone in project.milestones.all %}
+                <div class="milestone-item">
+                    <div class="milestone-marker">
+                        <div class="milestone-indicator bg-{% if milestone.status == 'COMPLETED' %}success{% elif milestone.status == 'IN_PROGRESS' %}primary{% elif milestone.status == 'OVERDUE' %}danger{% else %}secondary{% endif %}"></div>
+                        <div class="milestone-line"></div>
+                    </div>
+                    <div class="milestone-details">
+                        <div class="milestone-title">{{ milestone.title }}</div>
+                        <div class="milestone-date">Due: {{ milestone.due_date|date:"M d, Y" }}</div>
+                        <div class="milestone-status status-{{ milestone.status|lower }}">
+                            {{ milestone.get_status_display }}
+                        </div>
+                        <div class="milestone-actions">
+                            <a href="{% url 'project_management:milestone_update' project.pk milestone.pk %}" class="button button-sm button-icon">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'project_management:milestone_delete' project.pk milestone.pk %}" class="button button-sm button-icon danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>No milestones have been added to this project yet.</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Notes Tab -->
+        <div class="tab-content" id="notes">
+            <div class="tab-header">
+                <h3>Project Notes</h3>
+                <a href="{% url 'project_management:note_create' project.pk %}" class="button button-sm button-primary">
+                    <i class="fas fa-plus"></i> Add Note
+                </a>
+            </div>
+            
+            {% if project.notes.all %}
+            <div class="note-list">
+                {% for note in project.notes.all %}
+                <div class="note-item">
+                    <div class="note-header">
+                        <div class="note-title">{{ note.title }}</div>
+                        <div class="note-meta">{{ note.created_at|date:"M d, Y H:i" }}</div>
+                    </div>
+                    <div class="note-content">
+                        {{ note.content|linebreaks }}
+                    </div>
+                    <div class="note-footer">
+                        <div>By: {{ note.created_by }}</div>
+                        <div class="note-actions">
+                            <a href="{% url 'project_management:note_update' project.pk note.pk %}" class="button button-sm button-icon">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'project_management:note_delete' project.pk note.pk %}" class="button button-sm button-icon danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>No notes have been added to this project yet.</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Documents Tab -->
+        <div class="tab-content" id="documents">
+            <div class="tab-header">
+                <h3>Project Documents</h3>
+                <a href="{% url 'project_management:document_create' project.pk %}" class="button button-sm button-primary">
+                    <i class="fas fa-plus"></i> Upload Document
+                </a>
+            </div>
+            
+            {% if project.documents.all %}
+            <div class="document-grid">
+                {% for document in project.documents.all %}
+                <div class="document-item">
+                    <div class="document-icon">
+                        {% if document.document_type == 'PDF' %}
+                        <i class="fas fa-file-pdf"></i>
+                        {% elif document.document_type == 'DOC' %}
+                        <i class="fas fa-file-word"></i>
+                        {% elif document.document_type == 'XLS' %}
+                        <i class="fas fa-file-excel"></i>
+                        {% elif document.document_type == 'IMG' %}
+                        <i class="fas fa-file-image"></i>
+                        {% else %}
+                        <i class="fas fa-file"></i>
+                        {% endif %}
+                    </div>
+                    <div class="document-title">{{ document.title }}</div>
+                    <div class="document-type">{{ document.get_document_type_display }}</div>
+                    <div class="document-actions">
+                        <a href="{{ document.file.url }}" class="button button-sm button-icon" target="_blank">
+                            <i class="fas fa-download"></i>
+                        </a>
+                        <a href="{% url 'project_management:document_delete' project.pk document.pk %}" class="button button-sm button-icon danger">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>No documents have been uploaded to this project yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching functionality
+    const tabLinks = document.querySelectorAll('.tab-link');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            // Remove active class from all tabs
+            tabLinks.forEach(l => l.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            
+            // Add active class to selected tab
+            this.classList.add('active');
+            const tabId = this.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+});
+</script>
+{% endblock %} 

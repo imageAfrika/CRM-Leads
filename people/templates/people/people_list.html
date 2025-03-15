@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/people_styles.css' %}">
+{% endblock %}
+
+{% block title %}People Directory{% endblock %}
+{% block header_title %}People Directory{% endblock %}
+
+{% block content %}
+<!-- People List Header -->
+<div class="people-header">
+    <h1 class="people-title">
+        <i class="fas fa-users"></i> People Directory
+    </h1>
+    <div class="people-actions">
+        <a href="{% url 'people:register_person' %}" class="button button-primary">
+            <i class="fas fa-user-plus"></i> Register New Person
+        </a>
+        <a href="{% url 'people:contact_people' %}" class="button button-secondary">
+            <i class="fas fa-envelope"></i> Contact
+        </a>
+    </div>
+</div>
+
+<!-- Filters Section -->
+<div class="filter-section">
+    <h2 class="filter-title">
+        <i class="fas fa-filter"></i> Filter People
+    </h2>
+    <form method="get" class="filter-form">
+        <div class="form-group">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" id="name" name="name" class="form-input" placeholder="Search by name" value="{{ request.GET.name }}">
+        </div>
+        <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input type="text" id="email" name="email" class="form-input" placeholder="Search by email" value="{{ request.GET.email }}">
+        </div>
+        <div class="form-group">
+            <label for="role" class="form-label">Role</label>
+            <select id="role" name="role" class="form-input">
+                <option value="">All Roles</option>
+                {% for role in roles %}
+                <option value="{{ role.id }}" {% if request.GET.role == role.id|stringformat:"i" %}selected{% endif %}>{{ role.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-submit">
+            <button type="submit" class="button button-primary">
+                <i class="fas fa-search"></i> Search
+            </button>
+            <a href="{% url 'people:people_list' %}" class="button button-outline">
+                <i class="fas fa-times"></i> Clear
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- People Grid -->
+{% if people %}
+<div class="people-grid">
+    {% for person in people %}
+    <div class="person-card">
+        <div class="person-header">
+            {% if person.profile_picture %}
+            <img src="{{ person.profile_picture.url }}" alt="{{ person.full_name }}" class="person-avatar">
+            {% else %}
+            <img src="{% static 'images/default-avatar.png' %}" alt="{{ person.full_name }}" class="person-avatar">
+            {% endif %}
+            <h3 class="person-name">{{ person.full_name }}</h3>
+            <p class="person-role">
+                {% for role in person.role.all %}
+                <span class="badge badge-primary">{{ role.name }}</span>
+                {% empty %}
+                <span class="badge badge-secondary">No Role</span>
+                {% endfor %}
+            </p>
+        </div>
+        <div class="person-body">
+            <div class="person-info">
+                {% if person.email %}
+                <div class="info-item">
+                    <i class="fas fa-envelope info-icon"></i>
+                    <span class="info-text">{{ person.email }}</span>
+                </div>
+                {% endif %}
+                {% if person.phone %}
+                <div class="info-item">
+                    <i class="fas fa-phone info-icon"></i>
+                    <span class="info-text">{{ person.phone }}</span>
+                </div>
+                {% endif %}
+                {% if person.telegram_username %}
+                <div class="info-item">
+                    <i class="fab fa-telegram info-icon"></i>
+                    <span class="info-text">{{ person.telegram_username }}</span>
+                </div>
+                {% endif %}
+                {% if person.address %}
+                <div class="info-item">
+                    <i class="fas fa-map-marker-alt info-icon"></i>
+                    <span class="info-text">{{ person.address|truncatechars:50 }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="person-footer">
+            <a href="{% url 'people:person_detail' pk=person.id %}" class="button button-outline">
+                <i class="fas fa-eye"></i> View
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<div class="pagination">
+    {% if page_obj.has_previous %}
+    <span class="page-item">
+        <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+            <i class="fas fa-angle-double-left"></i>
+        </a>
+    </span>
+    <span class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+            <i class="fas fa-angle-left"></i>
+        </a>
+    </span>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+    {% if page_obj.number == num %}
+    <span class="page-item">
+        <a class="page-link active" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+    </span>
+    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+    <span class="page-item">
+        <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+    </span>
+    {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+    <span class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+            <i class="fas fa-angle-right"></i>
+        </a>
+    </span>
+    <span class="page-item">
+        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+            <i class="fas fa-angle-double-right"></i>
+        </a>
+    </span>
+    {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="card">
+    <div class="card-body" style="text-align: center;">
+        <i class="fas fa-users" style="font-size: 48px; color: #ccc; margin-bottom: 20px;"></i>
+        <h3>No people found</h3>
+        <p>Try adjusting your search criteria or add new people.</p>
+        <a href="{% url 'people:register_person' %}" class="button button-primary">
+            <i class="fas fa-user-plus"></i> Register New Person
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

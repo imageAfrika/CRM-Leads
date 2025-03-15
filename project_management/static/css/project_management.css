@@ -1,0 +1,621 @@
+/* Project Management - Modern and Minimalist Styling */
+
+/* Container & Layout */
+.container-fluid {
+    padding: 1.5rem;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 1.25rem 1.5rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+/* Header and Titles */
+.h3 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+/* Tables */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    font-weight: 600;
+    color: #495057;
+    border-top: none;
+    background-color: #f8f9fa;
+    padding: 0.75rem 1rem;
+}
+
+.table td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.table a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.table a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Project Cards Layout */
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+.project-card {
+    background-color: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+    overflow: hidden;
+    border: none;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.project-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.project-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    background-color: #f8f9fa;
+}
+
+.project-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    color: #333;
+}
+
+.project-card-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+}
+
+.project-card-footer {
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    background-color: #f8f9fa;
+    border-top: 1px solid #f0f0f0;
+}
+
+/* Project Status Badges */
+.badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Progress Bars */
+.progress {
+    height: 0.75rem;
+    background-color: #e9ecef;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.progress-bar {
+    border-radius: 1rem;
+}
+
+/* Form Elements */
+input.form-control,
+select.form-control,
+textarea.form-control {
+    height: 5rem;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #dee2e6;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+textarea.form-control {
+    height: auto;
+    min-height: 6rem;
+}
+
+input.form-control:focus,
+select.form-control:focus,
+textarea.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+/* Filter Form */
+form p {
+    margin-bottom: 1rem;
+}
+
+form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #495057;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    color: #fff;
+}
+
+.btn-outline-secondary {
+    color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.dashboard-card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.dashboard-card-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-card-label {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+/* Project Detail */
+.project-detail-header {
+    margin-bottom: 2rem;
+}
+
+.project-detail-back {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+    text-decoration: none;
+}
+
+.project-detail-back:hover {
+    color: #495057;
+    text-decoration: underline;
+}
+
+.project-detail-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+    color: #343a40;
+}
+
+.project-detail-subtitle {
+    font-size: 1.1rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.project-detail-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.project-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    color: #495057;
+}
+
+.project-detail-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Delete Confirmation */
+.delete-warning {
+    border-left: 4px solid #dc3545;
+    padding: 1rem;
+    background-color: rgba(220, 53, 69, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.btn-actions {
+    margin-top: 1.5rem;
+}
+
+/* Project list styles */
+.project-card .project-status {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.project-card .card-body {
+    padding-top: 2rem;
+}
+
+/* Notes styles */
+.note-item {
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.note-header {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.note-body {
+    margin-bottom: 0.5rem;
+}
+
+.note-footer {
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    color: #6c757d;
+}
+
+/* Milestone styles */
+.milestone-timeline {
+    position: relative;
+    padding-left: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.milestone-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #e9ecef;
+}
+
+.milestone-item {
+    position: relative;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.milestone-item:last-child {
+    border-bottom: none;
+}
+
+.milestone-item::before {
+    content: '';
+    position: absolute;
+    left: -2rem;
+    top: 0.25rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background-color: #007bff;
+    border: 2px solid #fff;
+}
+
+.milestone-item.completed::before {
+    background-color: #28a745;
+}
+
+.milestone-item.overdue::before {
+    background-color: #dc3545;
+}
+
+/* Financial overview styles */
+.financial-summary-card {
+    border-radius: 0.5rem;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.financial-summary-card.revenue {
+    background-color: #007bff;
+}
+
+.financial-summary-card.expenses {
+    background-color: #dc3545;
+}
+
+.financial-summary-card.profit {
+    background-color: #28a745;
+}
+
+.financial-summary-card h3 {
+    font-weight: 300;
+    font-size: 2rem;
+    margin-bottom: 0;
+}
+
+.financial-summary-card p {
+    opacity: 0.8;
+    margin-bottom: 0;
+}
+
+/* Team member styles */
+.team-member-card {
+    margin-bottom: 1rem;
+    transition: transform 0.2s;
+}
+
+.team-member-card:hover {
+    transform: translateY(-3px);
+}
+
+.team-member-avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 1rem;
+}
+
+/* Document styles */
+.document-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem;
+    transition: background-color 0.2s;
+}
+
+.document-item:hover {
+    background-color: #f8f9fa;
+}
+
+.document-icon {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    color: #6c757d;
+}
+
+.document-info {
+    flex-grow: 1;
+}
+
+.document-actions {
+    white-space: nowrap;
+}
+
+/* Budget utilization gauge */
+.budget-gauge {
+    position: relative;
+    height: 0.5rem;
+    background-color: #e9ecef;
+    border-radius: 1rem;
+    margin: 1rem 0;
+}
+
+.budget-gauge-fill {
+    position: absolute;
+    height: 100%;
+    border-radius: 1rem;
+    left: 0;
+    top: 0;
+    transition: width 0.5s ease-in-out;
+}
+
+.budget-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+/* Project finances specific styles */
+.finance-header {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 0.5rem;
+}
+
+.finance-header h1 {
+    margin-bottom: 0.5rem;
+}
+
+.finance-stats-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.finance-stat-card {
+    flex: 1;
+    min-width: 200px;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    color: white;
+    text-align: center;
+}
+
+.finance-stat-card h2 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+}
+
+.revenue-card {
+    background-color: #007bff;
+}
+
+.expense-card {
+    background-color: #dc3545;
+}
+
+.profit-card {
+    background-color: #28a745;
+}
+
+.transaction-table td {
+    vertical-align: middle;
+}
+
+.transaction-amount {
+    font-weight: 500;
+}
+
+.transaction-amount.positive {
+    color: #28a745;
+}
+
+.transaction-amount.negative {
+    color: #dc3545;
+}
+
+/* Loading indicator for ajax requests */
+.loading-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 0.15rem solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #007bff;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+    .finance-stat-card h2 {
+        font-size: 1.8rem;
+    }
+    
+    .finance-header {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+} 

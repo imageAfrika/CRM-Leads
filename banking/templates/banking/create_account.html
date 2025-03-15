@@ -16,11 +16,10 @@
         <div class="form-group">
             <label for="account_type" class="form-label">Account Type</label>
             <select name="account_type" id="account_type" class="form-control" required>
-                <option value="">-- Select Account Type --</option>
-                <option value="SAVINGS">Savings Account</option>
-                <option value="CHECKING">Checking Account</option>
-                <option value="CREDIT">Credit Account</option>
-                <option value="LOAN">Loan Account</option>
+                <option value="">-- Select Project --</option>
+                {% for project in projects %}
+                    <option value="{{ project.id }}">{{ project.name }}</option>
+                {% endfor %}
             </select>
         </div>
         

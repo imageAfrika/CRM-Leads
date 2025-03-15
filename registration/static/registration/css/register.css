@@ -1,0 +1,380 @@
+/* 
+ * registration/register.css
+ * Page-specific styles for the registration forms
+ */
+
+/* Form Container */
+.registration-form-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Multi-step Form Styles */
+.form-step {
+    display: none;
+    animation: fadeIn 0.5s ease;
+}
+
+.form-step.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Step Indicator Enhancement */
+.steps {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+}
+
+.steps::before {
+    content: "";
+    position: absolute;
+    top: 25px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e5e7eb;
+    z-index: 1;
+}
+
+.step {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.step-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: white;
+    border: 2px solid #e5e7eb;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.step.active .step-circle {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2);
+}
+
+.step.completed .step-circle {
+    background-color: #10b981; /* emerald-500 */
+    border-color: #10b981;
+    color: white;
+}
+
+.step-circle .step-icon {
+    display: none;
+    font-size: 1.2rem;
+}
+
+.step.completed .step-circle .step-number {
+    display: none;
+}
+
+.step.completed .step-circle .step-icon {
+    display: block;
+}
+
+.step-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    text-align: center;
+    transition: color 0.3s ease;
+}
+
+.step.active .step-label {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.step.completed .step-label {
+    color: #10b981;
+}
+
+/* Form Control Enhancements */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: white;
+    border: 2px solid #e5e7eb;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    outline: none;
+}
+
+.form-control.error {
+    border-color: #ef4444;
+}
+
+.form-error {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: none;
+}
+
+.form-error.visible {
+    display: block;
+    animation: shakeError 0.6s ease;
+}
+
+@keyframes shakeError {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+/* Password Field with Toggle */
+.password-field {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: color 0.3s ease;
+}
+
+.password-toggle:hover {
+    color: var(--primary-color);
+}
+
+/* Form Grid Layout */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Plan Selection in Registration */
+.plan-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.plan-selection-card {
+    border: 2px solid #e5e7eb;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.plan-selection-card:hover {
+    border-color: var(--primary-color-light);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.plan-selection-card.selected {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+.plan-selection-radio {
+    display: none;
+}
+
+/* Billing Cycle Toggle */
+.billing-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.toggle-label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e5e7eb;
+    transition: .4s;
+    border-radius: 30px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(30px);
+}
+
+.annual-badge {
+    background: #10b981;
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    margin-left: 0.5rem;
+}
+
+/* Form Navigation */
+.form-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* Form Submission */
+.form-submit {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.form-submit .btn {
+    min-width: 200px;
+}
+
+.form-submit-note {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: var(--dark-gray);
+}
+
+/* Terms Checkbox */
+.terms-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.terms-checkbox input[type="checkbox"] {
+    margin-top: 0.25rem;
+}
+
+.terms-checkbox label {
+    font-size: 0.875rem;
+    color: var(--text-color);
+}
+
+.terms-checkbox a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.terms-checkbox a:hover {
+    text-decoration: underline;
+}
+
+/* Form Success Message */
+.success-message {
+    text-align: center;
+    padding: 2rem;
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: var(--border-radius);
+    margin: 2rem 0;
+}
+
+.success-icon {
+    font-size: 3rem;
+    color: #10b981;
+    margin-bottom: 1rem;
+}
+
+.success-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.success-message p {
+    color: var(--dark-gray);
+    margin-bottom: 1.5rem;
+} 

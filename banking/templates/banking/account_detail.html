@@ -14,6 +14,7 @@
     <div class="account-header">
         <div class="account-info">
             <div class="account-type">{{ account.get_account_type_display }}</div>
+            <div class="account-name">{{ account.project.name }}</div>
             <div class="account-number">{{ account.account_number }}</div>
             <div class="account-date">Created on {{ account.created_at|date:"F d, Y" }}</div>
         </div>
@@ -41,7 +42,7 @@
 
 <div class="section-header">
     <h3><i class="fas fa-history"></i> Recent Transactions</h3>
-    <a href="{% url 'banking:transaction_history' account.account_number %}" class="btn secondary-btn">
+    <a href="{% url 'banking:account_transactions' account.account_number %}" class="btn secondary-btn">
         <i class="fas fa-list"></i> View All
     </a>
 </div>

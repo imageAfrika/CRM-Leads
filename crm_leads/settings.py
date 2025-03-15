@@ -39,18 +39,30 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    
+    # Third-party apps
+    'crispy_forms',
+    'crispy_bootstrap5',
+    
+    # Local apps
+    'authentication',
+    'dashboard',
+    'project_management',
     'clients.apps.ClientsConfig',
+    'leads.apps.LeadsConfig',
+    'products',
+    'crm_leads',
     'sales',
     'documents',
-    'dashboard',
-    'django_extensions',
-    'authentication',
-    'expenses.apps.ExpensesConfig',
-    'purchases.apps.PurchasesConfig',
-    'banking.apps.BankingConfig',
-    'reports.apps.ReportsConfig',
-    'products.apps.ProductsConfig',
-    'access_control.apps.AccessControlConfig',
+    'expenses',
+    'purchases',
+    'banking',
+    'reports',
+    'access_control',
+    'people.apps.PeopleConfig',
+    'registration.apps.RegistrationConfig',
+    'projects',
+    
 ]
 
 MIDDLEWARE = [
@@ -128,19 +140,19 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
+# https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
-    BASE_DIR / 'expenses' / 'static',
-    BASE_DIR / 'banking' / 'static',
-    BASE_DIR / 'reports' / 'static',
-    BASE_DIR / 'purchases' / 'static',
-    BASE_DIR / 'access_control' / 'static',
-    BASE_DIR / 'products' / 'static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Make sure Django can find app-specific static files
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -160,3 +172,20 @@ LOGIN_REDIRECT_URL = 'authentication:profile_selection'
 
 # Message settings
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+
+# Crispy Forms
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your_email@gmail.com'
+EMAIL_HOST_PASSWORD = 'your_email_password'
+DEFAULT_FROM_EMAIL = 'your_email@gmail.com'
+
+# Other settings
+# Telegram Bot settings
+TELEGRAM_BOT_TOKEN = 'your_telegram_bot_token'

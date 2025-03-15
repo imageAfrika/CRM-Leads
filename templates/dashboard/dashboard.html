@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load humanize %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -137,7 +138,10 @@
             <div class="chart-container">
                 <canvas id="revenueVsExpenditureChart" 
                     data-revenue="{{ stats.total_revenue|default:0 }}" 
-                    data-expenditure="{{ stats.total_expenditure|default:0 }}"></canvas>
+                    data-expenditure="{{ stats.total_expenditure|default:0 }}"
+                    data-monthly-revenue="{{ monthly_revenue|safe|default:'[]' }}"
+                    data-monthly-expenditure="{{ monthly_expenditure|safe|default:'[]' }}"
+                    data-months="{{ months|safe|default:'[]' }}"></canvas>
             </div>
         </div>
         
@@ -193,7 +197,7 @@
             </div>
         </div>
 
-        <a href="{% url 'documents:expenditure' %}" class="stat-link">
+        <a href="{% url 'expenses:expense_list' %}" class="stat-link">
             <div class="stat-card">
                 <div class="stat-icon" style="background: #fee2e2; color: #dc2626;">
                     <i class="fas fa-money-bill"></i>
@@ -205,11 +209,12 @@
                         <i class="fas fa-{% if stats.expenditure_trend < 0 %}arrow-down{% else %}arrow-up{% endif %}"></i>
                         {{ stats.expenditure_trend|floatformat:1 }}%
                     </div>
+                    <div class="stat-description">Combined total from expenses and purchases</div>
                 </div>
             </div>
         </a>
 
-        <a href="{% url 'documents:invoice_list' %}" class="stat-link">
+        <a href="{% url 'documents:invoice_list' %}?status=PAID" class="stat-link">
             <div class="stat-card">
                 <div class="stat-icon" style="background: #dcfce7; color: #16a34a;">
                     <i class="fas fa-file-invoice-dollar"></i>
@@ -221,9 +226,29 @@
                         <i class="fas fa-{% if stats.revenue_trend > 0 %}arrow-up{% else %}arrow-down{% endif %}"></i>
                         {{ stats.revenue_trend|floatformat:1 }}%
                     </div>
+                    <div class="stat-description">From paid invoices only</div>
                 </div>
             </div>
         </a>
+    <!-- Pnl Analysis -->
+     <div class="stat-card">
+        <div class="stat-icon" style="background: #f3e8ff; color: #7e22ce;">
+            <i class="fas fa-chart-line"></i>
+            </div>
+        <div class="stat-content">
+            <h3>PnL Analysis</h3>
+            <div class="stat-value">KES {{ stats.total_profit|floatformat:2 }}</div>
+            <div class="stat-trend {% if stats.total_profit_trend >= 0 %}positive{% else %}negative{% endif %}">
+                <i class="fas fa-{% if stats.total_profit_trend >= 0 %}arrow-up{% else %}arrow-down{% endif %}"></i>
+                {{ stats.total_profit_trend|floatformat:1 }}%
+            </div>
+        </div>
+     </div>
+
+
+
+
+
 
         <div class="stat-card">
             <div class="stat-icon" style="background: #f3e8ff; color: #7e22ce;">

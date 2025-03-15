@@ -1,0 +1,413 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Financial Overview: {{ project.name }} | {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/project_management.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Financial Overview: {{ project.name }}</h1>
+        <div>
+            <a href="{% url 'project_management:project_detail' project.pk %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Project
+            </a>
+        </div>
+    </div>
+    
+    <!-- Financial Summary -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Revenue</h5>
+                    <h2 class="display-6">{{ financial_summary.total_revenue|default:0|floatformat:2|intcomma }}</h2>
+                    <p class="card-text">Total income from this project</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-danger text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Expenses</h5>
+                    <h2 class="display-6">{{ financial_summary.total_expenses|default:0|floatformat:2|intcomma }}</h2>
+                    <p class="card-text">Total expenses for this project</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Net Profit</h5>
+                    <h2 class="display-6">{{ financial_summary.total_profit|default:0|floatformat:2|intcomma }}</h2>
+                    <p class="card-text">Revenue minus expenses</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Budget vs Actual -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Budget vs Actual</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Project Budget</h6>
+                            <h3>{{ project.budget|default:0|floatformat:2|intcomma }}</h3>
+                            
+                            {% if project.budget %}
+                                <div class="progress mt-2">
+                                    {% with utilization=project.get_budget_utilization %}
+                                        <div class="progress-bar {% if utilization > 100 %}bg-danger{% else %}bg-success{% endif %}" 
+                                             role="progressbar" 
+                                             style="width: {{ utilization|min:100 }}%;" 
+                                             aria-valuenow="{{ utilization|min:100 }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                            {{ utilization|floatformat:1 }}%
+                                        </div>
+                                    {% endwith %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>Actual Cost</h6>
+                            <h3>{{ project.actual_cost|default:0|floatformat:2|intcomma }}</h3>
+                            
+                            {% if project.budget and project.actual_cost > project.budget %}
+                                <div class="alert alert-danger mt-2">
+                                    <i class="fas fa-exclamation-triangle"></i> Over budget by {{ project.actual_cost|sub:project.budget|floatformat:2|intcomma }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Project Account Information -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Project Account</h5>
+                </div>
+                <div class="card-body">
+                    {% if project_account %}
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th>Account Number:</th>
+                                    <td>{{ project_account.account_number }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Account Type:</th>
+                                    <td>{{ project_account.get_account_type_display }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Current Balance:</th>
+                                    <td>{{ project_account.balance|floatformat:2|intcomma }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Created On:</th>
+                                    <td>{{ project_account.created_at|date:"Y-m-d" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            No project account found. Please create one to track finances for this project.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Recent Transactions</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_transactions %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Description</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transaction in recent_transactions %}
+                                        <tr>
+                                            <td>{{ transaction.timestamp|date:"Y-m-d" }}</td>
+                                            <td>{{ transaction.description }}</td>
+                                            <td>
+                                                <span class="badge
+                                                    {% if transaction.transaction_type == 'DEPOSIT' or transaction.transaction_type == 'TRANSFER_IN' or transaction.transaction_type == 'PAYMENT_RECEIVED' %}
+                                                        bg-success
+                                                    {% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER_OUT' or transaction.transaction_type == 'PAYMENT_SENT' %}
+                                                        bg-danger
+                                                    {% else %}
+                                                        bg-secondary
+                                                    {% endif %}
+                                                ">
+                                                    {{ transaction.get_transaction_type_display }}
+                                                </span>
+                                            </td>
+                                            <td class="
+                                                {% if transaction.transaction_type == 'DEPOSIT' or transaction.transaction_type == 'TRANSFER_IN' or transaction.transaction_type == 'PAYMENT_RECEIVED' %}
+                                                    text-success
+                                                {% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER_OUT' or transaction.transaction_type == 'PAYMENT_SENT' %}
+                                                    text-danger
+                                                {% endif %}
+                                            ">
+                                                {% if transaction.transaction_type == 'DEPOSIT' or transaction.transaction_type == 'TRANSFER_IN' or transaction.transaction_type == 'PAYMENT_RECEIVED' %}
+                                                    +
+                                                {% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER_OUT' or transaction.transaction_type == 'PAYMENT_SENT' %}
+                                                    -
+                                                {% endif %}
+                                                {{ transaction.amount|floatformat:2|intcomma }}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No recent transactions for this project.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Related Financial Items -->
+    <div class="row">
+        <!-- Invoices -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Invoices</h5>
+                    {% if invoices %}
+                        <a href="#" class="btn btn-sm btn-primary">View All</a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if invoices %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Invoice #</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for invoice in invoices|slice:":5" %}
+                                        <tr>
+                                            <td>
+                                                <a href="#">{{ invoice.invoice_number }}</a>
+                                            </td>
+                                            <td>{{ invoice.date|date:"Y-m-d" }}</td>
+                                            <td>
+                                                <span class="badge
+                                                    {% if invoice.status == 'PAID' %}
+                                                        bg-success
+                                                    {% elif invoice.status == 'PENDING' %}
+                                                        bg-warning
+                                                    {% elif invoice.status == 'OVERDUE' %}
+                                                        bg-danger
+                                                    {% else %}
+                                                        bg-secondary
+                                                    {% endif %}
+                                                ">
+                                                    {{ invoice.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>{{ invoice.total_amount|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No invoices for this project.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Expenses -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Expenses</h5>
+                    {% if expenses %}
+                        <a href="#" class="btn btn-sm btn-primary">View All</a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if expenses %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Date</th>
+                                        <th>Category</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for expense in expenses|slice:":5" %}
+                                        <tr>
+                                            <td>
+                                                <a href="#">{{ expense.description }}</a>
+                                            </td>
+                                            <td>{{ expense.date|date:"Y-m-d" }}</td>
+                                            <td>{{ expense.category }}</td>
+                                            <td>{{ expense.amount|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No expenses for this project.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Quotations -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Quotations</h5>
+                    {% if quotations %}
+                        <a href="#" class="btn btn-sm btn-primary">View All</a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if quotations %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Quote #</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for quote in quotations|slice:":5" %}
+                                        <tr>
+                                            <td>
+                                                <a href="#">{{ quote.quotation_number }}</a>
+                                            </td>
+                                            <td>{{ quote.date|date:"Y-m-d" }}</td>
+                                            <td>
+                                                <span class="badge
+                                                    {% if quote.status == 'ACCEPTED' %}
+                                                        bg-success
+                                                    {% elif quote.status == 'PENDING' %}
+                                                        bg-warning
+                                                    {% elif quote.status == 'REJECTED' %}
+                                                        bg-danger
+                                                    {% else %}
+                                                        bg-secondary
+                                                    {% endif %}
+                                                ">
+                                                    {{ quote.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>{{ quote.total_amount|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No quotations for this project.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Purchases -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Purchases</h5>
+                    {% if purchases %}
+                        <a href="#" class="btn btn-sm btn-primary">View All</a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if purchases %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Purchase #</th>
+                                        <th>Date</th>
+                                        <th>Supplier</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for purchase in purchases|slice:":5" %}
+                                        <tr>
+                                            <td>
+                                                <a href="#">{{ purchase.purchase_number }}</a>
+                                            </td>
+                                            <td>{{ purchase.date|date:"Y-m-d" }}</td>
+                                            <td>{{ purchase.supplier }}</td>
+                                            <td>{{ purchase.total_amount|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No purchases for this project.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/project_management.js' %}"></script>
+{% endblock %} 

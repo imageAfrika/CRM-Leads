@@ -1,5 +1,11 @@
 {% extends "products/base_products.html" %}
 {% load static %}
+{% load humanize %}
+{% load currency_filters %}
+
+{% block app_css %}
+<link rel="stylesheet" href="{% static 'products/css/purchase_list.css' %}">
+{% endblock %}
 
 {% block product_content %}
 <div class="card">

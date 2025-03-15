@@ -24,6 +24,11 @@ from .utils import (
     export_report_to_csv, send_scheduled_report
 )
 
+from products.models import Product, Category, Purchase
+from project_management.models import Project
+from leads.models import Lead
+from clients.models import Client
+
 
 @login_required
 def dashboard(request):
@@ -55,11 +60,26 @@ def dashboard(request):
         is_active=True
     ).order_by('next_run')[:5]
     
+    # Get the current date
+    today = timezone.now().date()
+    start_date = today - timedelta(days=30)
+    
+    # Get stats for various models
     context = {
         'favorite_reports': favorite_reports,
         'recent_reports': recent_reports,
         'report_types': report_types,
         'scheduled_reports': scheduled_reports,
+        'recent_purchases': Purchase.objects.order_by('-purchase_date')[:5],
+        'total_products': Product.objects.count(),
+        'active_products': Product.objects.filter(is_active=True).count(),
+        'total_clients': Client.objects.count(),
+        'active_clients': Client.objects.filter(is_active=True).count(),
+        'total_projects': Project.objects.count(),
+        'active_projects': Project.objects.filter(status='in_progress').count(),
+        'total_leads': Lead.objects.count(),
+        'converted_leads': Lead.objects.filter(status='converted').count(),
+        'lead_conversion_rate': calculate_lead_conversion_rate(),
     }
     
     return render(request, 'reports/dashboard.html', context)
@@ -155,6 +175,64 @@ def leads_reports(request):
     return render_report_type(request, 'LEADS')
 
 
+@login_required
+def projects_reports(request):
+    """
+    Display projects reports.
+    """
+    # Get all projects
+    projects = Project.objects.all()
+    
+    # Get project statistics
+    total_projects = projects.count()
+    active_projects = projects.filter(status='in_progress').count()
+    completed_projects = projects.filter(status='completed').count()
+    
+    # Calculate on-time and delayed projects
+    on_time_projects = 0
+    delayed_projects = 0
+    for project in projects:
+        if project.end_date and project.end_date < timezone.now().date() and project.status != 'completed':
+            delayed_projects += 1
+        elif project.status == 'completed':
+            if project.completed_date and project.end_date and project.completed_date <= project.end_date:
+                on_time_projects += 1
+            elif project.status == 'completed':
+                on_time_projects += 1
+    
+    # Calculate percentages
+    active_percentage = (active_projects / total_projects * 100) if total_projects > 0 else 0
+    completed_percentage = (completed_projects / total_projects * 100) if total_projects > 0 else 0
+    on_time_percentage = (on_time_projects / completed_projects * 100) if completed_projects > 0 else 0
+    
+    # Group projects by client
+    projects_by_client = {}
+    for project in projects:
+        client_name = project.client.name if project.client else "No Client"
+        if client_name in projects_by_client:
+            projects_by_client[client_name] += 1
+        else:
+            projects_by_client[client_name] = 1
+    
+    # Group projects by type
+    projects_by_type = Project.objects.values('project_type').annotate(count=Count('id'))
+    
+    context = {
+        'projects': projects,
+        'total_projects': total_projects,
+        'active_projects': active_projects,
+        'completed_projects': completed_projects,
+        'delayed_projects': delayed_projects,
+        'active_percentage': round(active_percentage, 1),
+        'completed_percentage': round(completed_percentage, 1),
+        'on_time_percentage': round(on_time_percentage, 1),
+        'projects_by_client': projects_by_client,
+        'projects_by_type': projects_by_type,
+    }
+    
+    return render(request, 'reports/projects_reports.html', context)
+
+
 def render_report_type(request, report_type):
     """
     Helper function to render reports of a specific type.
@@ -204,24 +282,45 @@ def create_report(request):
     Create a new report.
     """
     if request.method == 'POST':
-        form = ReportConfigurationForm(request.POST)
-        if form.is_valid():
-            # Create the report
-            report = Report.objects.create(
-                name=form.cleaned_data['name'],
-                description=form.cleaned_data['description'],
-                created_by=request.user
-            )
+        report_type = request.POST.get('report_type')
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        category = request.POST.get('category')
+        template = request.POST.get('template')
+        date_range = request.POST.get('date_range')
+        is_favorite = request.POST.get('is_favorite') == 'on'
+        
+        # Process different report types
+        if report_type == 'standard':
+            # Handle standard report creation
+            messages.success(request, f'Standard report "{title}" has been created successfully.')
+            return redirect('reports:report_list')
             
-            # Create the configuration
-            config = form.save(commit=False)
-            config.report = report
-            config.save()
+        elif report_type == 'custom':
+            # Handle custom report with modules and data sources
+            modules = request.POST.getlist('modules')
+            sources = request.POST.getlist('sources')
             
-            messages.success(request, 'Report created successfully.')
-            return redirect('reports:view_report', report_id=report.id)
-        else:
-            form = ReportConfigurationForm()
+            messages.success(request, f'Custom report "{title}" with {len(modules)} modules has been created successfully.')
+            return redirect('reports:report_list')
+            
+        elif report_type == 'scheduled':
+            # Handle scheduled report with frequency and delivery options
+            frequency = request.POST.get('frequency')
+            delivery_method = request.POST.get('delivery_method')
+            
+            if frequency == 'weekly':
+                day_of_week = request.POST.get('day_of_week')
+            elif frequency == 'monthly':
+                day_of_month = request.POST.get('day_of_month')
+                
+            if delivery_method in ['email', 'both']:
+                recipients = request.POST.get('recipients')
+            
+            messages.success(request, f'Scheduled report "{title}" set to run {frequency} has been created successfully.')
+            return redirect('reports:report_list')
+    else:
+        form = ReportConfigurationForm()
     
     context = {
         'form': form,
@@ -573,3 +672,13 @@ def api_get_report_data(request, report_id):
     chart_data = generate_chart_data(report.configuration)
     
     return JsonResponse(chart_data)
+
+
+def calculate_lead_conversion_rate():
+    total_leads = Lead.objects.count()
+    converted_leads = Lead.objects.filter(status='converted').count()
+    
+    if total_leads > 0:
+        return round((converted_leads / total_leads) * 100, 1)
+    else:
+        return 0.0

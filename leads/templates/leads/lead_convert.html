@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Convert Lead to Client | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Convert Lead to Client</h1>
+        <a href="{% url 'leads:lead_detail' lead.pk %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Lead
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <p class="lead">Are you sure you want to convert "{{ lead.title }}" to a client?</p>
+                
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-info-circle"></i> Information</h5>
+                    <p class="mb-0">Converting this lead will:</p>
+                    <ul class="mb-0">
+                        <li>Create a new client record with the lead's information</li>
+                        <li>Mark the lead as converted</li>
+                        <li>Preserve all lead history and activities</li>
+                        <li>Allow you to start managing projects and invoices for this client</li>
+                    </ul>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Lead Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <dl class="row">
+                                    <dt class="col-sm-4">Company Name</dt>
+                                    <dd class="col-sm-8">{{ lead.company_name }}</dd>
+
+                                    <dt class="col-sm-4">Contact Person</dt>
+                                    <dd class="col-sm-8">{{ lead.contact_person }}</dd>
+
+                                    <dt class="col-sm-4">Email</dt>
+                                    <dd class="col-sm-8">{{ lead.email }}</dd>
+
+                                    <dt class="col-sm-4">Phone</dt>
+                                    <dd class="col-sm-8">{{ lead.phone }}</dd>
+                                </dl>
+                            </div>
+                            <div class="col-md-6">
+                                <dl class="row">
+                                    <dt class="col-sm-4">Website</dt>
+                                    <dd class="col-sm-8">{{ lead.website|default:"-" }}</dd>
+
+                                    <dt class="col-sm-4">Status</dt>
+                                    <dd class="col-sm-8">
+                                        <span class="badge bg-{{ lead.get_status_color }}">
+                                            {{ lead.get_status_display }}
+                                        </span>
+                                    </dd>
+
+                                    <dt class="col-sm-4">Created</dt>
+                                    <dd class="col-sm-8">{{ lead.created_at|date:"Y-m-d" }}</dd>
+
+                                    <dt class="col-sm-4">Assigned To</dt>
+                                    <dd class="col-sm-8">{{ lead.assigned_to|default:"Unassigned" }}</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-exchange-alt"></i> Convert to Client
+                    </button>
+                    <a href="{% url 'leads:lead_detail' lead.pk %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

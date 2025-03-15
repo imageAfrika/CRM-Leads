@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Project Management{% endblock %}</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Base CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    
+    <!-- Project Management Core CSS -->
+    <link rel="stylesheet" href="{% static 'css/project_management.css' %}">
+    <link rel="stylesheet" href="{% static 'css/project_sidebar.css' %}">
+    
+    <!-- Page-specific CSS -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <div class="app-sidebar">
+            <div class="sidebar-menu">
+                <div class="sidebar-heading">
+                    Main
+                </div>
+                <a href="{% url 'dashboard:dashboard' %}" class="sidebar-link">
+                    <i class="fas fa-chart-line"></i>
+                    Dashboard
+                </a>
+                <a href="{% url 'people:people_list' %}" class="sidebar-link">
+                    <i class="fas fa-users"></i>
+                    People
+                </a>
+                <a href="{% url 'leads:lead_list' %}" class="sidebar-link">
+                    <i class="fas fa-funnel-dollar"></i>
+                    Leads
+                </a>
+                <a href="{% url 'project_management:project_list' %}" class="sidebar-link active">
+                    <i class="fas fa-tasks"></i>
+                    Projects
+                </a>
+                
+                <div class="sidebar-heading">
+                    Project Tools
+                </div>
+                <a href="{% url 'project_management:project_list' %}" class="sidebar-link">
+                    <i class="fas fa-list"></i>
+                    All Projects
+                </a>
+                <a href="{% url 'project_management:project_create' %}" class="sidebar-link">
+                    <i class="fas fa-plus-circle"></i>
+                    New Project
+                </a>
+                <a href="{% url 'project_management:project_dashboard' %}" class="sidebar-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Project Dashboard
+                </a>
+                <a href="{% url 'project_management:project_analytics' %}" class="sidebar-link">
+                    <i class="fas fa-chart-bar"></i>
+                    Analytics
+                </a>
+                
+                <div class="sidebar-heading">
+                    Sales & Finance
+                </div>
+                <a href="{% url 'products:product_list' %}" class="sidebar-link">
+                    <i class="fas fa-box"></i>
+                    Products
+                </a>
+                <a href="{% url 'sales:sale_list' %}" class="sidebar-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    Sales
+                </a>
+                <a href="{% url 'purchases:purchase_list' %}" class="sidebar-link">
+                    <i class="fas fa-truck"></i>
+                    Purchases
+                </a>
+                <a href="{% url 'expenses:expense_list' %}" class="sidebar-link">
+                    <i class="fas fa-receipt"></i>
+                    Expenses
+                </a>
+                <a href="{% url 'banking:dashboard' %}" class="sidebar-link">
+                    <i class="fas fa-university"></i>
+                    Banking
+                </a>
+                
+                <div class="sidebar-heading">
+                    Other
+                </div>
+                <a href="{% url 'documents:document_list' %}" class="sidebar-link">
+                    <i class="fas fa-file-alt"></i>
+                    Documents
+                </a>
+                <a href="#" class="sidebar-link">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="app-main">
+            <!-- Header -->
+            <div class="app-header">
+                <div class="header-left">
+                    <span class="sidebar-toggle">
+                        <i class="fas fa-bars"></i>
+                    </span>
+                    <span class="header-title">
+                        {% block header_title %}Projects{% endblock %}
+                    </span>
+                </div>
+                <div class="header-actions">
+                    <a href="#" class="button button-outline">
+                        <i class="fas fa-bell"></i>
+                    </a>
+                    <a href="#" class="button button-outline">
+                        <i class="fas fa-user"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Content -->
+            <div class="app-content">
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                {% block content %}{% endblock %}
+            </div>
+            
+            <!-- Footer -->
+            <div class="app-footer">
+                &copy; {% now "Y" %} CRM System. All rights reserved.
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script>
+        // Sidebar Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            const sidebar = document.querySelector('.app-sidebar');
+            const overlay = document.createElement('div');
+            overlay.classList.add('sidebar-overlay');
+            document.body.appendChild(overlay);
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                    overlay.classList.toggle('show');
+                });
+            }
+            
+            // Close sidebar when clicking on overlay
+            overlay.addEventListener('click', function() {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+            });
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(event) {
+                if (window.innerWidth <= 768) {
+                    if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
+                        sidebar.classList.remove('show');
+                        overlay.classList.remove('show');
+                    }
+                }
+            });
+        });
+    </script>
+    
+    <!-- Additional JavaScript -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

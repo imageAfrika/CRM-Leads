@@ -3,10 +3,16 @@ MIDDLEWARE = [
     'authentication.middleware.ProfileAuthenticationMiddleware',
 ]
 
+# Set DEBUG to True for development
+DEBUG = True
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [
+            BASE_DIR / 'templates',
+            BASE_DIR / 'registration' / 'templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -31,6 +37,10 @@ STATICFILES_DIRS = [
     BASE_DIR / 'banking' / 'static',
     BASE_DIR / 'banking' / 'static' / 'banking',
     BASE_DIR / 'reports' / 'static',
+    BASE_DIR / 'registration' / 'static',
+    BASE_DIR / 'access_control' / 'static',
+    BASE_DIR / 'people' / 'static',
+    BASE_DIR / 'project_management' / 'static',
 ]
 
 # The absolute path to the directory where collectstatic will collect static files for deployment
@@ -55,4 +65,7 @@ INSTALLED_APPS = [
     'banking.apps.BankingConfig',
     'reports.apps.ReportsConfig',
     'access_control.apps.AccessControlConfig',
+    'registration.apps.RegistrationConfig',
+    'people.apps.PeopleConfig',
+    'project_management.apps.ProjectManagementConfig',
 ]

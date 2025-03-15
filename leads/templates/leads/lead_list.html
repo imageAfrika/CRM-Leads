@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Leads | {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'leads/css/leads.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="leads-container">
+    <div class="leads-header">
+        <h1 class="leads-title">Leads</h1>
+        <div class="leads-actions">
+            <a href="{% url 'leads:lead_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Lead
+            </a>
+        </div>
+    </div>
+
+    <div class="lead-card mb-4">
+        <div class="lead-card-header">
+            <h5 class="lead-name">Filter Leads</h5>
+        </div>
+        <div class="lead-card-body">
+            <form method="get" class="row g-3 w-100">
+                {{ filter_form.as_p }}
+                <div class="col-12 mt-3">
+                    <div class="lead-form-buttons">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                        <a href="{% url 'leads:lead_list' %}" class="btn btn-secondary">Clear Filters</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if leads %}
+    <div class="lead-list">
+        {% for lead in leads %}
+        <div class="lead-card">
+            <div class="lead-card-header">
+                <h3 class="lead-name">{{ lead.title }}</h3>
+                <span class="lead-status {{ lead.status|lower }}">{{ lead.get_status_display }}</span>
+            </div>
+            <div class="lead-card-body">
+                <div class="lead-info-item">
+                    <span class="lead-info-label">Company</span>
+                    <span class="lead-info-value">{{ lead.company_name }}</span>
+                </div>
+                <div class="lead-info-item">
+                    <span class="lead-info-label">Contact Person</span>
+                    <span class="lead-info-value">{{ lead.contact_person }}</span>
+                </div>
+                <div class="lead-info-item">
+                    <span class="lead-info-label">Priority</span>
+                    <span class="lead-info-value">
+                        <span class="badge bg-{{ lead.get_priority_color }}">
+                            {{ lead.get_priority_display }}
+                        </span>
+                    </span>
+                </div>
+                <div class="lead-info-item">
+                    <span class="lead-info-label">Next Follow-up</span>
+                    <span class="lead-info-value">{{ lead.next_follow_up|date:"M d, Y" }}</span>
+                </div>
+                <div class="lead-info-item">
+                    <span class="lead-info-label">Created</span>
+                    <span class="lead-info-value">{{ lead.created_at|date:"M d, Y" }}</span>
+                </div>
+            </div>
+            <div class="lead-card-footer">
+                <a href="{% url 'leads:lead_detail' lead.pk %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-eye"></i> View
+                </a>
+                <a href="{% url 'leads:lead_update' lead.pk %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="{% url 'leads:lead_delete' lead.pk %}" class="btn btn-outline-danger btn-sm">
+                    <i class="fas fa-trash"></i> Delete
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="lead-empty-state">
+        <div class="lead-empty-icon">
+            <i class="fas fa-user-alt-slash"></i>
+        </div>
+        <h3 class="lead-empty-title">No leads found</h3>
+        <p class="lead-empty-message">
+            There are no leads that match your criteria. Try adjusting your filters or create a new lead.
+        </p>
+        <a href="{% url 'leads:lead_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Your First Lead
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add any JavaScript functionality here
+    });
+</script>
+{% endblock %} 

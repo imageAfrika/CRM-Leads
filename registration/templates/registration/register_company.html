@@ -1,0 +1,262 @@
+{% extends "registration/base_registration.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'registration/css/register_company.css' %}">
+{% endblock %}
+    
+
+{% block title %}Register Company{% endblock %}
+
+{% block content %}
+<div class="registration-container">
+    <section class="registration-header">
+        <h1>Register Your Company</h1>
+        <p>Create your account and start managing your business efficiently</p>
+    </section>
+    
+    <section class="registration-card">
+        <div class="steps-container">
+            <div class="steps">
+                <div class="step active">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Company Information</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Account Setup</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Subscription</div>
+                </div>
+            </div>
+        </div>
+        
+        <form class="registration-form" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-step active">
+                <h2>Company Information</h2>
+                <p>Tell us about your business</p>
+                
+                <div class="form-group">
+                    <label for="company_name">Company Name</label>
+                    <input type="text" class="form-control" id="company_name" name="company_name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="business_type">Business Type</label>
+                    <select class="form-control" id="business_type" name="business_type" required>
+                        <option value="">Select business type</option>
+                        <option value="retail">Retail</option>
+                        <option value="wholesale">Wholesale</option>
+                        <option value="manufacturing">Manufacturing</option>
+                        <option value="service">Service Provider</option>
+                        <option value="consulting">Consulting</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registration_number">Registration Number</label>
+                    <input type="text" class="form-control" id="registration_number" name="registration_number">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tax_id">Tax ID / VAT Number</label>
+                    <input type="text" class="form-control" id="tax_id" name="tax_id">
+                </div>
+                
+                <div class="form-group">
+                    <label for="company_logo">Company Logo (optional)</label>
+                    <input type="file" class="form-control" id="company_logo" name="company_logo">
+                </div>
+                
+                <div class="form-group">
+                    <label for="company_address">Company Address</label>
+                    <textarea class="form-control" id="company_address" name="company_address" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="company_city">City</label>
+                    <input type="text" class="form-control" id="company_city" name="company_city" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="company_country">Country</label>
+                    <input type="text" class="form-control" id="company_country" name="company_country" required>
+                </div>
+                
+                <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-primary btn-next">
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="form-step" style="display: none;">
+                <h2>Account Setup</h2>
+                <p>Create your admin account</p>
+                
+                <div class="form-group">
+                    <label for="admin_name">Full Name</label>
+                    <input type="text" class="form-control" id="admin_name" name="admin_name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="admin_email">Email Address</label>
+                    <input type="email" class="form-control" id="admin_email" name="admin_email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="admin_phone">Phone Number</label>
+                    <input type="tel" class="form-control" id="admin_phone" name="admin_phone" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="admin_password">Password</label>
+                    <div style="position: relative;">
+                        <input type="password" class="form-control" id="admin_password" name="admin_password" required>
+                        <button type="button" class="password-toggle" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="admin_password_confirm">Confirm Password</label>
+                    <div style="position: relative;">
+                        <input type="password" class="form-control" id="admin_password_confirm" name="admin_password_confirm" required>
+                        <button type="button" class="password-toggle" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-outline btn-prev">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button type="button" class="btn btn-primary btn-next">
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="form-step" style="display: none;">
+                <h2>Subscription Plan</h2>
+                <p>Choose a plan that fits your business needs</p>
+                
+                <div class="form-group">
+                    <div class="plan-grid">
+                        <!-- Basic Plan -->
+                        <div class="plan-card" data-plan="basic">
+                            <h3>Basic</h3>
+                            <div class="plan-price">
+                                KES 4,999<small>/month</small>
+                            </div>
+                            <ul class="plan-features">
+                                <li class="included">Up to 3 Users</li>
+                                <li class="included">Client Management</li>
+                                <li class="included">Quotes & Invoices</li>
+                                <li class="included">Basic Reporting</li>
+                                <li class="not-included">Inventory Management</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Professional Plan -->
+                        <div class="plan-card popular" data-plan="professional">
+                            <h3>Professional</h3>
+                            <div class="plan-price">
+                                KES 9,999<small>/month</small>
+                            </div>
+                            <ul class="plan-features">
+                                <li class="included">Up to 10 Users</li>
+                                <li class="included">Client Management</li>
+                                <li class="included">Quotes & Invoices</li>
+                                <li class="included">Inventory Management</li>
+                                <li class="included">Advanced Reporting</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Enterprise Plan -->
+                        <div class="plan-card" data-plan="enterprise">
+                            <h3>Enterprise</h3>
+                            <div class="plan-price">
+                                KES 19,999<small>/month</small>
+                            </div>
+                            <ul class="plan-features">
+                                <li class="included">Unlimited Users</li>
+                                <li class="included">Client Management</li>
+                                <li class="included">Quotes & Invoices</li>
+                                <li class="included">Inventory Management</li>
+                                <li class="included">API Access</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="selected_plan" name="subscription_plan" value="professional">
+                </div>
+                
+                <div class="form-group">
+                    <label>Billing Cycle</label>
+                    <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="radio" name="billing_cycle" value="monthly" checked>
+                            <span>Monthly</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="radio" name="billing_cycle" value="annually">
+                            <span>Annually (Save 20%)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="terms_agreement" name="terms_agreement" required>
+                        <label for="terms_agreement" style="margin-bottom: 0;">
+                            I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>
+                        </label>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-outline btn-prev">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Complete Registration <i class="fas fa-check"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set selected plan from URL parameter if available
+        const urlParams = new URLSearchParams(window.location.search);
+        const planParam = urlParams.get('plan');
+        
+        if (planParam) {
+            const planInput = document.getElementById('selected_plan');
+            if (planInput) {
+                planInput.value = planParam;
+            }
+            
+            const planCards = document.querySelectorAll('.plan-card');
+            planCards.forEach(card => {
+                if (card.dataset.plan === planParam) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %} 

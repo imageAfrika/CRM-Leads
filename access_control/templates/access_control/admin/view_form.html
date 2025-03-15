@@ -1,0 +1,88 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+<link rel="stylesheet" href="{% static "admin/css/forms.css" %}">
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-form{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'access_control:admin_index' %}">{% translate 'Access Control' %}</a>
+&rsaquo; <a href="{% url 'access_control:admin_views' %}">{% translate 'Views' %}</a>
+&rsaquo; {% if view_obj %}{% translate 'Edit' %}: {{ view_obj.name }}{% else %}{% translate 'Add' %}{% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <form method="post" id="view_form" novalidate>
+        {% csrf_token %}
+        <div>
+            {% if form.errors %}
+                <p class="errornote">
+                {% if form.errors.items|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}
+                </p>
+            {% endif %}
+
+            <fieldset class="module aligned">
+                <h2>{% translate 'View Information' %}</h2>
+                
+                <div class="form-row{% if form.name.errors %} errors{% endif %}">
+                    <div class="field-box">
+                        {{ form.name.errors }}
+                        <label for="{{ form.name.id_for_label }}" class="required">{{ form.name.label }}:</label>
+                        {{ form.name }}
+                        {% if form.name.help_text %}<div class="help">{{ form.name.help_text|safe }}</div>{% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row{% if form.app_name.errors %} errors{% endif %}">
+                    <div class="field-box">
+                        {{ form.app_name.errors }}
+                        <label for="{{ form.app_name.id_for_label }}" class="required">{{ form.app_name.label }}:</label>
+                        {{ form.app_name }}
+                        {% if form.app_name.help_text %}<div class="help">{{ form.app_name.help_text|safe }}</div>{% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row{% if form.view_name.errors %} errors{% endif %}">
+                    <div class="field-box">
+                        {{ form.view_name.errors }}
+                        <label for="{{ form.view_name.id_for_label }}" class="required">{{ form.view_name.label }}:</label>
+                        {{ form.view_name }}
+                        {% if form.view_name.help_text %}<div class="help">{{ form.view_name.help_text|safe }}</div>{% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row{% if form.url_pattern.errors %} errors{% endif %}">
+                    <div class="field-box">
+                        {{ form.url_pattern.errors }}
+                        <label for="{{ form.url_pattern.id_for_label }}">{{ form.url_pattern.label }}:</label>
+                        {{ form.url_pattern }}
+                        {% if form.url_pattern.help_text %}<div class="help">{{ form.url_pattern.help_text|safe }}</div>{% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-row{% if form.description.errors %} errors{% endif %}">
+                    <div class="field-box">
+                        {{ form.description.errors }}
+                        <label for="{{ form.description.id_for_label }}">{{ form.description.label }}:</label>
+                        {{ form.description }}
+                        {% if form.description.help_text %}<div class="help">{{ form.description.help_text|safe }}</div>{% endif %}
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="submit-row">
+                <input type="submit" value="{% translate 'Save' %}" class="default" name="_save">
+                {% if view_obj %}
+                    <p class="deletelink-box"><a href="{% url 'access_control:admin_view_delete' view_obj.id %}" class="deletelink">{% translate "Delete" %}</a></p>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %} 

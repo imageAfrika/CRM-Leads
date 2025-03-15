@@ -1,0 +1,128 @@
+{% extends "registration/base_registration.html" %}
+
+{% block title %}Select Payment Method - CRM Leads{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">Select Payment Method</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <i class="fas fa-info-circle fa-2x me-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Order Summary</h5>
+                            <p class="mb-0">You are subscribing to <strong>{{ selected_plan.name }}</strong> with <strong>{{ billing_cycle }}</strong> billing.</p>
+                            <p class="mb-0"><strong>Total Amount: KES {{ amount|floatformat:2 }}</strong></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <h4>Choose Your Payment Method</h4>
+                        
+                        <div class="row mt-3">
+                            {% for payment_method in form.payment_method.field.queryset %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card payment-method-card h-100">
+                                        <div class="card-body">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="payment_method" 
+                                                    id="payment{{ payment_method.id }}" 
+                                                    value="{{ payment_method.id }}" 
+                                                    {% if form.payment_method.value == payment_method.id %}checked{% endif %}>
+                                                <label class="form-check-label w-100" for="payment{{ payment_method.id }}">
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        {% if payment_method.name == 'card' %}
+                                                            <i class="fas fa-credit-card fa-2x text-primary me-3"></i>
+                                                        {% elif payment_method.name == 'mpesa' %}
+                                                            <i class="fas fa-mobile-alt fa-2x text-success me-3"></i>
+                                                        {% elif payment_method.name == 'airtel' %}
+                                                            <i class="fas fa-mobile fa-2x text-danger me-3"></i>
+                                                        {% else %}
+                                                            <i class="fas fa-money-bill-wave fa-2x text-secondary me-3"></i>
+                                                        {% endif %}
+                                                        
+                                                        <h5 class="mb-0">{{ payment_method.get_name_display }}</h5>
+                                                    </div>
+                                                    
+                                                    <p class="text-muted mb-0">{{ payment_method.description }}</p>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 d-flex justify-content-between align-items-center">
+                        <a href="{% url 'registration:subscription_plans' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> Back to Plans
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            Continue to Payment <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+    .payment-method-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 1px solid #dee2e6;
+    }
+    
+    .payment-method-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-color: #6c757d;
+    }
+    
+    .payment-method-card.selected {
+        border-color: #0d6efd;
+        box-shadow: 0 5px 15px rgba(13, 110, 253, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle payment method selection
+        const methodCards = document.querySelectorAll('.payment-method-card');
+        methodCards.forEach(card => {
+            const radio = card.querySelector('input[type="radio"]');
+            
+            // Add selected class if radio is checked initially
+            if (radio.checked) {
+                card.classList.add('selected');
+            }
+            
+            // Add click event to the entire card
+            card.addEventListener('click', function() {
+                // Clear selected class from all cards
+                methodCards.forEach(c => c.classList.remove('selected'));
+                
+                // Check the radio button and add selected class
+                radio.checked = true;
+                card.classList.add('selected');
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

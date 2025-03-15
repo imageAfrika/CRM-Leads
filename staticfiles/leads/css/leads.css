@@ -1,0 +1,830 @@
+/* Leads App - Modern & Minimalist Design
+-------------------------------------------------- */
+
+/* Variables */
+:root {
+  --lead-primary: #4a6cf7;
+  --lead-primary-hover: #3a5ce5;
+  --lead-secondary: #6c757d;
+  --lead-success: #2ecc71;
+  --lead-info: #3498db;
+  --lead-warning: #f39c12;
+  --lead-danger: #e74c3c;
+  --lead-light: #f8f9fa;
+  --lead-dark: #343a40;
+  --lead-grey-100: #f8f9fa;
+  --lead-grey-200: #e9ecef;
+  --lead-grey-300: #dee2e6;
+  --lead-grey-600: #6c757d;
+  --lead-grey-800: #343a40;
+  --lead-border-radius: 8px;
+  --lead-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --lead-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --lead-transition: all 0.3s ease;
+}
+
+/* Lead List Styles */
+.leads-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem 0;
+}
+
+.leads-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--lead-grey-200);
+}
+
+.leads-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.leads-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Lead Cards */
+.lead-card {
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
+  transition: all 0.2s ease;
+  overflow: hidden;
+  border: none;
+}
+
+.lead-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.lead-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #f8f9fa;
+}
+
+.lead-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.lead-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 50px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.lead-status.new {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.lead-status.contacted {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}
+
+.lead-status.qualified {
+  background-color: #fff8e1;
+  color: #ffa000;
+}
+
+.lead-status.proposal {
+  background-color: #ede7f6;
+  color: #7b1fa2;
+}
+
+.lead-status.negotiation {
+  background-color: #e1f5fe;
+  color: #0288d1;
+}
+
+.lead-status.won {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}
+
+.lead-status.lost {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+.lead-card-body {
+  padding: 1.5rem;
+}
+
+.lead-card-footer {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background-color: #f8f9fa;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Lead Detail Styles */
+.lead-detail-header {
+  background-color: white;
+  border-radius: var(--lead-border-radius);
+  box-shadow: var(--lead-shadow);
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.lead-detail-back {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  display: flex;
+  align-items: center;
+  color: var(--lead-grey-600);
+  text-decoration: none;
+  transition: var(--lead-transition);
+}
+
+.lead-detail-back:hover {
+  color: var(--lead-primary);
+}
+
+.lead-detail-name {
+  font-size: 1.75rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.lead-detail-company {
+  text-align: center;
+  color: var(--lead-grey-600);
+  margin-bottom: 1.5rem;
+}
+
+.lead-detail-tags {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.lead-tag {
+  padding: 0.25rem 0.75rem;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  background-color: var(--lead-grey-200);
+  color: var(--lead-grey-800);
+}
+
+.lead-detail-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+/* Lead Timeline Styles */
+.lead-timeline {
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.lead-timeline::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0.5rem;
+  width: 2px;
+  background-color: #dee2e6;
+}
+
+.lead-timeline-item {
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.lead-timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.lead-timeline-marker {
+  position: absolute;
+  left: -1.5rem;
+  top: 0.25rem;
+  width: 1rem;
+  height: 1rem;
+  background-color: #007bff;
+  border-radius: 50%;
+}
+
+.lead-timeline-item:before {
+  content: '';
+  position: absolute;
+  left: -1.2rem;
+  top: 12px;
+  bottom: 0;
+  width: 2px;
+  background-color: var(--lead-grey-300);
+  z-index: 1;
+}
+
+.lead-timeline-item:last-child:before {
+  display: none;
+}
+
+.lead-timeline-date {
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+.lead-timeline-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.lead-timeline-description {
+  font-size: 0.9rem;
+  color: #495057;
+}
+
+/* Lead Notes Styles */
+.lead-note {
+  background-color: var(--lead-grey-100);
+  border-radius: var(--lead-border-radius);
+  padding: 1rem;
+  border-left: 3px solid var(--lead-primary);
+}
+
+.lead-note-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.lead-note-body {
+  font-size: 0.95rem;
+  color: var(--lead-grey-800);
+}
+
+/* Lead Documents Styles */
+.lead-document-item {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--lead-grey-200);
+  display: flex;
+  align-items: center;
+}
+
+.lead-document-item:last-child {
+  border-bottom: none;
+}
+
+.lead-document-item a {
+  color: var(--lead-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.lead-document-item a:hover {
+  text-decoration: underline;
+}
+
+/* Lead Form Styles */
+.lead-form-container {
+  background-color: white;
+  border-radius: var(--lead-border-radius);
+  box-shadow: var(--lead-shadow);
+  padding: 2rem;
+}
+
+.lead-form-header {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.lead-form-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.lead-form-subtitle {
+  color: var(--lead-grey-600);
+}
+
+.lead-form-group {
+  margin-bottom: 1.25rem;
+}
+
+.lead-form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.lead-form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid var(--lead-grey-300);
+  border-radius: var(--lead-border-radius);
+  transition: var(--lead-transition);
+}
+
+.lead-form-control:focus {
+  border-color: var(--lead-primary);
+  box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
+  outline: none;
+}
+
+.lead-form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Lead Dashboard Styles */
+.lead-dashboard-header {
+  margin-bottom: 2rem;
+}
+
+.lead-dashboard-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.lead-dashboard-subtitle {
+  color: var(--lead-grey-600);
+}
+
+.lead-stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.lead-stat-card {
+  background-color: white;
+  border-radius: var(--lead-border-radius);
+  box-shadow: var(--lead-shadow);
+  padding: 1.5rem;
+  transition: var(--lead-transition);
+}
+
+.lead-stat-card:hover {
+  box-shadow: var(--lead-shadow-hover);
+}
+
+.lead-stat-title {
+  font-size: 0.875rem;
+  color: var(--lead-grey-600);
+  margin-bottom: 0.5rem;
+}
+
+.lead-stat-value {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.lead-stat-change {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.lead-stat-change.positive {
+  color: var(--lead-success);
+}
+
+.lead-stat-change.negative {
+  color: var(--lead-danger);
+}
+
+.lead-chart-container {
+  background-color: white;
+  border-radius: var(--lead-border-radius);
+  box-shadow: var(--lead-shadow);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.lead-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.lead-chart-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.lead-chart-filters {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Modal Styles */
+.modal-content {
+  border-radius: var(--lead-border-radius);
+  border: none;
+  box-shadow: var(--lead-shadow-hover);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--lead-grey-200);
+  padding: 1.25rem 1.5rem;
+}
+
+.modal-title {
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--lead-grey-200);
+  padding: 1.25rem 1.5rem;
+}
+
+/* Filter Form Styles */
+.lead-filter-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.lead-filter-form .form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.lead-filter-form .form-control {
+  border-radius: var(--lead-border-radius);
+  border: 1px solid var(--lead-grey-300);
+  padding: 0.5rem 0.75rem;
+}
+
+.lead-filter-form .form-control:focus {
+  border-color: var(--lead-primary);
+  box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
+}
+
+/* Form Field Styles */
+.text-danger {
+  color: var(--lead-danger);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+/* Lead Status Colors for Won/Lost */
+.lead-status.won {
+  background-color: rgba(46, 204, 113, 0.1);
+  color: var(--lead-success);
+}
+
+.lead-status.lost {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: var(--lead-danger);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .leads-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .leads-actions {
+    margin-top: 1rem;
+    width: 100%;
+  }
+  
+  .lead-detail-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .lead-detail-actions .btn {
+    width: 100%;
+  }
+  
+  .lead-form-buttons {
+    flex-direction: column;
+  }
+  
+  .lead-form-buttons .btn {
+    width: 100%;
+  }
+}
+
+/* Override Button Styles */
+.btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--lead-border-radius);
+  font-weight: 500;
+  transition: var(--lead-transition);
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: var(--lead-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--lead-primary-hover);
+}
+
+.btn-outline-primary {
+  background-color: transparent;
+  color: var(--lead-primary);
+  border: 1px solid var(--lead-primary);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--lead-primary);
+  color: white;
+}
+
+.btn-danger {
+  background-color: var(--lead-danger);
+  color: white;
+}
+
+.btn-success {
+  background-color: var(--lead-success);
+  color: white;
+}
+
+.btn-secondary {
+  background-color: var(--lead-secondary);
+  color: white;
+}
+
+/* Empty state styles */
+.lead-empty-state {
+  background-color: white;
+  border-radius: var(--lead-border-radius);
+  box-shadow: var(--lead-shadow);
+  padding: 3rem 2rem;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.lead-empty-icon {
+  font-size: 3rem;
+  color: var(--lead-grey-300);
+  margin-bottom: 1.5rem;
+}
+
+.lead-empty-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.lead-empty-message {
+  color: var(--lead-grey-600);
+  max-width: 500px;
+  margin: 0 auto 1.5rem;
+}
+
+/* Lead List Layout */
+.lead-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Form Fields */
+input.form-control,
+select.form-control,
+textarea.form-control {
+  height: 3rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #dee2e6;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+textarea.form-control {
+  height: auto;
+  min-height: 6rem;
+}
+
+input.form-control:focus,
+select.form-control:focus,
+textarea.form-control:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-label {
+  font-weight: 500;
+  color: #495057;
+}
+
+/* Filter Form */
+form p {
+  margin-bottom: 1rem;
+}
+
+form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #495057;
+}
+
+.lead-form-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Empty State */
+.lead-empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.lead-empty-icon {
+  font-size: 3rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
+.lead-empty-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #343a40;
+}
+
+.lead-empty-message {
+  font-size: 1rem;
+  color: #6c757d;
+  max-width: 500px;
+  margin: 0 auto 1.5rem auto;
+}
+
+/* Lead Detail Page */
+.lead-detail-header {
+  margin-bottom: 2rem;
+}
+
+.lead-detail-back {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+  text-decoration: none;
+}
+
+.lead-detail-back:hover {
+  color: #495057;
+  text-decoration: underline;
+}
+
+.lead-detail-name {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  color: #343a40;
+}
+
+.lead-detail-company {
+  font-size: 1.1rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
+.lead-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.lead-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  color: #495057;
+}
+
+.lead-detail-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Lead Notes */
+.lead-note {
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+}
+
+.lead-note-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.lead-note-body {
+  color: #212529;
+}
+
+/* Lead Timeline */
+.lead-timeline {
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.lead-timeline::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0.5rem;
+  width: 2px;
+  background-color: #dee2e6;
+}
+
+.lead-timeline-item {
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.lead-timeline-marker {
+  position: absolute;
+  left: -1.5rem;
+  top: 0.25rem;
+  width: 1rem;
+  height: 1rem;
+  background-color: #007bff;
+  border-radius: 50%;
+}
+
+.lead-timeline-date {
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+.lead-timeline-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.lead-timeline-description {
+  font-size: 0.9rem;
+  color: #495057;
+}
+
+/* Lead Documents */
+.lead-document-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.lead-document-item:last-child {
+  border-bottom: none;
+} 

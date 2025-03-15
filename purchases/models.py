@@ -46,6 +46,13 @@ class Purchase(models.Model):
         on_delete=models.SET_NULL,
         null=True
     )
+    project = models.ForeignKey(
+        'project_management.Project',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='purchases'
+    )
     quantity = models.PositiveIntegerField(default=1)
     unit_price = models.DecimalField(
         max_digits=10,

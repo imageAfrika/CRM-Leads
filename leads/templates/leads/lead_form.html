@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if lead %}Edit Lead{% else %}New Lead{% endif %} | {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'leads/css/leads_form.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="leads-container">
+    <div class="leads-header">
+        <h1 class="leads-title">{% if lead %}Edit Lead{% else %}New Lead{% endif %}</h1>
+        <div class="leads-actions">
+            <a href="{% url 'leads:lead_list' %}">
+                <i class="fas fa-arrow-left"></i> Back to Leads
+            </a>
+        </div>
+    </div>
+
+    <div class="lead-form-container">
+        <div class="lead-form-header">
+            <h2 class="lead-form-title">{% if lead %}Update Lead Information{% else %}Create New Lead{% endif %}</h2>
+            <p class="lead-form-subtitle">
+                {% if lead %}
+                Update the information for {{ lead.title }}
+                {% else %}
+                Fill in the details to create a new lead
+                {% endif %}
+            </p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="leadForm">
+            {% csrf_token %}
+            
+            <div class="form-row">
+                <div class="form-column">
+                    <div class="lead-form-group">
+                        <label for="{{ form.title.id_for_label }}" class="lead-form-label">Title*</label>
+                        <input type="text" name="title" id="{{ form.title.id_for_label }}" class="lead-form-control" value="{{ form.title.value|default_if_none:'' }}">
+                        {% if form.title.errors %}
+                        <div class="text-danger">{{ form.title.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-column">
+                    <div class="lead-form-group">
+                        <label for="{{ form.status.id_for_label }}" class="lead-form-label">Status*</label>
+                        <select name="status" id="{{ form.status.id_for_label }}" class="lead-form-control">
+                            {% for choice in form.status %}
+                                {{ choice }}
+                            {% endfor %}
+                        </select>
+                        {% if form.status.errors %}
+                        <div class="text-danger">{{ form.status.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-column">
+                    <div class="lead-form-group">
+                        <label for="{{ form.company_name.id_for_label }}" class="lead-form-label">Company Name*</label>
+                        <input type="text" name="company_name" id="{{ form.company_name.id_for_label }}" class="lead-form-control" value="{{ form.company_name.value|default_if_none:'' }}">
+                        {% if form.company_name.errors %}
+                        <div class="text-danger">{{ form.company_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-column">
+                    <div class="lead-form-group">
+                        <label for="{{ form.contact_person.id_for_label }}" class="lead-form-label">Contact Person*</label>
+                        <input type="text" name="contact_person" id="{{ form.contact_person.id_for_label }}" class="lead-form-control" value="{{ form.contact_person.value|default_if_none:'' }}">
+                        {% if form.contact_person.errors %}
+                        <div class="text-danger">{{ form.contact_person.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-column">
+                    <div class="lead-form-group">
+                        <label for="{{ form.email.id_for_label }}" class="lead-form-label">Email*</label>
+                        <input type="email" name="email" id="{{ form.email.id_for_label }}" class="lead-form-control" value="{{ form.email.value|default_if_none:'' }}">
+                        {% if form.email.errors %}
+                        <div class="text-danger">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-column">
+                    <div class="lead-form-group">
+                        <label for="{{ form.phone.id_for_label }}" class="lead-form-label">Phone</label>
+                        <input type="tel" name="phone" id="{{ form.phone.id_for_label }}" class="lead-form-control" value="{{ form.phone.value|default_if_none:'' }}">
+                        {% if form.phone.errors %}
+                        <div class="text-danger">{{ form.phone.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-column">
+                    <div class="lead-form-group">
+                        <label for="{{ form.website.id_for_label }}" class="lead-form-label">Website (Optional)</label>
+                        <input type="url" name="website" id="{{ form.website.id_for_label }}" class="lead-form-control" value="{{ form.website.value|default_if_none:'' }}">
+                        {% if form.website.errors %}
+                        <div class="text-danger">{{ form.website.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-column">
+                    <div class="lead-form-group">
+                        <label for="{{ form.source.id_for_label }}" class="lead-form-label">Source</label>
+                        <select name="source" id="{{ form.source.id_for_label }}" class="lead-form-control">
+                            {% for key, value in form.fields.source.choices %}
+                                <option value="{{ key }}" {% if form.source.value == key %}selected{% endif %}>{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if form.source.errors %}
+                        <div class="text-danger">{{ form.source.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-column">
+                    <div class="lead-form-group">
+                        <label for="{{ form.priority.id_for_label }}" class="lead-form-label">Priority*</label>
+                        <select name="priority" id="{{ form.priority.id_for_label }}" class="lead-form-control">
+                            {% for choice in form.priority %}
+                                {{ choice }}
+                            {% endfor %}
+                        </select>
+                        {% if form.priority.errors %}
+                        <div class="text-danger">{{ form.priority.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-column">
+                    <div class="lead-form-group">
+                        <label for="{{ form.next_follow_up.id_for_label }}" class="lead-form-label">Next Follow-up</label>
+                        <input type="date" name="next_follow_up" id="{{ form.next_follow_up.id_for_label }}" class="lead-form-control" value="{{ form.next_follow_up.value|default_if_none:'' }}">
+                        {% if form.next_follow_up.errors %}
+                        <div class="text-danger">{{ form.next_follow_up.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-column">
+                    <div class="lead-form-group">
+                        <label for="{{ form.assigned_to.id_for_label }}" class="lead-form-label">Assigned To</label>
+                        <select name="assigned_to" id="{{ form.assigned_to.id_for_label }}" class="lead-form-control">
+                            {% for choice in form.assigned_to %}
+                                {{ choice }}
+                            {% endfor %}
+                        </select>
+                        {% if form.assigned_to.errors %}
+                        <div class="text-danger">{{ form.assigned_to.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-column">
+                    <div class="lead-form-group">
+                        <label for="{{ form.estimated_value.id_for_label }}" class="lead-form-label">Estimated Value</label>
+                        <input type="number" name="estimated_value" id="{{ form.estimated_value.id_for_label }}" class="lead-form-control" value="{{ form.estimated_value.value|default_if_none:'' }}">
+                        {% if form.estimated_value.errors %}
+                        <div class="text-danger">{{ form.estimated_value.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-column full-width">
+                    <div class="lead-form-group">
+                        <label for="{{ form.description.id_for_label }}" class="lead-form-label">Description</label>
+                        <textarea name="description" id="{{ form.description.id_for_label }}" class="lead-form-control">{{ form.description.value|default_if_none:'' }}</textarea>
+                        {% if form.description.errors %}
+                        <div class="text-danger">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-column full-width">
+                    <div class="lead-form-group">
+                        <label for="{{ form.requirements.id_for_label }}" class="lead-form-label">Requirements</label>
+                        <textarea name="requirements" id="{{ form.requirements.id_for_label }}" class="lead-form-control">{{ form.requirements.value|default_if_none:'' }}</textarea>
+                        {% if form.requirements.errors %}
+                        <div class="text-danger">{{ form.requirements.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-column full-width">
+                    <div class="lead-form-group">
+                        <label for="{{ form.tags.id_for_label }}" class="lead-form-label">Tags</label>
+                        <input type="text" name="tags" id="{{ form.tags.id_for_label }}" class="lead-form-control" value="{{ form.tags.value|default_if_none:'' }}">
+                        <small class="text-muted">Separate tags with commas</small>
+                        {% if form.tags.errors %}
+                        <div class="text-danger">{{ form.tags.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="lead-form-buttons">
+                <a href="{% url 'leads:lead_list' %}">Cancel</a>
+                <button type="submit">
+                    {% if lead %}Update Lead{% else %}Create Lead{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize date pickers if needed
+        const datePickers = document.querySelectorAll('input[type="date"]');
+        datePickers.forEach(function(picker) {
+            // Custom date picker initialization can go here
+        });
+    });
+</script>
+{% endblock %}

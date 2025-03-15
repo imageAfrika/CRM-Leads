@@ -1,0 +1,41 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} delete-confirmation{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'access_control:admin_index' %}">{% translate 'Access Control' %}</a>
+&rsaquo; <a href="{% url back_url_name %}">{{ model_name|capfirst|escape }}s</a>
+&rsaquo; {{ object|truncatewords:"18" }}
+&rsaquo; {% translate 'Delete' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    {% if related_objects %}
+    <p>{% blocktranslate with escaped_object=object %}Deleting the {{ model_name }} '{{ escaped_object }}' would require deleting the following protected related objects:{% endblocktranslate %}</p>
+    <ul>
+    {% for related in related_objects %}
+        <li>{{ related|capfirst }}: {{ related.count }}</li>
+    {% endfor %}
+    </ul>
+    {% else %}
+    <p>{% blocktranslate with escaped_object=object %}Are you sure you want to delete the {{ model_name }} "{{ escaped_object }}"? All of the following related items will be deleted:{% endblocktranslate %}</p>
+    
+    <ul>{{ deleted_objects|unordered_list }}</ul>
+    
+    <form method="post">{% csrf_token %}
+    <div>
+    <input type="hidden" name="post" value="yes">
+    {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1">{% endif %}
+    {% if to_field %}<input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}">{% endif %}
+    <input type="submit" value="{% translate "Yes, I'm sure" %}">
+    <a href="{{ back_url }}" class="button cancel-link">{% translate "No, take me back" %}</a>
+    </div>
+    </form>
+    {% endif %}
+</div>
+{% endblock %} 

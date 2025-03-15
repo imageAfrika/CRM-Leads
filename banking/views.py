@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.http import HttpResponse
 from decimal import Decimal
 from .models import Account, Transaction, Debt, Tax
+from projects.models import Project
 import uuid
 import random
 import string
@@ -58,6 +59,9 @@ def create_account(request):
     """
     Create a new bank account with a random account number and PIN.
     """
+    # Fetch all registered projects
+    projects = Project.objects.all()  # Adjust the query as needed (e.g., filter by user, status, etc.)
+    
     if request.method == 'POST':
         account_type = request.POST.get('account_type')
         
@@ -67,19 +71,27 @@ def create_account(request):
         # Generate a random PIN
         pin = ''.join(random.choices(string.digits, k=4))
         
-        # Create the account
-        account = Account.objects.create(
-            account_number=account_number,
-            account_type=account_type,
-            owner=request.user,
-            pin=pin,
-            balance=0.00
-        )
-        
-        messages.success(request, f'Account created successfully! Your account number is {account_number} and your PIN is {pin}. Please keep these safe.')
-        return redirect('banking:account_detail', account_number=account_number)
+        try:
+            # Get the project instance based on the selected project ID
+            project = Project.objects.get(id=account_type)
+            
+            # Create the account
+            account = Account.objects.create(
+                account_number=account_number,
+                account_type='PROJECT',  # Set account type to PROJECT
+                owner=request.user,
+                pin=pin,
+                balance=0.00,
+                project=project  # Link the account to the selected project
+            )
+            
+            messages.success(request, f'Account created successfully! Your account number is {account_number} and your PIN is {pin}. Please keep these safe.')
+            return redirect('banking:account_detail', account_number=account_number)
+        except Project.DoesNotExist:
+            messages.error(request, 'Selected project does not exist.')
     
     context = {
+        'projects': projects,  # Add the projects to the context
         'active_tab': 'banking',  # Add this to highlight the banking tab in the navbar
     }
     return render(request, 'banking/create_account.html', context)

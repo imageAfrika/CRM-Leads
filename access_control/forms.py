@@ -1,134 +1,46 @@
 from django import forms
-from django.contrib.auth.models import User, Group
-from django.apps import apps
-from .models import AppPermission, UserAppPermission, GroupAppPermission, AccessLog
+from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import User
 
-class AppPermissionForm(forms.ModelForm):
+from .models import View, Permission
+
+class ViewForm(forms.ModelForm):
+    """Form for adding or editing a View"""
+    
     class Meta:
-        model = AppPermission
-        fields = ['name', 'app_name', 'feature', 'permission_type', 'description', 'is_active']
+        model = View
+        fields = ['name', 'app_name', 'view_name', 'url_pattern', 'description']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
         }
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-        # Get available apps for dropdown
-        app_choices = [(app.name, app.verbose_name) for app in AppPermission.get_available_apps()]
-        self.fields['app_name'] = forms.ChoiceField(choices=[('', '-- Select App --')] + app_choices)
-        
-        # Add Bootstrap classes
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control'})
+        help_texts = {
+            'app_name': _('The Django app this view belongs to.'),
+            'view_name': _('The name of the view function or class.'),
+            'url_pattern': _('The URL pattern that routes to this view.'),
+        }
 
-class UserAppPermissionForm(forms.ModelForm):
+class PermissionForm(forms.ModelForm):
+    """Form for adding or editing a Permission"""
+    
+    user = forms.ModelChoiceField(
+        queryset=User.objects.filter(is_superuser=False, is_staff=False),
+        label=_('User'),
+        help_text=_('The user this permission is for.')
+    )
+    
+    view = forms.ModelChoiceField(
+        queryset=View.objects.all(),
+        label=_('View'),
+        help_text=_('The view this permission grants access to.')
+    )
+    
     class Meta:
-        model = UserAppPermission
-        fields = ['user', 'permission']
-    
-    def __init__(self, *args, **kwargs):
-        current_user = kwargs.pop('current_user', None)
-        super().__init__(*args, **kwargs)
-        
-        # Only show active permissions
-        self.fields['permission'].queryset = AppPermission.objects.filter(is_active=True)
-        
-        # Add Bootstrap classes
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control'})
-        
-        # Save the current user for later use in save method
-        self.current_user = current_user
-    
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        if self.current_user:
-            instance.granted_by = self.current_user
-        if commit:
-            instance.save()
-        return instance
-
-class GroupAppPermissionForm(forms.ModelForm):
-    class Meta:
-        model = GroupAppPermission
-        fields = ['group', 'permission']
-    
-    def __init__(self, *args, **kwargs):
-        current_user = kwargs.pop('current_user', None)
-        super().__init__(*args, **kwargs)
-        
-        # Only show active permissions
-        self.fields['permission'].queryset = AppPermission.objects.filter(is_active=True)
-        
-        # Add Bootstrap classes
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control'})
-        
-        # Save the current user for later use in save method
-        self.current_user = current_user
-    
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        if self.current_user:
-            instance.granted_by = self.current_user
-        if commit:
-            instance.save()
-        return instance
-
-class BulkPermissionForm(forms.Form):
-    users = forms.ModelMultipleChoiceField(
-        queryset=User.objects.all(),
-        required=False,
-        widget=forms.SelectMultiple(attrs={'class': 'form-control'})
-    )
-    
-    groups = forms.ModelMultipleChoiceField(
-        queryset=Group.objects.all(),
-        required=False,
-        widget=forms.SelectMultiple(attrs={'class': 'form-control'})
-    )
-    
-    permissions = forms.ModelMultipleChoiceField(
-        queryset=AppPermission.objects.filter(is_active=True),
-        widget=forms.SelectMultiple(attrs={'class': 'form-control'})
-    )
-    
-    def clean(self):
-        cleaned_data = super().clean()
-        users = cleaned_data.get('users')
-        groups = cleaned_data.get('groups')
-        
-        if not users and not groups:
-            raise forms.ValidationError("You must select at least one user or group.")
-        
-        return cleaned_data
-
-class PermissionRevokeForm(forms.Form):
-    user_permissions = forms.ModelMultipleChoiceField(
-        queryset=UserAppPermission.objects.all(),
-        required=False,
-        widget=forms.CheckboxSelectMultiple
-    )
-    
-    group_permissions = forms.ModelMultipleChoiceField(
-        queryset=GroupAppPermission.objects.all(),
-        required=False,
-        widget=forms.CheckboxSelectMultiple
-    )
-    
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
-        group = kwargs.pop('group', None)
-        super().__init__(*args, **kwargs)
-        
-        if user:
-            self.fields['user_permissions'].queryset = UserAppPermission.objects.filter(user=user)
-            self.fields.pop('group_permissions')
-        elif group:
-            self.fields['group_permissions'].queryset = GroupAppPermission.objects.filter(group=group)
-            self.fields.pop('user_permissions')
-        else:
-            # If neither user nor group is provided, don't show any permissions
-            self.fields['user_permissions'].queryset = UserAppPermission.objects.none()
-            self.fields['group_permissions'].queryset = GroupAppPermission.objects.none() 
+        model = Permission
+        fields = ['user', 'view', 'is_active', 'notes']
+        widgets = {
+            'notes': forms.Textarea(attrs={'rows': 3}),
+        }
+        help_texts = {
+            'is_active': _('Designates whether this permission is active.'),
+            'notes': _('Additional notes about this permission.'),
+        } 

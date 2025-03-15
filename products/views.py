@@ -2,8 +2,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count, F, ExpressionWrapper, DecimalField, Q
+from django.db.models.functions import TruncMonth, TruncDay
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator
 from datetime import datetime, timedelta
 from django.db import transaction
@@ -41,6 +42,16 @@ def product_list(request):
     if status:
         products = products.filter(status=status)
     
+    # Filter by stock level
+    stock_level = request.GET.get('stock_level')
+    if stock_level:
+        if stock_level == 'low':
+            products = products.filter(current_stock__lte=F('reorder_level'), current_stock__gt=0)
+        elif stock_level == 'out':
+            products = products.filter(current_stock__lte=0)
+        elif stock_level == 'in':
+            products = products.filter(current_stock__gt=F('reorder_level'))
+    
     # Search
     search_query = request.GET.get('search')
     if search_query:
@@ -59,11 +70,13 @@ def product_list(request):
     categories = Category.objects.all()
     
     context = {
+        'products': products,
         'page_obj': page_obj,
         'categories': categories,
         'status_choices': Product.STATUS_CHOICES,
         'selected_category': category_id,
         'selected_status': status,
+        'selected_stock_level': stock_level,
         'search_query': search_query,
     }
     return render(request, 'products/product_list.html', context)

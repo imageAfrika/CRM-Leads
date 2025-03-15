@@ -1,0 +1,281 @@
+/* 
+ * registration/app_selection.css
+ * Page-specific styles for the app selection page
+ */
+
+/* App Grid Layout */
+.app-selection-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.app-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 3rem 0;
+}
+
+/* App Card Design */
+.app-card {
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    border: 2px solid transparent;
+}
+
+.app-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color-light);
+}
+
+.app-card.selected {
+    border-color: var(--primary-color);
+    box-shadow: 0 5px 25px rgba(79, 70, 229, 0.2);
+}
+
+.app-card.selected::after {
+    content: "✓";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    z-index: 2;
+}
+
+.app-header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--primary-color-light) 0%, var(--primary-color) 100%);
+    color: white;
+    position: relative;
+}
+
+.app-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.app-header p {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+.app-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.app-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+}
+
+.app-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.app-features li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+}
+
+.app-features li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.app-features li::before {
+    content: "✓";
+    color: #10b981; /* emerald-500 */
+    margin-right: 0.75rem;
+    font-weight: bold;
+}
+
+.app-footer {
+    padding: 1.5rem;
+    background-color: #f9fafb;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.app-price {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.app-toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Checkbox Styling */
+.app-toggle input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.app-toggle .toggle-slider {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+    background-color: #e5e7eb;
+    border-radius: 26px;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.app-toggle .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.app-toggle input:checked + .toggle-slider {
+    background-color: var(--primary-color);
+}
+
+.app-toggle input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+}
+
+.app-toggle .toggle-label {
+    margin-left: 10px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Summary Section */
+.app-summary {
+    margin-top: 3rem;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+}
+
+.summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.summary-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.summary-total {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.summary-apps {
+    margin-bottom: 2rem;
+}
+
+.summary-app-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.summary-app-item:last-child {
+    border-bottom: none;
+}
+
+.summary-app-name {
+    font-weight: 500;
+}
+
+.summary-app-price {
+    color: var(--text-color);
+}
+
+.summary-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+/* Animation */
+.app-card {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.app-card:nth-child(1) { animation-delay: 0.1s; }
+.app-card:nth-child(2) { animation-delay: 0.2s; }
+.app-card:nth-child(3) { animation-delay: 0.3s; }
+.app-card:nth-child(4) { animation-delay: 0.4s; }
+.app-card:nth-child(5) { animation-delay: 0.5s; }
+.app-card:nth-child(6) { animation-delay: 0.6s; }
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .app-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .summary-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .summary-actions {
+        flex-direction: column;
+    }
+    
+    .summary-actions .btn {
+        width: 100%;
+    }
+} 

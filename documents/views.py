@@ -175,6 +175,7 @@ class DocumentListView(ListView):
     model = Document
     template_name = 'documents/document_list.html'
     context_object_name = 'documents'
+    paginate_by = 20
     
     def get_queryset(self):
         queryset = Document.objects.all().order_by('-created_at')
@@ -184,18 +185,36 @@ class DocumentListView(ListView):
         if doc_type:
             queryset = queryset.filter(document_type=doc_type.upper())
             
-        # Filter by date
-        date = self.request.GET.get('date')
-        if date:
-            queryset = queryset.filter(created_at__date=date)
+        # Filter by status
+        status = self.request.GET.get('status')
+        if status:
+            queryset = queryset.filter(status=status.upper())
+            
+        # Filter by date range
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
+        
+        if start_date:
+            try:
+                start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+                queryset = queryset.filter(document_date__gte=start_date)
+            except ValueError:
+                pass
+                
+        if end_date:
+            try:
+                end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+                queryset = queryset.filter(document_date__lte=end_date)
+            except ValueError:
+                pass
             
         # Search filter
         search = self.request.GET.get('search')
         if search:
             queryset = queryset.filter(
-                Q(document_number__icontains=search) |
+                Q(invoice_number__icontains=search) |
                 Q(client__name__icontains=search) |
-                Q(notes__icontains=search)
+                Q(description__icontains=search)
             )
             
         return queryset
@@ -203,10 +222,16 @@ class DocumentListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         doc_type = self.request.GET.get('type', '').upper()
+        status = self.request.GET.get('status', '').upper()
         
         # Add document type to context for template
         context['current_type'] = doc_type
+        context['current_status'] = status
         context['title'] = f"{doc_type.title()}s" if doc_type else "All Documents"
+        
+        # Add document types and statuses for filters
+        context['document_types'] = Document.DOCUMENT_TYPES
+        context['status_choices'] = Document.STATUS_CHOICES
         
         return context
 

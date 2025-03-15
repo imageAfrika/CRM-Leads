@@ -1,115 +1,386 @@
-{% extends "reports/reports_base.html" %}
+{% extends 'base.html' %}
 {% load static %}
+{% load crispy_forms_tags %}
 
-{% block title %}Create Report{% endblock %}
+{% block title %}Create Report | {{ block.super }}{% endblock %}
 
-{% block reports_content %}
+{% block extra_css %}
+<link href="{% static 'css/reports.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
 <div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Create New Report</h1>
-        <a href="{% url 'reports:report_list' %}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
-            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to Reports
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Create Report</h1>
+        <a href="{% url 'reports:report_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Reports
         </a>
     </div>
 
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Report Configuration</h6>
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="reportTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="standard-tab" data-bs-toggle="tab" data-bs-target="#standard" type="button" role="tab" aria-controls="standard" aria-selected="true">Standard Report</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="custom-tab" data-bs-toggle="tab" data-bs-target="#custom" type="button" role="tab" aria-controls="custom" aria-selected="false">Custom Report</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="scheduled-tab" data-bs-toggle="tab" data-bs-target="#scheduled" type="button" role="tab" aria-controls="scheduled" aria-selected="false">Scheduled Report</button>
+                </li>
+            </ul>
                 </div>
                 <div class="card-body">
-                    <form method="post" id="report-form">
+            <div class="tab-content" id="reportTabsContent">
+                <div class="tab-pane fade show active" id="standard" role="tabpanel" aria-labelledby="standard-tab">
+                    <form method="post" id="standard-form" class="needs-validation" novalidate>
                         {% csrf_token %}
+                        <input type="hidden" name="report_type" value="standard">
                         
-                        <div class="form-group row">
-                            <label for="report_type" class="col-sm-2 col-form-label">Report Type</label>
-                            <div class="col-sm-10">
-                                <select class="form-control" id="report_type" name="report_type" required>
-                                    <option value="" selected disabled>Select Report Type</option>
-                                    <option value="BANKING">Banking Report</option>
-                                    <option value="SALES">Sales Report</option>
-                                    <option value="CLIENTS">Clients Report</option>
-                                    <option value="EXPENSES">Expenses Report</option>
-                                    <option value="PURCHASES">Purchases Report</option>
-                                    <option value="LEADS">Leads Report</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group row">
-                            <label for="name" class="col-sm-2 col-form-label">Report Name</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="name" name="name" required>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group row">
-                            <label for="description" class="col-sm-2 col-form-label">Description</label>
-                            <div class="col-sm-10">
-                                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group row">
-                            <label for="date_range" class="col-sm-2 col-form-label">Date Range</label>
-                            <div class="col-sm-10">
-                                <select class="form-control" id="date_range" name="date_range">
-                                    <option value="LAST_7_DAYS">Last 7 Days</option>
-                                    <option value="LAST_30_DAYS">Last 30 Days</option>
-                                    <option value="THIS_MONTH">This Month</option>
-                                    <option value="LAST_MONTH">Last Month</option>
-                                    <option value="THIS_QUARTER">This Quarter</option>
-                                    <option value="LAST_QUARTER">Last Quarter</option>
-                                    <option value="THIS_YEAR">This Year</option>
-                                    <option value="LAST_YEAR">Last Year</option>
-                                    <option value="CUSTOM">Custom Range</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div id="custom_date_range" class="form-group row d-none">
-                            <label class="col-sm-2 col-form-label">Custom Range</label>
-                            <div class="col-sm-5">
-                                <div class="input-group date">
-                                    <input type="text" class="form-control" id="start_date" name="start_date" placeholder="Start Date">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_title" class="form-label">Report Title</label>
+                                    <input type="text" class="form-control" id="id_title" name="title" required>
+                                    <div class="invalid-feedback">
+                                        Please provide a title for this report.
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="id_category" class="form-label">Report Category</label>
+                                    <select class="form-select" id="id_category" name="category" required>
+                                        <option value="" selected disabled>Select a category</option>
+                                        <option value="financial">Financial</option>
+                                        <option value="sales">Sales</option>
+                                        <option value="clients">Clients</option>
+                                        <option value="projects">Projects</option>
+                                        <option value="leads">Leads</option>
+                                        <option value="expenses">Expenses</option>
+                                        <option value="purchases">Purchases</option>
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please select a category.
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="id_template" class="form-label">Report Template</label>
+                                    <select class="form-select" id="id_template" name="template" required>
+                                        <option value="" selected disabled>Select a template</option>
+                                        <!-- Templates will be populated via JavaScript based on selected category -->
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please select a template.
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-5">
-                                <div class="input-group date">
-                                    <input type="text" class="form-control" id="end_date" name="end_date" placeholder="End Date">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_date_range" class="form-label">Date Range</label>
+                                    <select class="form-select" id="id_date_range" name="date_range">
+                                        <option value="last_7_days">Last 7 Days</option>
+                                        <option value="last_30_days" selected>Last 30 Days</option>
+                                        <option value="this_month">This Month</option>
+                                        <option value="last_month">Last Month</option>
+                                        <option value="this_quarter">This Quarter</option>
+                                        <option value="last_quarter">Last Quarter</option>
+                                        <option value="this_year">This Year</option>
+                                        <option value="last_year">Last Year</option>
+                                        <option value="custom">Custom Range</option>
+                                </select>
+                                </div>
+                                
+                                <div id="custom_date_range" class="mb-3 d-none">
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="id_start_date" class="form-label">Start Date</label>
+                                            <input type="date" class="form-control" id="id_start_date" name="start_date">
+                                        </div>
+                                        <div class="col">
+                                            <label for="id_end_date" class="form-label">End Date</label>
+                                            <input type="date" class="form-control" id="id_end_date" name="end_date">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="id_description" class="form-label">Report Description</label>
+                                    <textarea class="form-control" id="id_description" name="description" rows="4"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="id_favorite" name="is_favorite">
+                                <label class="form-check-label" for="id_favorite">
+                                    Add to Favorites
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'reports:report_list' %}'">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Generate Report</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="tab-pane fade" id="custom" role="tabpanel" aria-labelledby="custom-tab">
+                    <form method="post" id="custom-form" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="report_type" value="custom">
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_custom_title" class="form-label">Report Title</label>
+                                    <input type="text" class="form-control" id="id_custom_title" name="title" required>
+                                    <div class="invalid-feedback">
+                                        Please provide a title for this report.
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="id_custom_description" class="form-label">Report Description</label>
+                                    <textarea class="form-control" id="id_custom_description" name="description" rows="4"></textarea>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="id_report_modules" class="form-label">Report Modules</label>
+                                    <div class="border rounded p-3">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="module_summary" name="modules" value="summary" checked>
+                                            <label class="form-check-label" for="module_summary">
+                                                Summary Statistics
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="module_charts" name="modules" value="charts" checked>
+                                            <label class="form-check-label" for="module_charts">
+                                                Charts and Graphs
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="module_tables" name="modules" value="tables" checked>
+                                            <label class="form-check-label" for="module_tables">
+                                                Detailed Tables
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="module_trends" name="modules" value="trends">
+                                            <label class="form-check-label" for="module_trends">
+                                                Trend Analysis
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_data_sources" class="form-label">Data Sources</label>
+                                    <div class="border rounded p-3">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="source_sales" name="sources" value="sales">
+                                            <label class="form-check-label" for="source_sales">
+                                                Sales Data
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="source_clients" name="sources" value="clients">
+                                            <label class="form-check-label" for="source_clients">
+                                                Client Data
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="source_projects" name="sources" value="projects">
+                                            <label class="form-check-label" for="source_projects">
+                                                Project Data
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="source_leads" name="sources" value="leads">
+                                            <label class="form-check-label" for="source_leads">
+                                                Lead Data
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="source_expenses" name="sources" value="expenses">
+                                            <label class="form-check-label" for="source_expenses">
+                                                Expense Data
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="source_purchases" name="sources" value="purchases">
+                                            <label class="form-check-label" for="source_purchases">
+                                                Purchase Data
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="id_custom_date_range" class="form-label">Date Range</label>
+                                    <select class="form-select" id="id_custom_date_range" name="date_range">
+                                        <option value="last_7_days">Last 7 Days</option>
+                                        <option value="last_30_days" selected>Last 30 Days</option>
+                                        <option value="this_month">This Month</option>
+                                        <option value="last_month">Last Month</option>
+                                        <option value="this_quarter">This Quarter</option>
+                                        <option value="last_quarter">Last Quarter</option>
+                                        <option value="this_year">This Year</option>
+                                        <option value="last_year">Last Year</option>
+                                        <option value="custom">Custom Range</option>
+                                    </select>
+                                </div>
+                                
+                                <div id="custom_custom_date_range" class="mb-3 d-none">
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="id_custom_start_date" class="form-label">Start Date</label>
+                                            <input type="date" class="form-control" id="id_custom_start_date" name="start_date">
+                                        </div>
+                                        <div class="col">
+                                            <label for="id_custom_end_date" class="form-label">End Date</label>
+                                            <input type="date" class="form-control" id="id_custom_end_date" name="end_date">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="form-group row">
-                            <label for="is_favorite" class="col-sm-2 col-form-label">Favorite</label>
-                            <div class="col-sm-10">
-                                <div class="custom-control custom-switch">
-                                    <input type="checkbox" class="custom-control-input" id="is_favorite" name="is_favorite">
-                                    <label class="custom-control-label" for="is_favorite">Add to favorites</label>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="id_custom_favorite" name="is_favorite">
+                                <label class="form-check-label" for="id_custom_favorite">
+                                    Add to Favorites
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'reports:report_list' %}'">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Generate Custom Report</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="tab-pane fade" id="scheduled" role="tabpanel" aria-labelledby="scheduled-tab">
+                    <form method="post" id="scheduled-form" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="report_type" value="scheduled">
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_scheduled_title" class="form-label">Report Title</label>
+                                    <input type="text" class="form-control" id="id_scheduled_title" name="title" required>
+                                    <div class="invalid-feedback">
+                                        Please provide a title for this report.
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="id_scheduled_category" class="form-label">Report Category</label>
+                                    <select class="form-select" id="id_scheduled_category" name="category" required>
+                                        <option value="" selected disabled>Select a category</option>
+                                        <option value="financial">Financial</option>
+                                        <option value="sales">Sales</option>
+                                        <option value="clients">Clients</option>
+                                        <option value="projects">Projects</option>
+                                        <option value="leads">Leads</option>
+                                        <option value="expenses">Expenses</option>
+                                        <option value="purchases">Purchases</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="id_scheduled_template" class="form-label">Report Template</label>
+                                    <select class="form-select" id="id_scheduled_template" name="template" required>
+                                        <option value="" selected disabled>Select a template</option>
+                                        <!-- Templates will be populated via JavaScript based on selected category -->
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="id_scheduled_description" class="form-label">Report Description</label>
+                                    <textarea class="form-control" id="id_scheduled_description" name="description" rows="4"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_scheduled_frequency" class="form-label">Schedule Frequency</label>
+                                    <select class="form-select" id="id_scheduled_frequency" name="frequency" required>
+                                        <option value="" selected disabled>Select frequency</option>
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                        <option value="quarterly">Quarterly</option>
+                                    </select>
+                                </div>
+                                
+                                <div id="weekly_options" class="mb-3 d-none">
+                                    <label class="form-label">Day of Week</label>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        {% for day in "MTWTFSS" %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="day_of_week" id="day_{{ forloop.counter0 }}" value="{{ forloop.counter0 }}" {% if forloop.counter0 == 0 %}checked{% endif %}>
+                                            <label class="form-check-label" for="day_{{ forloop.counter0 }}">
+                                                {{ day }}
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <div id="monthly_options" class="mb-3 d-none">
+                                    <label for="id_day_of_month" class="form-label">Day of Month</label>
+                                    <select class="form-select" id="id_day_of_month" name="day_of_month">
+                                        {% for i in "12345678910111213141516171819202122232425262728293031" %}
+                                            {% if forloop.counter < 32 %}
+                                            <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="id_delivery_method" class="form-label">Delivery Method</label>
+                                    <select class="form-select" id="id_delivery_method" name="delivery_method" required>
+                                        <option value="" selected disabled>Select delivery method</option>
+                                        <option value="email">Email</option>
+                                        <option value="dashboard">Dashboard Only</option>
+                                        <option value="both">Email and Dashboard</option>
+                                    </select>
+                                </div>
+                                
+                                <div id="email_recipients" class="mb-3 d-none">
+                                    <label for="id_recipients" class="form-label">Email Recipients</label>
+                                    <textarea class="form-control" id="id_recipients" name="recipients" rows="3" placeholder="Enter email addresses, separated by commas"></textarea>
+                                    <div class="form-text">
+                                        Enter one or more email addresses, separated by commas.
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Dynamic fields based on report type will be loaded here -->
-                        <div id="dynamic_fields"></div>
-                        
-                        <div class="form-group row">
-                            <div class="col-sm-10 offset-sm-2">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Create Report
-                                </button>
-                                <a href="{% url 'reports:report_list' %}" class="btn btn-secondary">
-                                    Cancel
-                                </a>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="id_scheduled_favorite" name="is_favorite">
+                                <label class="form-check-label" for="id_scheduled_favorite">
+                                    Add to Favorites
+                                </label>
                             </div>
+                        </div>
+                        
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'reports:report_list' %}'">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Create Scheduled Report</button>
                         </div>
                     </form>
                 </div>
@@ -120,40 +391,152 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/reports.js' %}"></script>
 <script>
-    $(document).ready(function() {
-        // Initialize date pickers
-        $('.input-group.date').datepicker({
-            format: 'yyyy-mm-dd',
-            autoclose: true,
-            todayHighlight: true
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const forms = document.querySelectorAll('.needs-validation');
+        
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                
+                form.classList.add('was-validated');
+            }, false);
         });
         
-        // Show/hide custom date range based on selection
-        $('#date_range').change(function() {
-            if ($(this).val() === 'CUSTOM') {
-                $('#custom_date_range').removeClass('d-none');
+        // Handle date range selection
+        const dateRangeSelects = [
+            document.getElementById('id_date_range'),
+            document.getElementById('id_custom_date_range')
+        ];
+        
+        const customDateRanges = [
+            document.getElementById('custom_date_range'),
+            document.getElementById('custom_custom_date_range')
+        ];
+        
+        dateRangeSelects.forEach((select, index) => {
+            select.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    customDateRanges[index].classList.remove('d-none');
             } else {
-                $('#custom_date_range').addClass('d-none');
-            }
+                    customDateRanges[index].classList.add('d-none');
+                }
+            });
         });
         
-        // Load dynamic fields based on report type
-        $('#report_type').change(function() {
-            var reportType = $(this).val();
-            if (reportType) {
-                $.ajax({
-                    url: '/reports/api/report-fields/',
-                    data: {
-                        'report_type': reportType
-                    },
-                    dataType: 'json',
-                    success: function(data) {
-                        $('#dynamic_fields').html(data.html);
+        // Handle scheduled report frequency selection
+        const frequencySelect = document.getElementById('id_scheduled_frequency');
+        const weeklyOptions = document.getElementById('weekly_options');
+        const monthlyOptions = document.getElementById('monthly_options');
+        
+        if (frequencySelect) {
+            frequencySelect.addEventListener('change', function() {
+                weeklyOptions.classList.add('d-none');
+                monthlyOptions.classList.add('d-none');
+                
+                if (this.value === 'weekly') {
+                    weeklyOptions.classList.remove('d-none');
+                } else if (this.value === 'monthly') {
+                    monthlyOptions.classList.remove('d-none');
+                }
+            });
+        }
+        
+        // Handle delivery method selection
+        const deliveryMethodSelect = document.getElementById('id_delivery_method');
+        const emailRecipients = document.getElementById('email_recipients');
+        
+        if (deliveryMethodSelect) {
+            deliveryMethodSelect.addEventListener('change', function() {
+                if (this.value === 'email' || this.value === 'both') {
+                    emailRecipients.classList.remove('d-none');
+                } else {
+                    emailRecipients.classList.add('d-none');
+                }
+            });
+        }
+        
+        // Report templates by category
+        const templates = {
+            financial: [
+                { value: 'balance_sheet', label: 'Balance Sheet' },
+                { value: 'income_statement', label: 'Income Statement' },
+                { value: 'cash_flow', label: 'Cash Flow Statement' },
+                { value: 'financial_summary', label: 'Financial Summary' }
+            ],
+            sales: [
+                { value: 'sales_overview', label: 'Sales Overview' },
+                { value: 'sales_by_product', label: 'Sales by Product' },
+                { value: 'sales_by_customer', label: 'Sales by Customer' },
+                { value: 'sales_trends', label: 'Sales Trends' }
+            ],
+            clients: [
+                { value: 'client_overview', label: 'Client Overview' },
+                { value: 'client_acquisition', label: 'Client Acquisition' },
+                { value: 'client_retention', label: 'Client Retention' },
+                { value: 'client_activity', label: 'Client Activity' }
+            ],
+            projects: [
+                { value: 'project_status', label: 'Project Status' },
+                { value: 'project_timeline', label: 'Project Timeline' },
+                { value: 'project_budget', label: 'Project Budget' },
+                { value: 'project_resources', label: 'Project Resources' }
+            ],
+            leads: [
+                { value: 'lead_overview', label: 'Lead Overview' },
+                { value: 'lead_conversion', label: 'Lead Conversion' },
+                { value: 'lead_sources', label: 'Lead Sources' },
+                { value: 'lead_funnel', label: 'Lead Funnel' }
+            ],
+            expenses: [
+                { value: 'expense_summary', label: 'Expense Summary' },
+                { value: 'expense_by_category', label: 'Expenses by Category' },
+                { value: 'expense_trends', label: 'Expense Trends' },
+                { value: 'expense_analysis', label: 'Expense Analysis' }
+            ],
+            purchases: [
+                { value: 'purchase_summary', label: 'Purchase Summary' },
+                { value: 'purchase_by_supplier', label: 'Purchases by Supplier' },
+                { value: 'purchase_trends', label: 'Purchase Trends' },
+                { value: 'inventory_impact', label: 'Inventory Impact' }
+            ]
+        };
+        
+        // Populate templates based on category selection
+        const categorySelects = [
+            document.getElementById('id_category'),
+            document.getElementById('id_scheduled_category')
+        ];
+        
+        const templateSelects = [
+            document.getElementById('id_template'),
+            document.getElementById('id_scheduled_template')
+        ];
+        
+        categorySelects.forEach((select, index) => {
+            if (select) {
+                select.addEventListener('change', function() {
+                    const category = this.value;
+                    const templateSelect = templateSelects[index];
+                    
+                    // Clear existing options
+                    templateSelect.innerHTML = '<option value="" selected disabled>Select a template</option>';
+                    
+                    // Add new options based on selected category
+                    if (templates[category]) {
+                        templates[category].forEach(template => {
+                            const option = document.createElement('option');
+                            option.value = template.value;
+                            option.textContent = template.label;
+                            templateSelect.appendChild(option);
+                        });
                     }
                 });
-            } else {
-                $('#dynamic_fields').html('');
             }
         });
     });

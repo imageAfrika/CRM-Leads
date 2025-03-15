@@ -1,0 +1,147 @@
+{% extends "registration/base_registration.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'registration/css/home.css' %}">
+{% endblock %}
+
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="registration-container">
+    <!-- Hero Section -->
+    <section class="registration-header">
+        <h1>Business Management Made Simple</h1>
+        <p>All-in-one solution for your business needs</p>
+    </section>
+    
+    <!-- Feature Grid -->
+    <section class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3>Sales Management</h3>
+            <p>Track sales, create quotes, generate invoices, and monitor customer relationships with ease.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-box"></i>
+            </div>
+            <h3>Inventory Control</h3>
+            <p>Manage your inventory efficiently, track stock levels, and automate purchase orders.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <h3>Financial Tracking</h3>
+            <p>Keep tabs on expenses, revenue, and generate financial reports for better decision making.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3>Client Management</h3>
+            <p>Organize client information, track interactions, and build lasting relationships.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-file-invoice"></i>
+            </div>
+            <h3>Document Management</h3>
+            <p>Create, store, and manage all your business documents in one secure location.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <h3>Access Control</h3>
+            <p>Set permissions and control who can access specific features and information.</p>
+        </div>
+    </section>
+    
+    <!-- Call To Action -->
+    <section class="registration-card">
+        <h2>Ready to streamline your business?</h2>
+        <p>Join thousands of businesses already using CRM Leads to manage their operations efficiently.</p>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{% url 'registration:register_company' %}" class="btn btn-primary">
+                <i class="fas fa-user-plus"></i> Register Now
+            </a>
+            <a href="{% url 'registration:subscription_plans' %}" class="btn btn-outline">
+                <i class="fas fa-tag"></i> View Pricing
+            </a>
+        </div>
+    </section>
+    
+    <!-- Steps Section -->
+    <section class="registration-card">
+        <h2>Get Started in 3 Simple Steps</h2>
+        <div class="steps-container">
+            <div class="steps">
+                <div class="step completed">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Register your company</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Choose your plan</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Start managing your business</div>
+                </div>
+            </div>
+            <p>Our simple setup process gets you up and running in minutes, not days. No technical skills required.</p>
+        </div>
+    </section>
+    
+    <!-- Testimonials -->
+    <section class="registration-card">
+        <h2>What Our Customers Say</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+            <div style="background: #f9fafb; padding: 1.5rem; border-radius: var(--border-radius);">
+                <p style="font-style: italic;">"CRM Leads has transformed how we manage our business. Everything is now organized in one place and accessible from anywhere."</p>
+                <div style="font-weight: 600;">John Smith</div>
+                <div style="color: var(--dark-gray); font-size: 0.875rem;">CEO, Tech Solutions Inc.</div>
+            </div>
+            <div style="background: #f9fafb; padding: 1.5rem; border-radius: var(--border-radius);">
+                <p style="font-style: italic;">"The inventory management feature has saved us countless hours and significantly reduced errors in our stock keeping."</p>
+                <div style="font-weight: 600;">Sarah Johnson</div>
+                <div style="color: var(--dark-gray); font-size: 0.875rem;">Operations Manager, Retail Plus</div>
+            </div>
+            <div style="background: #f9fafb; padding: 1.5rem; border-radius: var(--border-radius);">
+                <p style="font-style: italic;">"The financial tracking and reporting capabilities have given us insights we never had before. Highly recommended!"</p>
+                <div style="font-weight: 600;">Michael Brown</div>
+                <div style="color: var(--dark-gray); font-size: 0.875rem;">Finance Director, Global Services</div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add animation to feature cards
+        const featureCards = document.querySelectorAll('.feature-card');
+        featureCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100 + (index * 100));
+        });
+    });
+</script>
+{% endblock %} 

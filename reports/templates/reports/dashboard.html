@@ -1,198 +1,200 @@
-{% extends 'reports/reports_base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Reports Dashboard{% endblock %}
+{% block title %}Reports Dashboard | {{ block.super }}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/reports_dashboard.css' %}">
+<link href="{% static 'css/reports.css' %}" rel="stylesheet">
 {% endblock %}
 
-{% block reports_content %}
-<div class="reports-dashboard">
-    <div class="dashboard-header">
-        <h1>Reports Dashboard</h1>
-        <div class="dashboard-actions">
-            <a href="{% url 'reports:create_report' %}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Create Report
-            </a>
-            <a href="{% url 'reports:report_list' %}" class="btn btn-secondary">
-                <i class="fas fa-list"></i> All Reports
-            </a>
-        </div>
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Reports Dashboard</h1>
+        <a href="{% url 'reports:report_list' %}" class="btn btn-primary">
+            <i class="fas fa-list"></i> View All Reports
+        </a>
     </div>
-    
-    <!-- Stats Grid -->
-    <div class="stats-grid">
-        <div class="stat-card banking">
-            <div class="stat-card-header">
-                <div class="stat-card-icon">
-                    <i class="fas fa-university"></i>
-                </div>
-                <h3 class="stat-card-title">Banking Reports</h3>
-            </div>
-            <div class="stat-card-value">{{ stats.banking_count|default:"0" }}</div>
-            <div class="stat-card-trend {% if stats.banking_trend > 0 %}up{% elif stats.banking_trend < 0 %}down{% endif %}">
-                <i class="fas fa-{% if stats.banking_trend > 0 %}arrow-up{% elif stats.banking_trend < 0 %}arrow-down{% else %}minus{% endif %}"></i>
-                {{ stats.banking_trend|default:"0" }}%
-            </div>
-            <a href="{% url 'reports:banking_reports' %}" class="btn btn-primary mt-3">View Reports</a>
-        </div>
-        
-        <div class="stat-card sales">
-            <div class="stat-card-header">
-                <div class="stat-card-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <h3 class="stat-card-title">Sales Reports</h3>
-            </div>
-            <div class="stat-card-value">{{ stats.sales_count|default:"0" }}</div>
-            <div class="stat-card-trend {% if stats.sales_trend > 0 %}up{% elif stats.sales_trend < 0 %}down{% endif %}">
-                <i class="fas fa-{% if stats.sales_trend > 0 %}arrow-up{% elif stats.sales_trend < 0 %}arrow-down{% else %}minus{% endif %}"></i>
-                {{ stats.sales_trend|default:"0" }}%
-            </div>
-            <a href="{% url 'reports:sales_reports' %}" class="btn btn-primary mt-3">View Reports</a>
-        </div>
-        
-        <div class="stat-card clients">
-            <div class="stat-card-header">
-                <div class="stat-card-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <h3 class="stat-card-title">Client Reports</h3>
-            </div>
-            <div class="stat-card-value">{{ stats.clients_count|default:"0" }}</div>
-            <div class="stat-card-trend {% if stats.clients_trend > 0 %}up{% elif stats.clients_trend < 0 %}down{% endif %}">
-                <i class="fas fa-{% if stats.clients_trend > 0 %}arrow-up{% elif stats.clients_trend < 0 %}arrow-down{% else %}minus{% endif %}"></i>
-                {{ stats.clients_trend|default:"0" }}%
-            </div>
-            <a href="{% url 'reports:clients_reports' %}" class="btn btn-primary mt-3">View Reports</a>
-        </div>
-        
-        <div class="stat-card expenses">
-            <div class="stat-card-header">
-                <div class="stat-card-icon">
-                    <i class="fas fa-money-bill-wave"></i>
-                </div>
-                <h3 class="stat-card-title">Expense Reports</h3>
-            </div>
-            <div class="stat-card-value">{{ stats.expenses_count|default:"0" }}</div>
-            <div class="stat-card-trend {% if stats.expenses_trend > 0 %}up{% elif stats.expenses_trend < 0 %}down{% endif %}">
-                <i class="fas fa-{% if stats.expenses_trend > 0 %}arrow-up{% elif stats.expenses_trend < 0 %}arrow-down{% else %}minus{% endif %}"></i>
-                {{ stats.expenses_trend|default:"0" }}%
-            </div>
-            <a href="{% url 'reports:expenses_reports' %}" class="btn btn-primary mt-3">View Reports</a>
-        </div>
-        
-        <div class="stat-card scheduled">
-            <div class="stat-card-header">
-                <div class="stat-card-icon">
-                    <i class="fas fa-calendar-alt"></i>
-                </div>
-                <h3 class="stat-card-title">Scheduled Reports</h3>
-            </div>
-            <div class="stat-card-value">{{ stats.scheduled_count|default:"0" }}</div>
-            <div class="stat-card-trend {% if stats.scheduled_trend > 0 %}up{% elif stats.scheduled_trend < 0 %}down{% endif %}">
-                <i class="fas fa-{% if stats.scheduled_trend > 0 %}arrow-up{% elif stats.scheduled_trend < 0 %}arrow-down{% else %}minus{% endif %}"></i>
-                {{ stats.scheduled_trend|default:"0" }}%
-            </div>
-            <a href="{% url 'reports:scheduled_reports' %}" class="btn btn-primary mt-3">View Reports</a>
-        </div>
-    </div>
-    
-    <!-- Recent Reports -->
-    <div class="recent-reports">
-        <div class="recent-reports-header">
-            <h2>Recent Reports</h2>
-            <a href="{% url 'reports:report_list' %}">View All</a>
-        </div>
-        
-        <ul class="recent-reports-list">
-            {% for report in recent_reports %}
-            <li class="recent-reports-item">
-                <div class="recent-reports-item-icon report-type-{{ report.configuration.report_type|lower }}-bg">
-                    <i class="fas fa-{{ report.configuration.get_report_type_icon }}"></i>
-                </div>
-                <div class="recent-reports-item-content">
-                    <a href="{% url 'reports:view_report' report.id %}" class="recent-reports-item-title">
-                        {{ report.configuration.name }}
-                    </a>
-                    <div class="recent-reports-item-meta">
-                        <span>
-                            <i class="fas fa-tag"></i>
-                            {{ report.configuration.get_report_type_display }}
-                        </span>
-                        <span>
-                            <i class="far fa-clock"></i>
-                            {{ report.updated_at|date:"M d, Y" }}
-                        </span>
+
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Reports
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_reports }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-file-alt fa-2x text-gray-300"></i>
+                        </div>
                     </div>
                 </div>
-                <div class="recent-reports-item-actions">
-                    <a href="{% url 'reports:view_report' report.id %}" class="btn btn-sm btn-info">
-                        <i class="fas fa-eye"></i>
-                    </a>
-                    <button class="favorite-toggle {% if report.configuration.is_favorite %}active{% endif %}" data-report-id="{{ report.id }}">
-                        <i class="{% if report.configuration.is_favorite %}fas{% else %}far{% endif %} fa-star"></i>
-                    </button>
-                </div>
-            </li>
-            {% empty %}
-            <li class="recent-reports-item">
-                <div class="no-reports">
-                    <p>No reports found. Create your first report to get started.</p>
-                    <a href="{% url 'reports:create_report' %}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Create Report
-                    </a>
-                </div>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-    
-    <!-- Favorite Reports -->
-    {% if favorite_reports %}
-    <div class="favorite-reports">
-        <div class="favorite-reports-header">
-            <h2><i class="fas fa-star"></i> Favorite Reports</h2>
+            </div>
         </div>
-        
-        <ul class="favorite-reports-list">
-            {% for report in favorite_reports %}
-            <li class="recent-reports-item">
-                <div class="recent-reports-item-icon report-type-{{ report.configuration.report_type|lower }}-bg">
-                    <i class="fas fa-{{ report.configuration.get_report_type_icon }}"></i>
-                </div>
-                <div class="recent-reports-item-content">
-                    <a href="{% url 'reports:view_report' report.id %}" class="recent-reports-item-title">
-                        {{ report.configuration.name }}
-                    </a>
-                    <div class="recent-reports-item-meta">
-                        <span>
-                            <i class="fas fa-tag"></i>
-                            {{ report.configuration.get_report_type_display }}
-                        </span>
-                        <span>
-                            <i class="far fa-clock"></i>
-                            {{ report.updated_at|date:"M d, Y" }}
-                        </span>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Scheduled Reports
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ scheduled_reports_count }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                        </div>
                     </div>
                 </div>
-                <div class="recent-reports-item-actions">
-                    <a href="{% url 'reports:view_report' report.id %}" class="btn btn-sm btn-info">
-                        <i class="fas fa-eye"></i>
-                    </a>
-                    <button class="favorite-toggle active" data-report-id="{{ report.id }}">
-                        <i class="fas fa-star"></i>
-                    </button>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Reports Generated
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ reports_generated }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
                 </div>
-            </li>
-            {% endfor %}
-        </ul>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Favorite Reports
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ favorite_reports_count }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-star fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Recent Reports</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in recent_reports %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'reports:view_report' report.id %}">{{ report.title }}</a>
+                                    </td>
+                                    <td>{{ report.get_report_type_display }}</td>
+                                    <td>{{ report.created_at|date:"Y-m-d" }}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'reports:view_report' report.id %}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'reports:export_report_pdf' report.id %}" class="btn btn-sm btn-secondary">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No reports found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Report Categories</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{% url 'reports:banking_reports' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-university me-2"></i> Banking Reports
+                            </div>
+                            <span class="badge bg-primary rounded-pill">{{ banking_reports_count }}</span>
+                        </a>
+                        <a href="{% url 'reports:sales' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-chart-line me-2"></i> Sales Reports
+                            </div>
+                            <span class="badge bg-primary rounded-pill">{{ sales_reports_count }}</span>
+                        </a>
+                        <a href="{% url 'reports:clients_reports' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-users me-2"></i> Client Reports
+                            </div>
+                            <span class="badge bg-primary rounded-pill">{{ client_reports_count }}</span>
+                        </a>
+                        <a href="{% url 'reports:expenses' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-receipt me-2"></i> Expense Reports
+                            </div>
+                            <span class="badge bg-primary rounded-pill">{{ expense_reports_count }}</span>
+                        </a>
+                        <a href="{% url 'reports:purchases_reports' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-shopping-cart me-2"></i> Purchase Reports
+                            </div>
+                            <span class="badge bg-primary rounded-pill">{{ purchase_reports_count }}</span>
+                        </a>
+                        <a href="{% url 'reports:leads' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-funnel-dollar me-2"></i> Lead Reports
+                            </div>
+                            <span class="badge bg-primary rounded-pill">{{ lead_reports_count }}</span>
+                        </a>
+                        <a href="{% url 'reports:projects' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-project-diagram me-2"></i> Project Reports
+                            </div>
+                            <span class="badge bg-primary rounded-pill">{{ project_reports_count }}</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/reports.js' %}"></script>
 {% endblock %}

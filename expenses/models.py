@@ -39,6 +39,13 @@ class Expense(models.Model):
         on_delete=models.SET_NULL,
         null=True
     )
+    project = models.ForeignKey(
+        'project_management.Project',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='expenses'
+    )
     date = models.DateField(default=timezone.now)
     payment_method = models.CharField(
         max_length=10,
@@ -72,6 +79,13 @@ class RecurringExpense(models.Model):
     title = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.ForeignKey(ExpenseCategory, on_delete=models.SET_NULL, null=True)
+    project = models.ForeignKey(
+        'project_management.Project',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='recurring_expenses'
+    )
     frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES)
     next_date = models.DateField(default=timezone.now)
     is_active = models.BooleanField(default=True)
@@ -125,6 +139,7 @@ class RecurringExpense(models.Model):
             title=self.title,
             amount=self.amount,
             category=self.category,
+            project=self.project,
             date=next_date,
             description=f"Auto-generated from recurring expense: {self.title}",
             created_by=self.created_by,

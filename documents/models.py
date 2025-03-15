@@ -1,3 +1,4 @@
+import pdfkit
 from django.db import models
 from django.urls import reverse
 from clients.models import Client
@@ -22,6 +23,9 @@ class Document(models.Model):
         ('PROFORMA_INVOICE', 'Proforma Invoice'),
         ('PAYMENT_RECEIPT', 'Payment Receipt'),
         ('SALES_RECEIPT', 'Sales Receipt'),
+        ('PURCHASE', 'Purchase'),
+        ('EXPENSE', 'Expense'),
+        ('SALE', 'Sale'),
     )
 
     STATUS_CHOICES = (
@@ -29,6 +33,8 @@ class Document(models.Model):
         ('SENT', 'Sent'),
         ('PAID', 'Paid'),
         ('OVERDUE', 'Overdue'),
+        ('CANCELLED', 'Cancelled'),
+        ('COMPLETED', 'Completed'),
     )
 
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
@@ -48,10 +54,17 @@ class Document(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='DRAFT')
     file = models.FileField(upload_to='documents/', null=True, blank=True)
     
+    # Relationships
+    quote = models.ForeignKey('Quote', on_delete=models.SET_NULL, null=True, blank=True, related_name='invoices')
+    purchase = models.ForeignKey('products.Purchase', on_delete=models.SET_NULL, null=True, blank=True, related_name='documents')
+    expense = models.ForeignKey('expenses.Expense', on_delete=models.SET_NULL, null=True, blank=True, related_name='documents')
+    sale = models.ForeignKey('sales.Sale', on_delete=models.SET_NULL, null=True, blank=True, related_name='documents')
+    
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    quote = models.OneToOneField('Quote', on_delete=models.CASCADE, null=True, blank=True, related_name='document')
+    created_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, related_name='created_documents')
+    updated_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, related_name='updated_documents')
 
     # Add number fields for different document types
     quote_number = models.IntegerField(null=True, blank=True)
@@ -208,8 +221,8 @@ class Quote(models.Model):
 
     def convert_to_invoice(self):
         """Convert this quote to an invoice"""
-        if self.status not in ['SENT', 'ACCEPTED']:
-            raise ValueError(f"Only sent or accepted quotes can be converted to invoices. Current status: {self.status}")
+        if self.status not in ['DRAFT', 'SENT', 'ACCEPTED']:
+            raise ValueError(f"Only draft, sent or accepted quotes can be converted to invoices. Current status: {self.status}")
         
         if Document.objects.filter(quote=self, document_type='INVOICE').exists():
             raise ValueError("This quote has already been converted to an invoice")

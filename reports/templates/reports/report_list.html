@@ -1,111 +1,248 @@
-{% extends "reports/reports_base.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Reports | {{ block.super }}{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/report_list.css' %}">
+<link href="{% static 'css/reports.css' %}" rel="stylesheet">
 {% endblock %}
 
-{% block reports_content %}
-<div class="reports-container">
-    <div class="reports-header">
-        <h1>Reports</h1>
-        <div class="reports-actions">
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Reports</h1>
+        <div>
             <a href="{% url 'reports:create_report' %}" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Create Report
             </a>
-            <a href="{% url 'reports:dashboard' %}" class="btn btn-secondary">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
+            <a href="{% url 'reports:scheduled_reports' %}" class="btn btn-secondary">
+                <i class="fas fa-calendar-alt"></i> Scheduled Reports
             </a>
         </div>
     </div>
 
-    <div class="reports-tabs">
-        <a href="{% url 'reports:report_list' %}" class="tab active">All Reports</a>
-        <a href="{% url 'reports:banking_reports' %}" class="tab">Banking</a>
-        <a href="{% url 'reports:sales_reports' %}" class="tab">Sales</a>
-        <a href="{% url 'reports:clients_reports' %}" class="tab">Clients</a>
-        <a href="{% url 'reports:scheduled_reports' %}" class="tab">Scheduled</a>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Filter Reports</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                {{ filter_form.as_p }}
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    <a href="{% url 'reports:report_list' %}" class="btn btn-secondary">Clear Filters</a>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <div class="reports-list">
-        {% if page_obj %}
-            <table class="reports-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Type</th>
-                        <th>Created</th>
-                        <th>Last Updated</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for report in page_obj %}
-                    <tr>
-                        <td>
-                            <a href="{% url 'reports:view_report' report.id %}">
-                                {{ report.configuration.name }}
-                            </a>
-                        </td>
-                        <td>{{ report.configuration.get_report_type_display }}</td>
-                        <td>{{ report.created_at|date:"M d, Y" }}</td>
-                        <td>{{ report.updated_at|date:"M d, Y" }}</td>
-                        <td class="actions">
-                            <a href="{% url 'reports:view_report' report.id %}" class="btn btn-sm btn-info" title="View">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <a href="{% url 'reports:update_report' report.id %}" class="btn btn-sm btn-warning" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <form method="post" action="{% url 'reports:delete_report' report.id %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this report?')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                            <form method="post" action="{% url 'reports:toggle_favorite' report.id %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm {% if report.configuration.is_favorite %}btn-warning{% else %}btn-outline-warning{% endif %}" title="{% if report.configuration.is_favorite %}Remove from favorites{% else %}Add to favorites{% endif %}">
-                                    <i class="fas fa-star"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            
-            {% if page_obj.has_other_pages %}
-            <div class="pagination">
-                <span class="step-links">
-                    {% if page_obj.has_previous %}
-                        <a href="?page=1">&laquo; first</a>
-                        <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-                    {% endif %}
-            
-                    <span class="current">
-                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                    </span>
-            
-                    {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}">next</a>
-                        <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-                    {% endif %}
-                </span>
+    <div class="card">
+        <div class="card-body">
+            <ul class="nav nav-tabs mb-3" id="reportTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="true">All Reports</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="favorites-tab" data-bs-toggle="tab" data-bs-target="#favorites" type="button" role="tab" aria-controls="favorites" aria-selected="false">Favorites</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="recent-tab" data-bs-toggle="tab" data-bs-target="#recent" type="button" role="tab" aria-controls="recent" aria-selected="false">Recent</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="reportTabsContent">
+                <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Created</th>
+                                    <th>Last Generated</th>
+                                    <th>Scheduled</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in reports %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'reports:view_report' report.id %}">{{ report.title }}</a>
+                                        {% if report.is_favorite %}
+                                        <i class="fas fa-star text-warning"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ report.get_report_type_display }}</td>
+                                    <td>{{ report.created_at|date:"Y-m-d" }}</td>
+                                    <td>{{ report.last_generated|date:"Y-m-d H:i"|default:"-" }}</td>
+                                    <td>
+                                        {% if report.is_scheduled %}
+                                        <span class="badge bg-success">Yes</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'reports:view_report' report.id %}" class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'reports:update_report' report.id %}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'reports:export_report_pdf' report.id %}" class="btn btn-sm btn-secondary" data-bs-toggle="tooltip" title="Export PDF">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </a>
+                                            <a href="{% url 'reports:export_report_excel' report.id %}" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Export Excel">
+                                                <i class="fas fa-file-excel"></i>
+                                            </a>
+                                            <a href="{% url 'reports:toggle_favorite' report.id %}" class="btn btn-sm {% if report.is_favorite %}btn-warning{% else %}btn-outline-warning{% endif %}" data-bs-toggle="tooltip" title="{% if report.is_favorite %}Remove from Favorites{% else %}Add to Favorites{% endif %}">
+                                                <i class="{% if report.is_favorite %}fas{% else %}far{% endif %} fa-star"></i>
+                                            </a>
+                                            <a href="{% url 'reports:delete_report' report.id %}" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No reports found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="favorites" role="tabpanel" aria-labelledby="favorites-tab">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Created</th>
+                                    <th>Last Generated</th>
+                                    <th>Scheduled</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in favorite_reports %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'reports:view_report' report.id %}">{{ report.title }}</a>
+                                        <i class="fas fa-star text-warning"></i>
+                                    </td>
+                                    <td>{{ report.get_report_type_display }}</td>
+                                    <td>{{ report.created_at|date:"Y-m-d" }}</td>
+                                    <td>{{ report.last_generated|date:"Y-m-d H:i"|default:"-" }}</td>
+                                    <td>
+                                        {% if report.is_scheduled %}
+                                        <span class="badge bg-success">Yes</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'reports:view_report' report.id %}" class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'reports:update_report' report.id %}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'reports:export_report_pdf' report.id %}" class="btn btn-sm btn-secondary" data-bs-toggle="tooltip" title="Export PDF">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </a>
+                                            <a href="{% url 'reports:toggle_favorite' report.id %}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" title="Remove from Favorites">
+                                                <i class="fas fa-star"></i>
+                                            </a>
+                                            <a href="{% url 'reports:delete_report' report.id %}" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No favorite reports found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="recent" role="tabpanel" aria-labelledby="recent-tab">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Created</th>
+                                    <th>Last Generated</th>
+                                    <th>Scheduled</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in recent_reports %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'reports:view_report' report.id %}">{{ report.title }}</a>
+                                        {% if report.is_favorite %}
+                                        <i class="fas fa-star text-warning"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ report.get_report_type_display }}</td>
+                                    <td>{{ report.created_at|date:"Y-m-d" }}</td>
+                                    <td>{{ report.last_generated|date:"Y-m-d H:i"|default:"-" }}</td>
+                                    <td>
+                                        {% if report.is_scheduled %}
+                                        <span class="badge bg-success">Yes</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'reports:view_report' report.id %}" class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'reports:update_report' report.id %}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'reports:export_report_pdf' report.id %}" class="btn btn-sm btn-secondary" data-bs-toggle="tooltip" title="Export PDF">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </a>
+                                            <a href="{% url 'reports:toggle_favorite' report.id %}" class="btn btn-sm {% if report.is_favorite %}btn-warning{% else %}btn-outline-warning{% endif %}" data-bs-toggle="tooltip" title="{% if report.is_favorite %}Remove from Favorites{% else %}Add to Favorites{% endif %}">
+                                                <i class="{% if report.is_favorite %}fas{% else %}far{% endif %} fa-star"></i>
+                                            </a>
+                                            <a href="{% url 'reports:delete_report' report.id %}" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No recent reports found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            {% endif %}
-        {% else %}
-            <div class="no-reports">
-                <p>No reports found. Create your first report to get started.</p>
-                <a href="{% url 'reports:create_report' %}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Create Report
-                </a>
-            </div>
-        {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/report_list.js' %}"></script>
+<script src="{% static 'js/reports.js' %}"></script>
 {% endblock %} 

@@ -1,82 +1,58 @@
 from django.contrib import admin
-from django.contrib.auth.models import User, Group
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin, GroupAdmin as BaseGroupAdmin
-from .models import AppPermission, UserAppPermission, GroupAppPermission, AccessLog
+from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from .models import View, Permission
 
-class UserAppPermissionInline(admin.TabularInline):
-    model = UserAppPermission
+class PermissionInline(admin.TabularInline):
+    """Inline admin for permissions"""
+    model = Permission
     extra = 1
-    autocomplete_fields = ['permission', 'granted_by']
-    verbose_name = "App Permission"
-    verbose_name_plural = "App Permissions"
-    fk_name = 'user'
+    raw_id_fields = ('view', 'granted_by')
+    autocomplete_fields = ('view',)
+    fk_name = 'user'  # Specify which foreign key to use for the inline
 
-class GroupAppPermissionInline(admin.TabularInline):
-    model = GroupAppPermission
-    extra = 1
-    autocomplete_fields = ['permission', 'granted_by']
-    verbose_name = "App Permission"
-    verbose_name_plural = "App Permissions"
+class CustomUserAdmin(BaseUserAdmin):
+    """Extended User admin with permissions inline"""
+    inlines = BaseUserAdmin.inlines + (PermissionInline,)
 
-class UserAdmin(BaseUserAdmin):
-    inlines = BaseUserAdmin.inlines + (UserAppPermissionInline,)
-
-class GroupAdmin(BaseGroupAdmin):
-    inlines = (GroupAppPermissionInline,)
-
-# Unregister the original User and Group admins
+# Re-register UserAdmin
 admin.site.unregister(User)
-admin.site.unregister(Group)
+admin.site.register(User, CustomUserAdmin)
 
-# Register our custom User and Group admins
-admin.site.register(User, UserAdmin)
-admin.site.register(Group, GroupAdmin)
-
-@admin.register(AppPermission)
-class AppPermissionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'app_name', 'feature', 'permission_type', 'is_active')
-    list_filter = ('app_name', 'permission_type', 'is_active')
-    search_fields = ('name', 'app_name', 'feature', 'description')
-    ordering = ('app_name', 'feature', 'permission_type')
+@admin.register(View)
+class ViewAdmin(admin.ModelAdmin):
+    """Admin interface for views"""
+    list_display = ('name', 'app_name', 'view_name', 'url_pattern', 'created_at')
+    list_filter = ('app_name',)
+    search_fields = ('name', 'app_name', 'view_name', 'url_pattern')
+    ordering = ('app_name', 'view_name')
+    readonly_fields = ('created_at', 'updated_at')
     fieldsets = (
         (None, {
-            'fields': ('name', 'app_name', 'feature', 'permission_type')
+            'fields': ('name', 'app_name', 'view_name', 'url_pattern')
         }),
-        ('Details', {
-            'fields': ('description', 'is_active')
+        ('Additional Information', {
+            'fields': ('description', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
         }),
     )
 
-@admin.register(UserAppPermission)
-class UserAppPermissionAdmin(admin.ModelAdmin):
-    list_display = ('user', 'permission', 'granted_by', 'granted_at')
-    list_filter = ('permission__app_name', 'permission__permission_type', 'granted_at')
-    search_fields = ('user__username', 'permission__name', 'granted_by__username')
-    autocomplete_fields = ['user', 'permission', 'granted_by']
-    date_hierarchy = 'granted_at'
-
-@admin.register(GroupAppPermission)
-class GroupAppPermissionAdmin(admin.ModelAdmin):
-    list_display = ('group', 'permission', 'granted_by', 'granted_at')
-    list_filter = ('permission__app_name', 'permission__permission_type', 'granted_at')
-    search_fields = ('group__name', 'permission__name', 'granted_by__username')
-    autocomplete_fields = ['group', 'permission', 'granted_by']
-    date_hierarchy = 'granted_at'
-
-@admin.register(AccessLog)
-class AccessLogAdmin(admin.ModelAdmin):
-    list_display = ('timestamp', 'action', 'user', 'target_display', 'permission')
-    list_filter = ('action', 'timestamp', 'permission__app_name')
-    search_fields = ('user__username', 'target_user__username', 'target_group__name', 'permission__name', 'notes')
-    readonly_fields = ('timestamp', 'user', 'target_user', 'target_group', 'permission', 'action', 'notes')
-    date_hierarchy = 'timestamp'
-    
-    def target_display(self, obj):
-        return obj.target_user.username if obj.target_user else obj.target_group.name
-    target_display.short_description = 'Target'
-    
-    def has_add_permission(self, request):
-        return False
-    
-    def has_change_permission(self, request, obj=None):
-        return False
+@admin.register(Permission)
+class PermissionAdmin(admin.ModelAdmin):
+    """Admin interface for permissions"""
+    list_display = ('user', 'view', 'granted_by', 'granted_at', 'is_active')
+    list_filter = ('is_active', 'granted_at', 'view__app_name')
+    search_fields = ('user__username', 'view__name', 'notes')
+    raw_id_fields = ('user', 'view', 'granted_by')
+    autocomplete_fields = ('view',)
+    readonly_fields = ('granted_at',)
+    ordering = ('-granted_at',)
+    fieldsets = (
+        (None, {
+            'fields': ('user', 'view', 'is_active')
+        }),
+        ('Grant Information', {
+            'fields': ('granted_by', 'granted_at', 'notes'),
+            'classes': ('collapse',)
+        }),
+    ) 

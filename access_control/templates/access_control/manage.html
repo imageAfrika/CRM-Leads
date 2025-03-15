@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Access Control | Manage Permissions{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Admin-like styles */
+    :root {
+        --primary: #79aec8;
+        --secondary: #417690;
+        --accent: #f5dd5d;
+        --header-bg: #417690;
+        --link-fg: #447e9b;
+        --link-hover: #036;
+        --header-link-color: #fff;
+    }
+
+    body {
+        background: #f8f8f8;
+        color: #333;
+    }
+
+    .admin-container {
+        width: 100%;
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .admin-header {
+        background: var(--header-bg);
+        color: #fff;
+        padding: 1rem 2rem;
+        margin: -2rem -2rem 2rem -2rem;
+    }
+
+    .admin-header h1 {
+        font-size: 1.375rem;
+        font-weight: 400;
+        margin: 0;
+    }
+
+    .admin-content {
+        background: #fff;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .module {
+        margin-bottom: 2rem;
+    }
+
+    .module h2 {
+        background: var(--secondary);
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 400;
+        padding: 0.8rem 1rem;
+        margin: 0;
+        border-radius: 4px 4px 0 0;
+    }
+
+    .module-content {
+        padding: 1rem;
+    }
+
+    /* Form styles */
+    .form-row {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .form-row:last-child {
+        border-bottom: none;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #666;
+    }
+
+    .form-select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: white;
+        font-size: 0.875rem;
+    }
+
+    /* Table styles */
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .results-table th {
+        background: #f8f8f8;
+        padding: 0.8rem;
+        text-align: left;
+        font-weight: 500;
+        color: #666;
+        border-bottom: 1px solid #eee;
+    }
+
+    .results-table td {
+        padding: 0.8rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .results-table tr:hover {
+        background: #f8f8f8;
+    }
+
+    /* Permission items */
+    .permission-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .permission-item {
+        padding: 0.8rem;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        align-items: center;
+    }
+
+    .permission-item:last-child {
+        border-bottom: none;
+    }
+
+    .permission-item:hover {
+        background: #f8f8f8;
+    }
+
+    .permission-checkbox {
+        margin-right: 1rem;
+    }
+
+    .permission-info {
+        flex-grow: 1;
+    }
+
+    .permission-name {
+        font-weight: 500;
+        color: #333;
+    }
+
+    .permission-url {
+        font-size: 0.875rem;
+        color: #666;
+        margin-top: 0.25rem;
+    }
+
+    /* Buttons */
+    .object-tools {
+        float: right;
+        margin-top: -3rem;
+    }
+
+    .addlink {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        background: var(--accent);
+        color: var(--header-bg);
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.875rem;
+    }
+
+    .addlink:hover {
+        background: #f5dd5d;
+    }
+
+    /* Messages */
+    .messagelist {
+        margin: 0 0 1rem 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .messagelist li {
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 4px;
+    }
+
+    .messagelist li.success {
+        background: #dfd;
+        border: 1px solid #9e9;
+    }
+
+    .messagelist li.error {
+        background: #fdd;
+        border: 1px solid #e99;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        background: #79aec8;
+        padding: 0.8rem 2rem;
+        color: #fff;
+        margin: -2rem -2rem 2rem -2rem;
+        font-size: 0.875rem;
+    }
+
+    .breadcrumbs a {
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .breadcrumbs a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <div class="breadcrumbs">
+            <a href="{% url 'admin:index' %}">Home</a> &rsaquo; 
+            <a href="{% url 'access_control:manage' %}">Access Control</a> &rsaquo; 
+            Manage Permissions
+        </div>
+        <h1>Manage User Permissions</h1>
+    </div>
+
+    <div class="object-tools">
+        <a href="{% url 'access_control:scan' %}" class="addlink">Scan Views</a>
+    </div>
+
+    {% if messages %}
+    <ul class="messagelist">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div class="module">
+        <h2>Select User</h2>
+        <div class="module-content">
+            <div class="form-row">
+                <label class="form-label" for="user-dropdown">User:</label>
+                <select id="user-dropdown" class="form-select">
+                    <option value="">Choose a user...</option>
+                    {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div id="permissions-module" class="module" style="display: none;">
+        <h2>View Permissions</h2>
+        <div class="module-content">
+            {% regroup views by app_name as app_list %}
+            {% for app in app_list %}
+            <div class="module">
+                <h2>{{ app.grouper|title }}</h2>
+                <div class="module-content">
+                    <ul class="permission-list">
+                        {% for view in app.list %}
+                        <li class="permission-item">
+                            <input type="checkbox" 
+                                   class="permission-checkbox"
+                                   data-view-id="{{ view.id }}"
+                                   id="view_{{ view.id }}">
+                            <div class="permission-info">
+                                <div class="permission-name">{{ view.name }}</div>
+                                {% if view.url_pattern %}
+                                <div class="permission-url">{{ view.url_pattern }}</div>
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script id="user-permissions-data" type="application/json">
+    {{ user_permissions|safe }}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const userDropdown = document.getElementById('user-dropdown');
+    const permissionsModule = document.getElementById('permissions-module');
+    const userPermissions = JSON.parse(document.getElementById('user-permissions-data').textContent);
+    
+    userDropdown.addEventListener('change', function() {
+        const userId = this.value;
+        if (userId) {
+            permissionsModule.style.display = 'block';
+            updateCheckboxes(userId);
+        } else {
+            permissionsModule.style.display = 'none';
+        }
+    });
+    
+    function updateCheckboxes(userId) {
+        const checkboxes = document.querySelectorAll('.permission-checkbox');
+        const userPerms = userPermissions[userId] || {};
+        
+        checkboxes.forEach(checkbox => {
+            const viewId = checkbox.dataset.viewId;
+            checkbox.checked = userPerms[viewId] || false;
+        });
+    }
+    
+    document.querySelectorAll('.permission-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', async function() {
+            const userId = userDropdown.value;
+            const viewId = this.dataset.viewId;
+            const isActive = this.checked;
+            
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: `user_id=${userId}&view_id=${viewId}&is_active=${isActive}`
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    showMessage('success', data.message);
+                    // Update the stored permissions
+                    if (!userPermissions[userId]) {
+                        userPermissions[userId] = {};
+                    }
+                    userPermissions[userId][viewId] = isActive;
+                } else {
+                    showMessage('error', data.message);
+                    this.checked = !isActive; // Revert checkbox
+                }
+            } catch (error) {
+                showMessage('error', 'An error occurred while updating permissions');
+                this.checked = !isActive; // Revert checkbox
+            }
+        });
+    });
+    
+    function showMessage(type, message) {
+        const messageList = document.querySelector('.messagelist') || createMessageList();
+        const li = document.createElement('li');
+        li.className = type;
+        li.textContent = message;
+        messageList.appendChild(li);
+        
+        setTimeout(() => li.remove(), 3000);
+        
+        // Remove the message list if it's empty
+        if (!messageList.hasChildNodes()) {
+            messageList.remove();
+        }
+    }
+    
+    function createMessageList() {
+        const messageList = document.createElement('ul');
+        messageList.className = 'messagelist';
+        document.querySelector('.admin-header').insertAdjacentElement('afterend', messageList);
+        return messageList;
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+{% endblock %} 

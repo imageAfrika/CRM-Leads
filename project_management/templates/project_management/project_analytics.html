@@ -1,0 +1,289 @@
+{% extends 'project_management/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Project Analytics | {{ block.super }}{% endblock %}
+
+{% block header_title %}Project Analytics{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/project_analytics.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="content-container">
+    <div class="analytics-header">
+        <h1 class="analytics-title">Financial Analytics</h1>
+        <div class="analytics-actions">
+            <button id="export-button" class="button button-outline">
+                <i class="fas fa-file-export"></i> Export Data
+            </button>
+            <a href="{% url 'project_management:project_list' %}" class="button button-outline">
+                <i class="fas fa-arrow-left"></i> Back to Projects
+            </a>
+        </div>
+    </div>
+    
+    <div class="filter-container">
+        <form id="analytics-filter-form">
+            <div class="filter-grid">
+                <div class="filter-field">
+                    <label class="filter-label" for="project-filter">Project</label>
+                    <select class="filter-select" id="project-filter">
+                        <option value="all">All Projects</option>
+                        {% for project in projects %}
+                        <option value="{{ project.id }}">{{ project.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-field">
+                    <label class="filter-label" for="date-range-filter">Date Range</label>
+                    <select class="filter-select" id="date-range-filter">
+                        <option value="this-month">This Month</option>
+                        <option value="last-month">Last Month</option>
+                        <option value="this-quarter">This Quarter</option>
+                        <option value="last-quarter">Last Quarter</option>
+                        <option value="this-year" selected>This Year</option>
+                        <option value="last-year">Last Year</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+                
+                <div class="filter-field">
+                    <label class="filter-label" for="start-date-filter">Start Date</label>
+                    <input type="date" class="filter-input" id="start-date-filter">
+                </div>
+                
+                <div class="filter-field">
+                    <label class="filter-label" for="end-date-filter">End Date</label>
+                    <input type="date" class="filter-input" id="end-date-filter">
+                </div>
+            </div>
+            
+            <div class="filter-actions">
+                <button type="reset" class="button button-outline">Reset</button>
+                <button type="submit" class="button button-primary">Apply Filters</button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="analytics-grid">
+        <!-- Financial Summary Metrics -->
+        <div class="analytics-card metrics-summary">
+            <div class="card-header">
+                <h2 class="card-title">Financial Summary</h2>
+                <div class="card-icon icon-primary">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+            </div>
+            
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <div class="metric-icon budget-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="metric-value">${{ total_budget|default:"50,000"|intcomma }}</div>
+                    <div class="metric-title">Total Budget</div>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-icon invoices-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="metric-value">${{ total_invoices|default:"46,000"|intcomma }}</div>
+                    <div class="metric-title">Total Invoices</div>
+                    <span class="metric-change change-positive">+8.2% from last period</span>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-icon expenses-icon">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <div class="metric-value">${{ total_expenses|default:"32,000"|intcomma }}</div>
+                    <div class="metric-title">Total Expenses</div>
+                    <span class="metric-change change-negative">+3.5% from last period</span>
+                </div>
+                
+                <div class="metric-item">
+                    <div class="metric-icon purchases-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="metric-value">${{ total_purchases|default:"12,000"|intcomma }}</div>
+                    <div class="metric-title">Total Purchases</div>
+                    <span class="metric-change change-positive">+2.1% from last period</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Chart: Budget vs. Invoices vs. Expenses vs. Purchases -->
+        <div class="analytics-card main-chart">
+            <div class="card-header">
+                <h2 class="card-title">Financial Overview</h2>
+                <div class="card-icon icon-primary">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="overview-chart"></canvas>
+            </div>
+            
+            <div class="chart-legend">
+                <div class="legend-item">
+                    <div class="legend-color legend-budget"></div>
+                    <span>Budget</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-invoices"></div>
+                    <span>Invoices</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-expenses"></div>
+                    <span>Expenses</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-purchases"></div>
+                    <span>Purchases</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Side Charts -->
+        <div class="analytics-card side-chart">
+            <div class="card-header">
+                <h2 class="card-title">Cost Distribution</h2>
+                <div class="card-icon icon-warning">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="distribution-chart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Side Charts -->
+        <div class="analytics-card side-chart">
+            <div class="card-header">
+                <h2 class="card-title">Profit Margin Trend</h2>
+                <div class="card-icon icon-success">
+                    <i class="fas fa-chart-area"></i>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="trend-chart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Project Comparison Table -->
+        <div class="analytics-card project-comparison">
+            <div class="card-header">
+                <h2 class="card-title">Project Comparison</h2>
+                <div class="card-icon icon-primary">
+                    <i class="fas fa-table"></i>
+                </div>
+            </div>
+            
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Project</th>
+                        <th>Budget</th>
+                        <th>Invoices</th>
+                        <th>Expenses</th>
+                        <th>Purchases</th>
+                    </tr>
+                </thead>
+                <tbody id="project-comparison-body">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Transaction Data Table -->
+        <div class="analytics-card data-table">
+            <div class="card-header">
+                <h2 class="card-title">Recent Transactions</h2>
+                <div class="card-icon icon-primary">
+                    <i class="fas fa-list"></i>
+                </div>
+            </div>
+            
+            <table class="data-grid">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Project</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ now|date:"M d, Y" }}</td>
+                        <td>Office Renovation</td>
+                        <td>Invoice</td>
+                        <td>Milestone 3 completion</td>
+                        <td class="positive">$15,000.00</td>
+                        <td><span class="status-badge status-completed">Paid</span></td>
+                    </tr>
+                    <tr>
+                        <td>{{ now|date:"M d, Y" }}</td>
+                        <td>Website Redesign</td>
+                        <td>Expense</td>
+                        <td>Developer hours</td>
+                        <td class="negative">$4,500.00</td>
+                        <td><span class="status-badge status-completed">Processed</span></td>
+                    </tr>
+                    <tr>
+                        <td>{{ now|date:"M d, Y" }}</td>
+                        <td>Marketing Campaign</td>
+                        <td>Purchase</td>
+                        <td>Ad credits</td>
+                        <td class="negative">$2,000.00</td>
+                        <td><span class="status-badge status-in-progress">Pending</span></td>
+                    </tr>
+                    <tr>
+                        <td>{{ now|date:"M d, Y" }}</td>
+                        <td>Mobile App Development</td>
+                        <td>Invoice</td>
+                        <td>Phase 1 completion</td>
+                        <td class="positive">$12,000.00</td>
+                        <td><span class="status-badge status-completed">Paid</span></td>
+                    </tr>
+                    <tr>
+                        <td>{{ now|date:"M d, Y" }}</td>
+                        <td>Office Renovation</td>
+                        <td>Expense</td>
+                        <td>Furniture delivery</td>
+                        <td class="negative">$3,200.00</td>
+                        <td><span class="status-badge status-completed">Processed</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="data-pagination">
+                <div class="page-info">
+                    Showing 1 to 5 of 24 entries
+                </div>
+                <div class="pagination-controls">
+                    <button class="pagination-button disabled">Previous</button>
+                    <button class="pagination-button active">1</button>
+                    <button class="pagination-button">2</button>
+                    <button class="pagination-button">3</button>
+                    <button class="pagination-button">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="{% static 'js/project_analytics.js' %}"></script>
+{% endblock %} 

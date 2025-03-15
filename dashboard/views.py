@@ -1,25 +1,46 @@
 from django.views.generic import TemplateView
 from clients.models import Client
-from sales.models import Sale
-from documents.models import Document, Quote, Expenditure
 from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, F, ExpressionWrapper, DecimalField
 from decimal import Decimal
 from django.http import JsonResponse
-from django.db.models.functions import TruncDate, TruncMonth
+from django.db.models.functions import TruncDate, TruncMonth, TruncWeek, TruncQuarter, TruncYear
 from datetime import datetime
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.db.models import Sum, Q
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from authentication.models import Profile
 import json
 from calendar import month_name
+from humanize import intcomma   
+
+# Import models from other apps
+from documents.models import Quote, Document
+from sales.models import Sale
 from expenses.models import Expense
 from purchases.models import Purchase
 
-class DashboardView(TemplateView):
+class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'dashboard/dashboard.html'
+    login_url = 'authentication:login'
+    redirect_field_name = 'next'
+
+    def get(self, request, *args, **kwargs):
+        # Check user role and redirect if necessary
+        if request.user.is_authenticated:
+            role = request.session.get('user_role')
+            print(f"DashboardView: User role is {role}")
+            
+            # If staff role, redirect to profile 
+            if role == 'staff':
+                print(f"Redirecting staff user to profile")
+                return redirect('authentication:profile')
+        
+        # Continue with normal processing for administrators
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -30,150 +51,72 @@ class DashboardView(TemplateView):
         
         # Recent items for quick access
         context['recent_clients'] = Client.objects.order_by('-created_at')[:5]
-        context['recent_documents'] = Document.objects.order_by('-created_at')[:5]
-        context['recent_quotes'] = Quote.objects.filter(status='DRAFT').order_by('-created_at')[:5]
-        context['recent_sales'] = Document.objects.filter(document_type='INVOICE').order_by('-created_at')[:5]
-
+        
         # Get date ranges
         now = timezone.now()
         this_month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         last_month_start = (this_month_start - timedelta(days=1)).replace(day=1)
         
-        # Get quotes statistics
-        total_quotes = Quote.objects.count()
-        quotes_this_month = Quote.objects.filter(created_at__gte=this_month_start).count()
-        quotes_last_month = Quote.objects.filter(
+        # Get clients statistics
+        total_clients = Client.objects.count()
+        clients_this_month = Client.objects.filter(created_at__gte=this_month_start).count()
+        clients_last_month = Client.objects.filter(
             created_at__gte=last_month_start,
             created_at__lt=this_month_start
         ).count()
         
-        # Get quotes total amount
-        quotes_amount = Quote.objects.aggregate(
-            total=Sum('total_amount')
-        )['total'] or 0
+        # Calculate client trend (percentage change)
+        client_trend = self._calculate_trend(clients_this_month, clients_last_month)
         
-        # Get invoices statistics
-        total_invoices = Document.objects.filter(document_type='INVOICE').count()
-        invoices_this_month = Document.objects.filter(
-            document_type='INVOICE',
-            created_at__gte=this_month_start
-        ).count()
-        invoices_last_month = Document.objects.filter(
-            document_type='INVOICE',
-            created_at__gte=last_month_start,
-            created_at__lt=this_month_start
-        ).count()
+        # Quotes vs Invoices data
+        quotes_count = Quote.objects.filter(status='INVOICED').count()
+        invoices_count = Document.objects.filter(document_type='INVOICE').count()
+        quotes_amount = Quote.objects.filter(status='INVOICED').aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+        invoices_amount = Document.objects.filter(document_type='INVOICE').aggregate(Sum('total_amount'))['total_amount__sum'] or 0
         
-        # Get invoices total amount
-        invoices_amount = Document.objects.filter(document_type='INVOICE').aggregate(
-            total=Sum('total_amount')
-        )['total'] or 0
+        # Revenue vs Expenditure data
+        # Revenue = Paid invoices + Sales
+        invoice_revenue = Document.objects.filter(document_type='INVOICE', status='PAID').aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+        sales_revenue = Sale.objects.filter(payment_status='PAID').aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+        total_revenue = invoice_revenue + sales_revenue
         
-        # Calculate trends (percentage change)
-        quote_trend = self._calculate_trend(quotes_this_month, quotes_last_month)
-        invoice_trend = self._calculate_trend(invoices_this_month, invoices_last_month)
+        # Expenditure = Expenses + Purchases
+        total_expenses = Expense.objects.all().aggregate(Sum('amount'))['amount__sum'] or 0
+        total_purchases = Purchase.objects.all().aggregate(Sum('amount'))['amount__sum'] or 0
+        total_expenditure = total_expenses + total_purchases
         
-        # Get revenue and expenditure
-        total_revenue = Document.objects.filter(document_type='INVOICE').aggregate(
-            total=Sum('total_amount')
-        )['total'] or 0
-        
-        total_expenditure = Expense.objects.aggregate(
-            total=Sum('amount')
-        )['total'] or 0
-        
-        # Calculate revenue and expenditure for this month and last month
-        revenue_this_month = Document.objects.filter(
-            document_type='INVOICE',
-            created_at__gte=this_month_start
-        ).aggregate(total=Sum('total_amount'))['total'] or 0
-        
-        revenue_last_month = Document.objects.filter(
-            document_type='INVOICE',
-            created_at__gte=last_month_start,
-            created_at__lt=this_month_start
-        ).aggregate(total=Sum('total_amount'))['total'] or 0
-        
-        expenditure_this_month = Expense.objects.filter(
-            date__gte=this_month_start
-        ).aggregate(total=Sum('amount'))['total'] or 0
-        
-        expenditure_last_month = Expense.objects.filter(
-            date__gte=last_month_start,
-            date__lt=this_month_start
-        ).aggregate(total=Sum('amount'))['total'] or 0
-        
-        # Calculate trends
-        revenue_trend = self._calculate_trend(revenue_this_month, revenue_last_month)
-        expenditure_trend = self._calculate_trend(expenditure_this_month, expenditure_last_month)
-        
-        # Calculate conversion rate (quotes to invoices)
-        conversion_rate = 0
-        if total_quotes > 0:
-            conversion_rate = round((total_invoices / total_quotes) * 100)
-        
-        # Calculate conversion trend
-        conversion_this_month = 0
-        if quotes_this_month > 0:
-            conversion_this_month = (invoices_this_month / quotes_this_month) * 100
-            
-        conversion_last_month = 0
-        if quotes_last_month > 0:
-            conversion_last_month = (invoices_last_month / quotes_last_month) * 100
-            
-        conversion_trend = self._calculate_trend(conversion_this_month, conversion_last_month)
+        # Purchases vs Sales data
+        # Sales = Invoices (paid) + Sales
+        total_sales = invoice_revenue + sales_revenue
+
+        # Calculate profit and margin
+        total_profit = total_revenue - total_expenditure
+        total_margin = self._calculate_percentage(total_profit, total_revenue)
+        total_margin_percentage = self._calculate_percentage(total_profit, total_revenue)
+        total_margin_percentage_trend = self._calculate_trend(total_margin_percentage, total_margin_percentage)
+        total_margin_percentage_trend_percentage = self._calculate_percentage(total_margin_percentage_trend, total_margin_percentage)
         
         # Prepare stats dictionary
         context['stats'] = {
-            'total_quotes': total_quotes,
-            'total_invoices': total_invoices,
+            'total_clients': total_clients,
+            'client_trend': client_trend,
+            'quotes_count': quotes_count,
+            'invoices_count': invoices_count,
             'quotes_amount': quotes_amount,
             'invoices_amount': invoices_amount,
-            'quote_trend': quote_trend,
-            'invoice_trend': invoice_trend,
             'total_revenue': total_revenue,
             'total_expenditure': total_expenditure,
-            'revenue_trend': revenue_trend,
-            'expenditure_trend': expenditure_trend,
-            'conversion_rate': conversion_rate,
-            'conversion_trend': conversion_trend,
+            'total_purchases': total_purchases,
+            'total_sales': total_sales,
+            'total_profit': total_profit,
+            'total_margin': total_margin,
+                'total_margin_percentage': total_margin_percentage,
+            'total_margin_percentage_trend': total_margin_percentage_trend,
+            'total_margin_percentage_trend_percentage': total_margin_percentage_trend_percentage
         }
         
-        # Get monthly data for charts (last 6 months)
-        six_months_ago = now - timedelta(days=180)
-        
-        # Get monthly expenses
-        monthly_expenses = self._get_monthly_data(
-            Expense.objects.filter(date__gte=six_months_ago),
-            'date', 'amount'
-        )
-        
-        # Get monthly purchases
-        monthly_purchases = self._get_monthly_data(
-            Purchase.objects.filter(date__gte=six_months_ago),
-            'date', 'amount'
-        )
-        
-        # Get monthly revenue
-        monthly_revenue = self._get_monthly_data(
-            Document.objects.filter(
-                document_type='INVOICE',
-                created_at__gte=six_months_ago
-            ),
-            'created_at', 'total_amount'
-        )
-        
-        # Prepare months labels
-        months = []
-        for i in range(5, -1, -1):
-            month_date = now - timedelta(days=30 * i)
-            months.append(month_name[month_date.month][:3])
-        
-        # Add monthly data to context
-        context['months'] = json.dumps(months)
-        context['monthly_expenses'] = json.dumps(list(monthly_expenses.values()))
-        context['monthly_purchases'] = json.dumps(list(monthly_purchases.values()))
-        context['monthly_revenue'] = json.dumps(list(monthly_revenue.values()))
+        # Monthly data for trends chart
+        context['monthly_data'] = self._get_monthly_data()
         
         return context
     
@@ -183,164 +126,447 @@ class DashboardView(TemplateView):
             return 100 if current > 0 else 0
         return round(((current - previous) / previous) * 100)
     
-    def _get_monthly_data(self, queryset, date_field, amount_field):
-        """Get monthly aggregated data for the last 6 months"""
+    def _calculate_percentage(self, part, whole):
+        """Calculate percentage of part compared to whole"""
+        if whole == 0:
+            return 0
+        return round((part / whole) * 100, 2)
+    
+    def _get_monthly_data(self):
+        """Get data for monthly trends chart"""
+        # Get the last 12 months
         now = timezone.now()
-        result = {}
+        end_date = now.replace(day=1)
+        start_date = (end_date - timedelta(days=365)).replace(day=1)
         
-        # Initialize with zeros for the last 6 months
-        for i in range(5, -1, -1):
-            month_date = now - timedelta(days=30 * i)
-            month_key = month_date.month
-            result[month_key] = 0
+        # Revenue data by month (Invoices + Sales)
+        invoice_revenue = Document.objects.filter(
+            document_date__gte=start_date,
+            document_date__lt=now,
+            document_type='INVOICE',
+            status='PAID'
+        ).annotate(
+            month=TruncMonth('document_date')
+        ).values('month').annotate(total=Sum('total_amount')).order_by('month')
         
-        # Get data from database
-        monthly_data = queryset.annotate(
-            month=TruncMonth(date_field)
-        ).values('month').annotate(
-            total=Sum(amount_field)
-        ).order_by('month')
+        sales_revenue = Sale.objects.filter(
+            sale_date__gte=start_date,
+            sale_date__lt=now,
+            payment_status='PAID'
+        ).annotate(
+            month=TruncMonth('sale_date')
+        ).values('month').annotate(total=Sum('total_amount')).order_by('month')
         
-        # Fill in the data
-        for item in monthly_data:
-            month_key = item['month'].month
-            if month_key in result:
-                result[month_key] = float(item['total'])
+        # Expenditure data by month (Expenses + Purchases)
+        expenses = Expense.objects.filter(
+            date__gte=start_date,
+            date__lt=now
+        ).annotate(
+            month=TruncMonth('date')
+        ).values('month').annotate(total=Sum('amount')).order_by('month')
         
-        return result
-
-class CalendarView(TemplateView):
-    template_name = 'dashboard/calendar.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['documents_url'] = reverse('documents:document_list')
-        return context 
-
-class ScheduleView(TemplateView):
-    template_name = 'dashboard/schedule.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Add your events data here
-        context['events'] = []
-        return context 
-
-class StatisticsView(TemplateView):
-    template_name = 'dashboard/statistics.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        purchases = Purchase.objects.filter(
+            date__gte=start_date,
+            date__lt=now
+        ).annotate(
+            month=TruncMonth('date')
+        ).values('month').annotate(total=Sum('amount')).order_by('month')
         
-        # Get project statistics
-        context['stats'] = {
-            'quotes_data': self.get_quotes_stats(),
-            'revenue_data': self.get_revenue_stats()
+        # Prepare data for chart
+        months = []
+        revenue_data = []
+        expenditure_data = []
+        profit_data = []
+        
+        # Create a dict of the month mapped to its data
+        invoice_dict = {item['month'].strftime('%Y-%m'): item['total'] for item in invoice_revenue}
+        sales_dict = {item['month'].strftime('%Y-%m'): item['total'] for item in sales_revenue}
+        expense_dict = {item['month'].strftime('%Y-%m'): item['total'] for item in expenses}
+        purchase_dict = {item['month'].strftime('%Y-%m'): item['total'] for item in purchases}
+        
+        # Generate the list of months
+        current_date = start_date
+        while current_date < now:
+            month_key = current_date.strftime('%Y-%m')
+            months.append(current_date.strftime('%b %Y'))  # e.g., "Jan 2023"
+            
+            # Calculate revenue (invoices + sales)
+            month_invoice = invoice_dict.get(month_key, 0)
+            month_sales = sales_dict.get(month_key, 0)
+            month_revenue = month_invoice + month_sales
+            revenue_data.append(float(month_revenue))
+            
+            # Calculate expenditure (expenses + purchases)
+            month_expense = expense_dict.get(month_key, 0)
+            month_purchase = purchase_dict.get(month_key, 0)
+            month_expenditure = month_expense + month_purchase
+            expenditure_data.append(float(month_expenditure))
+            
+            # Calculate profit
+            month_profit = month_revenue - month_expenditure
+            profit_data.append(float(month_profit))
+            
+            # Move to next month
+            if current_date.month == 12:
+                current_date = current_date.replace(year=current_date.year + 1, month=1)
+            else:
+                current_date = current_date.replace(month=current_date.month + 1)
+        
+        return {
+            'months': months,
+            'revenue': revenue_data,
+            'expenditure': expenditure_data,
+            'profit': profit_data
         }
+
+class CalendarView(LoginRequiredMixin, TemplateView):
+    template_name = 'dashboard/calendar.html'
+    login_url = 'authentication:login'
+    redirect_field_name = 'next'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         return context
 
-    def get_quotes_stats(self):
-        total_quotes = Quote.objects.count()
-        total_invoices = Document.objects.filter(document_type='INVOICE').count()
-        
-        return {
-            'total_quotes': total_quotes,
-            'total_invoices': total_invoices
-        }
+class ScheduleView(LoginRequiredMixin, TemplateView):
+    template_name = 'dashboard/schedule.html'
+    login_url = 'authentication:login'
+    redirect_field_name = 'next'
 
-    def get_revenue_stats(self):
-        total_revenue = Document.objects.filter(
-            document_type='INVOICE'
-        ).aggregate(total=Sum('total_amount'))['total'] or 0
-        
-        total_expenditure = Document.objects.filter(
-            document_type='EXPENSE'
-        ).aggregate(total=Sum('total_amount'))['total'] or 0
-        
-        return {
-            'total_revenue': float(total_revenue),
-            'total_expenditure': float(total_expenditure)
-        }
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
-def get_chart_data(request):
-    period = request.GET.get('period', 'month')
-    
-    # Calculate date range
-    end_date = datetime.now()
-    if period == 'week':
-        start_date = end_date - timedelta(days=7)
-    elif period == 'month':
-        start_date = end_date - timedelta(days=30)
-    elif period == 'quarter':
-        start_date = end_date - timedelta(days=90)
-    else:  # year
-        start_date = end_date - timedelta(days=365)
+class StatisticsView(LoginRequiredMixin, TemplateView):
+    template_name = 'dashboard/statistics.html'
+    login_url = 'authentication:login'
+    redirect_field_name = 'next'
 
-    # Get quotes data
-    quotes_data = Quote.objects.filter(
-        created_at__range=(start_date, end_date)
-    ).annotate(
-        date=TruncDate('created_at')
-    ).values('date').annotate(
-        count=Count('id'),
-        total=Sum('total_amount')
-    ).order_by('date')
-
-    # Get invoices data
-    invoices_data = Document.objects.filter(
-        document_type='INVOICE',
-        created_at__range=(start_date, end_date)
-    ).annotate(
-        date=TruncDate('created_at')
-    ).values('date').annotate(
-        count=Count('id'),
-        total=Sum('total_amount')
-    ).order_by('date')
-
-    # Get revenue data
-    revenue_data = Document.objects.filter(
-        document_type='INVOICE',
-        created_at__range=(start_date, end_date)
-    ).annotate(
-        date=TruncDate('created_at')
-    ).values('date').annotate(
-        total=Sum('total_amount')
-    ).order_by('date')
-
-    # Get expenditure data
-    expenditure_data = Document.objects.filter(
-        document_type='EXPENSE',
-        created_at__range=(start_date, end_date)
-    ).annotate(
-        date=TruncDate('created_at')
-    ).values('date').annotate(
-        total=Sum('total_amount')
-    ).order_by('date')
-
-    # Prepare data for charts
-    dates = sorted(set(
-        [item['date'] for item in quotes_data] +
-        [item['date'] for item in invoices_data] +
-        [item['date'] for item in revenue_data] +
-        [item['date'] for item in expenditure_data]
-    ))
-
-    return JsonResponse({
-        'labels': [date.strftime('%Y-%m-%d') for date in dates],
-        'quotes_data': [next((item['count'] for item in quotes_data if item['date'] == date), 0) for date in dates],
-        'invoices_data': [next((item['count'] for item in invoices_data if item['date'] == date), 0) for date in dates],
-        'quotes_amount': [float(next((item['total'] for item in quotes_data if item['date'] == date), 0)) for date in dates],
-        'invoices_amount': [float(next((item['total'] for item in invoices_data if item['date'] == date), 0)) for date in dates],
-        'revenue_data': [float(next((item['total'] for item in revenue_data if item['date'] == date), 0)) for date in dates],
-        'expenditure_data': [float(next((item['total'] for item in expenditure_data if item['date'] == date), 0)) for date in dates],
-    }) 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
 @login_required
-def dashboard(request):
-    profile_id = request.session.get('profile_id')
-    profile = Profile.objects.get(id=profile_id) if profile_id else None
+def get_chart_data(request):
+    """Get data for dashboard charts"""
+    chart_type = request.GET.get('type', 'monthly')
+    timeline = request.GET.get('timeline', 'month')  # Options: week, month, quarter, year
     
-    context = {
-        'profile': profile,
-    }
-    return render(request, 'dashboard/dashboard.html', context) 
+    # Get date range based on timeline
+    now = timezone.now()
+    if timeline == 'week':
+        start_date = now - timedelta(days=7)
+        truncate_func = TruncDate
+        date_format = '%d %b'  # e.g., "01 Jan"
+    elif timeline == 'month':
+        start_date = now - timedelta(days=30)
+        truncate_func = TruncDate
+        date_format = '%d %b'  # e.g., "01 Jan"
+    elif timeline == 'quarter':
+        start_date = now - timedelta(days=90)
+        truncate_func = TruncWeek
+        date_format = 'Week %W'  # e.g., "Week 01"
+    elif timeline == 'year':
+        start_date = now - timedelta(days=365)
+        truncate_func = TruncMonth
+        date_format = '%b %Y'  # e.g., "Jan 2023"
+    else:
+        # Default to month
+        start_date = now - timedelta(days=30)
+        truncate_func = TruncDate
+        date_format = '%d %b'
+    
+    # Quote vs Invoice data
+    if chart_type == 'quotes_invoices':
+        if request.GET.get('view_type') == 'amount':
+            # Get quotes and invoices amounts over time
+            quotes = Quote.objects.filter(
+                created_at__gte=start_date, 
+                status='INVOICED'
+            ).annotate(
+                date=truncate_func('created_at')
+            ).values('date').annotate(
+                total=Sum('total_amount')
+            ).order_by('date')
+            
+            invoices = Document.objects.filter(
+                document_date__gte=start_date,
+                document_type='INVOICE'
+            ).annotate(
+                date=truncate_func('document_date')
+            ).values('date').annotate(
+                total=Sum('total_amount')
+            ).order_by('date')
+        else:
+            # Get quotes and invoices count over time
+            quotes = Quote.objects.filter(
+                created_at__gte=start_date,
+                status='INVOICED'
+            ).annotate(
+                date=truncate_func('created_at')
+            ).values('date').annotate(
+                total=Count('id')
+            ).order_by('date')
+            
+            invoices = Document.objects.filter(
+                document_date__gte=start_date,
+                document_type='INVOICE'
+            ).annotate(
+                date=truncate_func('document_date')
+            ).values('date').annotate(
+                total=Count('id')
+            ).order_by('date')
+        
+        # Create a dict of date mapped to data
+        quote_dict = {item['date'].strftime('%Y-%m-%d'): item['total'] for item in quotes}
+        invoice_dict = {item['date'].strftime('%Y-%m-%d'): item['total'] for item in invoices}
+        
+        # Generate list of dates
+        current_date = start_date
+        labels = []
+        quote_data = []
+        invoice_data = []
+        
+        while current_date <= now:
+            date_key = current_date.strftime('%Y-%m-%d')
+            labels.append(current_date.strftime(date_format))
+            quote_data.append(float(quote_dict.get(date_key, 0)))
+            invoice_data.append(float(invoice_dict.get(date_key, 0)))
+            current_date += timedelta(days=1)
+        
+        data = {
+            'labels': labels,
+            'datasets': [
+                {
+                    'label': 'Quotes',
+                    'data': quote_data,
+                    'backgroundColor': 'rgba(54, 162, 235, 0.2)',
+                    'borderColor': 'rgba(54, 162, 235, 1)',
+                    'borderWidth': 1
+                },
+                {
+                    'label': 'Invoices',
+                    'data': invoice_data,
+                    'backgroundColor': 'rgba(255, 99, 132, 0.2)',
+                    'borderColor': 'rgba(255, 99, 132, 1)',
+                    'borderWidth': 1
+                }
+            ]
+        }
+    
+    # Revenue vs Expenditure data
+    elif chart_type == 'revenue_expenditure':
+        # Get revenue data (Invoices + Sales)
+        invoice_revenue = Document.objects.filter(
+            document_date__gte=start_date,
+            document_type='INVOICE',
+            status='PAID'
+        ).annotate(
+            date=truncate_func('document_date')
+        ).values('date').annotate(
+            total=Sum('total_amount')
+        ).order_by('date')
+        
+        sales_revenue = Sale.objects.filter(
+            sale_date__gte=start_date,
+            payment_status='PAID'
+        ).annotate(
+            date=truncate_func('sale_date')
+        ).values('date').annotate(
+            total=Sum('total_amount')
+        ).order_by('date')
+        
+        # Get expenditure data (Expenses + Purchases)
+        expenses = Expense.objects.filter(
+            date__gte=start_date
+        ).annotate(
+            date=truncate_func('date')
+        ).values('date').annotate(
+            total=Sum('amount')
+        ).order_by('date')
+        
+        purchases = Purchase.objects.filter(
+            date__gte=start_date
+        ).annotate(
+            date=truncate_func('date')
+        ).values('date').annotate(
+            total=Sum('amount')
+        ).order_by('date')
+        
+        # Create a dict of date mapped to data
+        invoice_dict = {item['date'].strftime('%Y-%m-%d'): item['total'] for item in invoice_revenue}
+        sales_dict = {item['date'].strftime('%Y-%m-%d'): item['total'] for item in sales_revenue}
+        expense_dict = {item['date'].strftime('%Y-%m-%d'): item['total'] for item in expenses}
+        purchase_dict = {item['date'].strftime('%Y-%m-%d'): item['total'] for item in purchases}
+        
+        # Generate list of dates
+        current_date = start_date
+        labels = []
+        revenue_data = []
+        expenditure_data = []
+        
+        while current_date <= now:
+            date_key = current_date.strftime('%Y-%m-%d')
+            labels.append(current_date.strftime(date_format))
+            
+            # Revenue = Invoices + Sales
+            date_invoice = invoice_dict.get(date_key, 0)
+            date_sales = sales_dict.get(date_key, 0)
+            revenue_data.append(float(date_invoice + date_sales))
+            
+            # Expenditure = Expenses + Purchases
+            date_expense = expense_dict.get(date_key, 0)
+            date_purchase = purchase_dict.get(date_key, 0)
+            expenditure_data.append(float(date_expense + date_purchase))
+            
+            current_date += timedelta(days=1)
+
+        # Calculate profit and margin
+        profit_data = [revenue - expenditure for revenue, expenditure in zip(revenue_data, expenditure_data)]
+        margin_data = [revenue - expenditure for revenue, expenditure in zip(revenue_data, expenditure_data)]
+        margin_percentage_data = [profit / revenue * 100 for profit, revenue in zip(profit_data, revenue_data)] 
+
+        
+        data = {
+            'labels': labels,
+            'datasets': [
+                {
+                    'label': 'Revenue',
+                    'data': revenue_data,
+                    'backgroundColor': 'rgba(75, 192, 192, 0.2)',
+                    'borderColor': 'rgba(75, 192, 192, 1)',
+                    'borderWidth': 1
+                },
+                {
+                    'label': 'Expenditure',
+                    'data': expenditure_data,
+                    'backgroundColor': 'rgba(255, 159, 64, 0.2)',
+                    'borderColor': 'rgba(255, 159, 64, 1)',
+                    'borderWidth': 1
+                },
+                {
+                    'label': 'Profit',
+                    'data': profit_data,
+                    'backgroundColor': 'rgba(54, 162, 235, 0.2)',
+                    'borderColor': 'rgba(54, 162, 235, 1)',
+                    'borderWidth': 1
+                }
+            ]
+        }
+    
+    # Purchases vs Sales data
+    elif chart_type == 'purchases_sales':
+        # Get purchases data
+        purchases = Purchase.objects.filter(
+            date__gte=start_date
+        ).annotate(
+            date=truncate_func('date')
+        ).values('date').annotate(
+            total=Sum('amount')
+        ).order_by('date')
+        
+        # Get sales data (Invoices + Sales)
+        invoice_sales = Document.objects.filter(
+            document_date__gte=start_date,
+            document_type='INVOICE',
+            status='PAID'
+        ).annotate(
+            date=truncate_func('document_date')
+        ).values('date').annotate(
+            total=Sum('total_amount')
+        ).order_by('date')
+        
+        sales_sales = Sale.objects.filter(
+            sale_date__gte=start_date,
+            payment_status='PAID'
+        ).annotate(
+            date=truncate_func('sale_date')
+        ).values('date').annotate(
+            total=Sum('total_amount')
+        ).order_by('date')
+        
+        # Calculate profit and margin
+        profit_data = [revenue - expenditure for revenue, expenditure in zip(revenue_data, expenditure_data)]
+        margin_data = [revenue - expenditure for revenue, expenditure in zip(revenue_data, expenditure_data)]
+        margin_percentage_data = [profit / revenue * 100 for profit, revenue in zip(profit_data, revenue_data)]
+
+        # Create a dict of date mapped to data
+        purchase_dict = {item['date'].strftime('%Y-%m-%d'): item['total'] for item in purchases}
+        invoice_dict = {item['date'].strftime('%Y-%m-%d'): item['total'] for item in invoice_sales}
+        sales_dict = {item['date'].strftime('%Y-%m-%d'): item['total'] for item in sales_sales}
+        
+        # Generate list of dates
+        current_date = start_date
+        labels = []
+        purchase_data = []
+        sales_data = []
+        
+        while current_date <= now:
+            date_key = current_date.strftime('%Y-%m-%d')
+            labels.append(current_date.strftime(date_format))
+            
+            # Purchases
+            purchase_data.append(float(purchase_dict.get(date_key, 0)))
+            
+            # Sales = Invoices + Sales
+            date_invoice = invoice_dict.get(date_key, 0)
+            date_sales = sales_dict.get(date_key, 0)
+            sales_data.append(float(date_invoice + date_sales))
+            
+            current_date += timedelta(days=1)
+
+        
+        data = {
+            'labels': labels,
+            'datasets': [
+                {
+                    'label': 'Purchases',
+                    'data': purchase_data,
+                    'backgroundColor': 'rgba(153, 102, 255, 0.2)',
+                    'borderColor': 'rgba(153, 102, 255, 1)',
+                    'borderWidth': 1
+                },
+                {
+                    'label': 'Sales',
+                    'data': sales_data,
+                    'backgroundColor': 'rgba(255, 206, 86, 0.2)',
+                    'borderColor': 'rgba(255, 206, 86, 1)',
+                    'borderWidth': 1
+                }
+            ]
+        }
+    
+    # Monthly trends
+    else:
+        # Default to monthly trends
+        # Use _get_monthly_data from DashboardView
+        monthly_data = DashboardView()._get_monthly_data()
+        
+        data = {
+            'labels': monthly_data['months'],
+            'datasets': [
+                {
+                    'label': 'Revenue',
+                    'data': monthly_data['revenue'],
+                    'backgroundColor': 'rgba(75, 192, 192, 0.2)',
+                    'borderColor': 'rgba(75, 192, 192, 1)',
+                    'borderWidth': 1
+                },
+                {
+                    'label': 'Expenditure',
+                    'data': monthly_data['expenditure'],
+                    'backgroundColor': 'rgba(255, 159, 64, 0.2)',
+                    'borderColor': 'rgba(255, 159, 64, 1)',
+                    'borderWidth': 1
+                },
+                {
+                    'label': 'Profit/Loss',
+                    'data': monthly_data['profit'],
+                    'backgroundColor': 'rgba(54, 162, 235, 0.2)',
+                    'borderColor': 'rgba(54, 162, 235, 1)',
+                    'borderWidth': 1
+                }
+            ]
+        }
+    
+    return JsonResponse(data) 

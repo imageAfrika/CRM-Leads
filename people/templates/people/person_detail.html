@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/people_styles.css' %}">
+{% endblock %}
+
+{% block title %}{{ person.full_name }} - Detail{% endblock %}
+{% block header_title %}Person Detail{% endblock %}
+
+{% block content %}
+<!-- Person Header -->
+<div class="detail-header">
+    {% if person.profile_picture %}
+    <img src="{{ person.profile_picture.url }}" alt="{{ person.full_name }}" class="detail-avatar">
+    {% else %}
+    <img src="{% static 'images/default-avatar.png' %}" alt="{{ person.full_name }}" class="detail-avatar">
+    {% endif %}
+    
+    <div class="detail-info">
+        <h1 class="detail-name">{{ person.full_name }}</h1>
+        
+        <div class="detail-subtitle">
+            {% for role in person.role.all %}
+            <span class="badge badge-primary">{{ role.name }}</span>
+            {% empty %}
+            <span class="badge badge-secondary">No Role</span>
+            {% endfor %}
+        </div>
+        
+        <div class="detail-meta">
+            {% if person.email %}
+            <div class="meta-item">
+                <i class="fas fa-envelope meta-icon"></i>
+                <span class="meta-text">{{ person.email }}</span>
+            </div>
+            {% endif %}
+            
+            {% if person.phone %}
+            <div class="meta-item">
+                <i class="fas fa-phone meta-icon"></i>
+                <span class="meta-text">{{ person.phone }}</span>
+            </div>
+            {% endif %}
+            
+            {% if person.telegram_username %}
+            <div class="meta-item">
+                <i class="fab fa-telegram meta-icon"></i>
+                <span class="meta-text">{{ person.telegram_username }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="detail-actions">
+        <a href="{% url 'people:contact_people' %}?person={{ person.id }}" class="button button-primary">
+            <i class="fas fa-envelope"></i> Contact
+        </a>
+        <a href="{% url 'people:people_list' %}" class="button button-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>
+
+<!-- Person Tabs -->
+<div class="detail-tabs">
+    <a href="#information" class="detail-tab active">
+        <i class="fas fa-info-circle"></i> Information
+    </a>
+    <a href="#history" class="detail-tab">
+        <i class="fas fa-history"></i> Contact History
+    </a>
+    <a href="#roles" class="detail-tab">
+        <i class="fas fa-user-tag"></i> Roles
+    </a>
+</div>
+
+<!-- Information Section -->
+<div id="information" class="card">
+    <div class="card-header">
+        <h2>Personal Information</h2>
+    </div>
+    <div class="card-body">
+        {% if person.address %}
+        <div class="detail-section">
+            <h3 class="section-title">Address</h3>
+            <p>{{ person.address }}</p>
+        </div>
+        {% endif %}
+        
+        <div class="detail-section">
+            <h3 class="section-title">Registration Details</h3>
+            <div class="meta-item">
+                <i class="fas fa-user meta-icon"></i>
+                <span class="meta-text">Registered by: {{ person.registered_by|default:"Unknown" }}</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-calendar meta-icon"></i>
+                <span class="meta-text">Registered on: {{ person.created_at|date:"F j, Y" }}</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-clock meta-icon"></i>
+                <span class="meta-text">Last updated: {{ person.updated_at|date:"F j, Y" }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact History Section -->
+<div id="contact-history" class="card" style="display: none;">
+    <div class="card-header">
+        <h2>Contact History</h2>
+    </div>
+    <div class="card-body">
+        {% if contact_history %}
+        <div class="contact-history-list">
+            {% for contact in contact_history %}
+            <div class="contact-item">
+                <div class="contact-header">
+                    <div class="contact-type badge badge-primary">{{ contact.get_contact_type_display }}</div>
+                    <div class="contact-date">{{ contact.contact_date|date:"F j, Y H:i" }}</div>
+                </div>
+                <div class="contact-subject">{{ contact.subject }}</div>
+                <div class="contact-message">{{ contact.message }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-contact-history">
+            <p>No contact history available for this person.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Roles Section -->
+<div id="roles" class="card" style="display: none;">
+    <div class="card-header">
+        <h2>Role Management</h2>
+    </div>
+    <div class="card-body">
+        <form method="post" class="form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">Assigned Roles</label>
+                <div class="role-list">
+                    {% for role in available_roles %}
+                    <div class="role-item">
+                        <input type="checkbox" id="role_{{ role.id }}" name="role" value="{{ role.id }}" 
+                            {% if role in person.role.all %}checked{% endif %}>
+                        <label for="role_{{ role.id }}">{{ role.name }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="form-group" style="text-align: right;">
+                <button type="submit" class="button button-primary">
+                    <i class="fas fa-save"></i> Update Roles
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab navigation
+        const tabs = document.querySelectorAll('.detail-tab');
+        const sections = {
+            'information': document.getElementById('information'),
+            'history': document.getElementById('contact-history'),
+            'roles': document.getElementById('roles')
+        };
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Deactivate all tabs and hide all sections
+                tabs.forEach(t => t.classList.remove('active'));
+                Object.values(sections).forEach(section => {
+                    if (section) section.style.display = 'none';
+                });
+                
+                // Activate clicked tab and show corresponding section
+                this.classList.add('active');
+                const target = this.getAttribute('href').substring(1);
+                if (sections[target]) {
+                    sections[target].style.display = 'block';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

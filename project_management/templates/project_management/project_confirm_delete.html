@@ -1,0 +1,77 @@
+{% extends 'project_management/base.html' %}
+{% load static %}
+
+{% block title %}Delete Project: {{ project.name }}{% endblock %}
+
+{% block header_title %}Delete Project{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-warning {
+        border-left: 4px solid var(--danger-color);
+        padding: 15px 20px;
+        background-color: rgba(231, 76, 60, 0.05);
+        margin-bottom: 24px;
+        border-radius: var(--border-radius);
+    }
+    
+    .delete-warning h3 {
+        color: var(--danger-color);
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+    
+    .delete-form {
+        background-color: white;
+        border-radius: var(--border-radius);
+        padding: 24px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Delete Project</h1>
+        <a href="{% url 'project_management:project_detail' project.pk %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Project
+        </a>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <h4 class="mb-3">Are you sure you want to delete "{{ project.name }}"?</h4>
+                <p>This action cannot be undone. All associated data will be permanently deleted.</p>
+                
+                <div class="delete-warning">
+                    <h5><i class="fas fa-exclamation-triangle"></i> Warning</h5>
+                    <p class="mb-2">Deleting this project will also remove:</p>
+                    <ul class="mb-0">
+                        <li>All project milestones and progress data</li>
+                        <li>All associated documents and files</li>
+                        <li>All team member associations</li>
+                        <li>All financial records related to this project</li>
+                        <li>All project notes and communications</li>
+                    </ul>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete Project
+                    </button>
+                    <a href="{% url 'project_management:project_detail' project.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -39,16 +39,17 @@
         {% for account in accounts %}
             <div class="account-card">
                 <div class="account-type">{{ account.get_account_type_display }}</div>
+                <div class="account-project">{{ account.project.name }}</div>
                 <div class="account-number">{{ account.account_number }}</div>
                 <div class="account-balance">${{ account.balance|floatformat:2|intcomma }}</div>
                 <div class="account-actions">
-                    <a href="{% url 'banking:account_detail' account.id %}" class="btn primary-btn">
+                    <a href="{% url 'banking:account_detail' account.account_number %}" class="btn primary-btn">
                         <i class="fas fa-eye"></i> View
                     </a>
-                    <a href="{% url 'banking:deposit' account.id %}" class="btn secondary-btn">
+                    <a href="{% url 'banking:deposit' account.account_number %}" class="btn secondary-btn">
                         <i class="fas fa-arrow-down"></i> Deposit
                     </a>
-                    <a href="{% url 'banking:withdraw' account.id %}" class="btn secondary-btn">
+                    <a href="{% url 'banking:withdraw' account.account_number %}" class="btn secondary-btn">
                         <i class="fas fa-arrow-up"></i> Withdraw
                     </a>
                 </div>

@@ -1,0 +1,413 @@
+/* Modern Minimalist Leads CSS */
+
+/* Timeline styles */
+.timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 8px;
+    width: 2px;
+    background-color: #ebeef0;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 25px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    border: 2px solid #dee2e6;
+    z-index: 1;
+}
+
+.timeline-marker.bg-success {
+    background-color: #2ecc71;
+    border-color: #27ae60;
+}
+
+.timeline-content {
+    background-color: #fff;
+    padding: 18px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border-left: 3px solid #4a6fdc;
+}
+
+/* Card styles */
+.border-left-primary {
+    border-left: 4px solid #4a6fdc !important;
+}
+
+.border-left-success {
+    border-left: 4px solid #2ecc71 !important;
+}
+
+.border-left-info {
+    border-left: 4px solid #3498db !important;
+}
+
+.border-left-warning {
+    border-left: 4px solid #f39c12 !important;
+}
+
+.border-left-danger {
+    border-left: 4px solid #e74c3c !important;
+}
+
+.chart-container {
+    position: relative;
+    height: 350px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.form-label.required::after {
+    content: '*';
+    color: #e74c3c;
+    margin-left: 3px;
+}
+
+.invalid-feedback {
+    display: block;
+    color: #e74c3c;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+/* Status badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.badge.bg-new { background-color: #4a6fdc !important; color: white; }
+.badge.bg-contacted { background-color: #2ecc71 !important; color: white; }
+.badge.bg-qualified { background-color: #3498db !important; color: white; }
+.badge.bg-proposal { background-color: #f39c12 !important; color: white; }
+.badge.bg-negotiation { background-color: #e74c3c !important; color: white; }
+.badge.bg-won { background-color: #2ecc71 !important; color: white; }
+.badge.bg-lost { background-color: #6c757d !important; color: white; }
+
+/* Priority badges */
+.badge.bg-low { background-color: #6c757d !important; color: white; }
+.badge.bg-medium { background-color: #f39c12 !important; color: white; }
+.badge.bg-high { background-color: #e74c3c !important; color: white; }
+
+/* Source badges */
+.badge.bg-website { background-color: #4a6fdc !important; color: white; }
+.badge.bg-referral { background-color: #2ecc71 !important; color: white; }
+.badge.bg-social { background-color: #3498db !important; color: white; }
+.badge.bg-email { background-color: #f39c12 !important; color: white; }
+.badge.bg-other { background-color: #6c757d !important; color: white; }
+
+/* Lead cards */
+.lead-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    overflow: hidden;
+}
+
+.lead-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.lead-stats-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    border-left: 4px solid transparent;
+}
+
+.lead-stats-card.total {
+    border-left-color: #4a6fdc;
+}
+
+.lead-stats-card.new {
+    border-left-color: #3498db;
+}
+
+.lead-stats-card.qualified {
+    border-left-color: #f39c12;
+}
+
+.lead-stats-card.won {
+    border-left-color: #2ecc71;
+}
+
+.lead-stats-card h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #6c757d;
+}
+
+.lead-stats-card .number {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 10px 0;
+    color: #2c3e50;
+}
+
+.lead-chart-container {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    height: 400px;
+}
+
+/* Lead filters and tables */
+.lead-filters {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.lead-filters .form-group {
+    margin-bottom: 0;
+    min-width: 200px;
+    flex: 1;
+}
+
+.lead-table {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    width: 100%;
+}
+
+.lead-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    padding: 12px 15px;
+    border-bottom: 1px solid #ebeef0;
+}
+
+.lead-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #ebeef0;
+    vertical-align: middle;
+}
+
+.lead-table tr:last-child td {
+    border-bottom: none;
+}
+
+.lead-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.lead-table .lead-title {
+    color: #4a6fdc;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.lead-table .lead-title:hover {
+    text-decoration: underline;
+}
+
+/* Activity badges */
+.activity-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    margin-right: 15px;
+}
+
+.activity-badge i {
+    font-size: 16px;
+    color: #6c757d;
+}
+
+.activity-badge.created {
+    background-color: rgba(74, 111, 220, 0.1);
+}
+
+.activity-badge.created i {
+    color: #4a6fdc;
+}
+
+.activity-badge.updated {
+    background-color: rgba(243, 156, 18, 0.1);
+}
+
+.activity-badge.updated i {
+    color: #f39c12;
+}
+
+.activity-badge.completed {
+    background-color: rgba(46, 204, 113, 0.1);
+}
+
+.activity-badge.completed i {
+    color: #2ecc71;
+}
+
+.activity-badge.converted {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.activity-badge.converted i {
+    color: #3498db;
+}
+
+/* Dashboard components */
+.dashboard-header {
+    margin-bottom: 30px;
+}
+
+.dashboard-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #2c3e50;
+}
+
+.dashboard-subtitle {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+/* Progress bars */
+.progress {
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: #ebeef0;
+    margin-bottom: 10px;
+}
+
+.progress-bar {
+    border-radius: 4px;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.progress-label .label {
+    color: #6c757d;
+}
+
+.progress-label .value {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+/* Source icons */
+.source-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.source-icon i {
+    font-size: 14px;
+    color: white;
+}
+
+.source-website {
+    background-color: #4a6fdc;
+}
+
+.source-referral {
+    background-color: #2ecc71;
+}
+
+.source-social {
+    background-color: #3498db;
+}
+
+.source-other {
+    background-color: #6c757d;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .timeline::before {
+        left: 20px;
+    }
+    
+    .timeline-item {
+        padding-left: 50px;
+    }
+    
+    .timeline-marker {
+        left: 12px;
+    }
+    
+    .timeline-content {
+        padding: 15px;
+    }
+    
+    .lead-stats-card {
+        margin-bottom: 15px;
+    }
+    
+    .lead-chart-container {
+        height: 350px;
+    }
+    
+    .lead-filters {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+    }
+    
+    .lead-filters .form-group {
+        min-width: 100%;
+    }
+    
+    .lead-table {
+        display: block;
+        overflow-x: auto;
+    }
+} 

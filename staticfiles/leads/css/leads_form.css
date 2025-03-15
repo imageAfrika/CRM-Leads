@@ -1,0 +1,247 @@
+/* 
+ * Leads Form - Modern & Minimalist Design
+ * Custom styling without Bootstrap dependencies
+ */
+
+/* Variables */
+:root {
+  --lead-primary: #4a6cf7;
+  --lead-primary-hover: #3a5ce5;
+  --lead-secondary: #6c757d;
+  --lead-success: #2ecc71;
+  --lead-info: #3498db;
+  --lead-warning: #f39c12;
+  --lead-danger: #e74c3c;
+  --lead-light: #f8f9fa;
+  --lead-dark: #343a40;
+  --lead-grey-100: #f8f9fa;
+  --lead-grey-200: #e9ecef;
+  --lead-grey-300: #dee2e6;
+  --lead-grey-600: #6c757d;
+  --lead-grey-800: #343a40;
+  --lead-border-radius: 8px;
+  --lead-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --lead-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --lead-transition: all 0.3s ease;
+}
+
+/* Lead Form Container */
+.leads-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Lead Header */
+.leads-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--lead-grey-200);
+}
+
+.leads-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--lead-dark);
+  margin: 0;
+}
+
+.leads-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Back to Leads Button */
+.leads-actions a {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.6rem 1.2rem;
+  background-color: transparent;
+  color: var(--lead-primary);
+  border: 1px solid var(--lead-primary);
+  border-radius: var(--lead-border-radius);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--lead-transition);
+}
+
+.leads-actions a:hover {
+  background-color: var(--lead-primary);
+  color: white;
+}
+
+.leads-actions i {
+  margin-right: 0.5rem;
+}
+
+/* Form Container */
+.lead-form-container {
+  background-color: white;
+  border-radius: var(--lead-border-radius);
+  box-shadow: var(--lead-shadow);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.lead-form-header {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.lead-form-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--lead-dark);
+}
+
+.lead-form-subtitle {
+  color: var(--lead-grey-600);
+  font-size: 0.95rem;
+}
+
+/* Form Layout */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+.form-column {
+  position: relative;
+}
+
+.form-column.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Form Elements */
+.lead-form-group {
+  margin-bottom: 1.25rem;
+}
+
+.lead-form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--lead-dark);
+}
+
+.lead-form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid var(--lead-grey-300);
+  border-radius: var(--lead-border-radius);
+  background-color: white;
+  transition: var(--lead-transition);
+  font-family: inherit;
+}
+
+.lead-form-control:focus {
+  border-color: var(--lead-primary);
+  box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
+  outline: none;
+}
+
+/* Select dropdown styling */
+select.lead-form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px;
+  padding-right: 2.5rem;
+}
+
+/* Textarea styling */
+textarea.lead-form-control {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Form buttons */
+.lead-form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.lead-form-buttons a,
+.lead-form-buttons button {
+  display: inline-block;
+  padding: 0.6rem 1.5rem;
+  border-radius: var(--lead-border-radius);
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--lead-transition);
+  border: none;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+/* Button styles */
+.lead-form-buttons a {
+  background-color: var(--lead-grey-200);
+  color: var(--lead-grey-800);
+}
+
+.lead-form-buttons a:hover {
+  background-color: var(--lead-grey-300);
+}
+
+.lead-form-buttons button {
+  background-color: var(--lead-primary);
+  color: white;
+}
+
+.lead-form-buttons button:hover {
+  background-color: var(--lead-primary-hover);
+}
+
+/* Error messages */
+.text-danger {
+  color: var(--lead-danger);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  display: block;
+}
+
+.text-muted {
+  color: var(--lead-grey-600);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .leads-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .leads-actions {
+    margin-top: 1rem;
+    width: 100%;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .lead-form-buttons {
+    flex-direction: column;
+  }
+  
+  .lead-form-buttons a,
+  .lead-form-buttons button {
+    width: 100%;
+    text-align: center;
+  }
+}

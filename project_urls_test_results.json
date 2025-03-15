@@ -1,0 +1,42 @@
+{
+  "/projects/": {
+    "status": "success",
+    "code": 302
+  },
+  "/projects/create/": {
+    "status": "success",
+    "code": 302
+  },
+  "/projects/1/": {
+    "status": "success",
+    "code": 302
+  },
+  "/projects/1/update/": {
+    "status": "success",
+    "code": 302
+  },
+  "/projects/1/finances/": {
+    "status": "success",
+    "code": 302
+  },
+  "/projects/dashboard/": {
+    "status": "success",
+    "code": 302
+  },
+  "/projects/analytics/": {
+    "status": "success",
+    "code": 302
+  },
+  "/projects/1/documents/create/": {
+    "status": "success",
+    "code": 302
+  },
+  "/projects/1/milestones/create/": {
+    "status": "success",
+    "code": 302
+  },
+  "/projects/1/notes/create/": {
+    "status": "success",
+    "code": 302
+  }
+}

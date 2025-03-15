@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Profile
 from django.contrib.auth.models import Group
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, PasswordResetForm
 
 @login_required
 def profile_selection(request):
@@ -19,56 +20,30 @@ def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        role = request.POST.get('role')
-
-        # Debug prints
-        print(f"Login attempt - Username: {username}, Role: {role}")
-
+        role = request.POST.get('role', 'staff')  # Default to staff if not provided
+        
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
-            print(f"User authenticated - Is superuser: {user.is_superuser}, Is staff: {user.is_staff}")
-            print(f"User groups: {list(user.groups.all())}")
+            # Store the role in session before doing login
+            request.session['user_role'] = role
+            print(f"User {username} logged in as {role}")
             
-            # Check if user has the appropriate role
-            if role == 'admin' and user.is_superuser:
-                login(request, user)
-                profile = Profile.objects.filter(user=user).first()
-                if not profile:
-                    profile = Profile.objects.create(
-                        user=user,
-                        name='Administrator',
-                        pin='0000'
-                    )
-                request.session['profile_id'] = profile.id
+            login(request, user)
+            
+            # Redirect based on role
+            if role == 'administrator':
                 return redirect('dashboard:dashboard')
-            
-            elif role == 'staff' and user.is_staff:  # Changed condition
-                if not user.groups.filter(name='Staff').exists():
-                    # Add user to Staff group if not already in it
-                    from django.contrib.auth.models import Group
-                    staff_group, _ = Group.objects.get_or_create(name='Staff')
-                    user.groups.add(staff_group)
-                
-                login(request, user)
-                return redirect('authentication:profile_selection')
-            
             else:
-                if role == 'admin':
-                    messages.error(request, 'You do not have administrator privileges')
-                else:
-                    messages.error(request, 'You do not have staff privileges')
+                return redirect('authentication:profile')
         else:
             messages.error(request, 'Invalid username or password')
-            print("Authentication failed")
     
+    # Add the form for GET requests
     return render(request, 'authentication/login.html')
 
 @login_required
 def logout_view(request):
-    # Clear profile from session on logout
-    if 'profile_id' in request.session:
-        del request.session['profile_id']
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
     return redirect('authentication:login')
@@ -119,7 +94,19 @@ def profile_select(request, pk):
                 # Store profile in request
                 request.profile = profile
                 messages.success(request, f'Welcome back, {profile.name}!')
-                return redirect('dashboard:dashboard')
+                
+                # Get the role from session
+                role = request.session.get('user_role', 'staff')
+                
+                # Ensure the profile has the correct role
+                profile.role = role  
+                profile.save()
+                
+                # Redirect based on role
+                if role == 'administrator':
+                    return redirect('dashboard:dashboard')
+                else:  # staff role
+                    return redirect('authentication:profile')
             else:
                 messages.error(request, 'Incorrect PIN. Please try again.')
         
@@ -127,6 +114,44 @@ def profile_select(request, pk):
     except Profile.DoesNotExist:
         messages.error(request, 'Profile not found.')
         return redirect('authentication:profile_selection')
+
+@login_required
+def profile_view(request):
+    role = request.session.get('user_role', None)
+    
+    # For administrator role, redirect immediately to dashboard
+    if role == 'administrator':
+        return redirect('dashboard:dashboard')
+    
+    # Otherwise render template, but with a fixed context
+    return render(request, 'authentication/profile_fixed.html', {})
+
+@login_required
+def password_change(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('authentication:profile')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'authentication/password_change.html', {'form': form})
+
+def password_reset(request):
+    if request.method == 'POST':
+        form = PasswordResetForm(request.POST)
+        if form.is_valid():
+            form.save(
+                request=request,
+                subject_template_name='authentication/password_reset_subject.txt',
+                email_template_name='authentication/password_reset_email.html'
+            )
+            messages.success(request, 'Password reset instructions have been sent to your email.')
+            return redirect('authentication:login')
+    else:
+        form = PasswordResetForm()
+    return render(request, 'authentication/password_reset.html', {'form': form})
 
 def index_view(request):
     if request.user.is_authenticated:

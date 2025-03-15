@@ -334,6 +334,8 @@
     border: 1px solid rgba(226, 232, 240, 0.8);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     overflow: hidden;
+    height: auto;
+    min-height: 400px;
 }
 
 .chart-card:hover {
@@ -343,8 +345,9 @@
 
 .chart-container {
     position: relative;
-    height: 300px;
+    height: 350px;
     width: 100%;
+    margin-bottom: 20px;
 }
 
 .chart-card h2 {

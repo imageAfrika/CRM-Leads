@@ -83,4 +83,69 @@ class SaleItem(models.Model):
     class Meta:
         ordering = ['id']
 
+class Invoice(models.Model):
+    STATUS_CHOICES = (
+        ('DRAFT', 'Draft'),
+        ('SENT', 'Sent'),
+        ('PAID', 'Paid'),
+        ('OVERDUE', 'Overdue'),
+        ('CANCELLED', 'Cancelled'),
+    )
+    
+    invoice_number = models.CharField(max_length=50, unique=True)
+    client = models.ForeignKey('clients.Client', on_delete=models.CASCADE, related_name='invoices')
+    project = models.ForeignKey('project_management.Project', on_delete=models.SET_NULL, null=True, blank=True, related_name='invoices')
+    date = models.DateField(default=timezone.now)
+    due_date = models.DateField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='DRAFT')
+    subtotal = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    tax_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    discount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    total_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    notes = models.TextField(blank=True)
+    terms = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"Invoice {self.invoice_number} - {self.client.name}"
+    
+    def get_absolute_url(self):
+        return reverse('sales:invoice_detail', kwargs={'pk': self.pk})
+    
+    def calculate_totals(self):
+        """Calculate subtotal, tax, and total amounts"""
+        self.subtotal = sum(item.get_total() for item in self.items.all())
+        self.total_amount = self.subtotal + self.tax_amount - self.discount
+        
+    def save(self, *args, **kwargs):
+        if not self.invoice_number:
+            last_invoice = Invoice.objects.order_by('-id').first()
+            if last_invoice:
+                last_id = int(last_invoice.invoice_number.split('-')[-1])
+                self.invoice_number = f"INV-{last_id + 1:04d}"
+            else:
+                self.invoice_number = "INV-0001"
+                
+        super().save(*args, **kwargs)
+        
+    def is_overdue(self):
+        return self.due_date < timezone.now().date() and self.status != 'PAID'
+
+class InvoiceItem(models.Model):
+    invoice = models.ForeignKey(Invoice, related_name='items', on_delete=models.CASCADE)
+    description = models.CharField(max_length=255)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    discount = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    
+    def get_total(self):
+        """Calculate total price for this item including discount"""
+        subtotal = self.quantity * self.unit_price
+        discount_amount = subtotal * (self.discount / 100)
+        return subtotal - discount_amount
+    
+    def __str__(self):
+        return f"{self.description} - {self.quantity} x ${self.unit_price}"
+
 

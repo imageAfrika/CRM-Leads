@@ -1,0 +1,128 @@
+{% extends "registration/base_registration.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'registration/css/airtel_payment.css' %}">
+{% endblock %}
+
+{% block title %}Airtel Money Payment - CRM Leads{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">Airtel Money Payment</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-4">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <i class="fas fa-info-circle fa-2x me-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Order Summary</h5>
+                            <p class="mb-0">You are subscribing to <strong>{{ selected_plan.name }}</strong> with <strong>{{ billing_cycle }}</strong> billing.</p>
+                            <p class="mb-0"><strong>Total Amount: KES {{ amount|floatformat:2 }}</strong></p>
+                            <p class="mb-0"><strong>Transaction Reference: {{ transaction_ref }}</strong></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-4 mb-md-0">
+                            <div class="card-header bg-danger text-white">
+                                <h5 class="mb-0">Airtel Money Payment Instructions</h5>
+                            </div>
+                            <div class="card-body">
+                                <ol class="payment-steps">
+                                    <li class="mb-3">
+                                        <strong>Go to your Airtel Money menu</strong><br>
+                                        <small class="text-muted">Press the Airtel Money app or dial *222# on your phone</small>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong>Select "Make Payments"</strong><br>
+                                        <small class="text-muted">Choose the payments option from the menu</small>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong>Select "Pay Bill"</strong><br>
+                                        <small class="text-muted">Choose the Pay Bill option</small>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong>Enter Business Number:</strong><br>
+                                        <span class="badge bg-light text-dark p-2 fs-5">900800</span><br>
+                                        <small class="text-muted">This is our CRM Leads business number</small>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong>Enter Account Number:</strong><br>
+                                        <span class="badge bg-light text-dark p-2 fs-5">{{ transaction_ref }}</span><br>
+                                        <small class="text-muted">Use the transaction reference above as the account number</small>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong>Enter Amount:</strong><br>
+                                        <span class="badge bg-light text-dark p-2 fs-5">{{ amount|floatformat:0 }}</span><br>
+                                        <small class="text-muted">Enter the exact amount shown</small>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong>Enter your Airtel Money PIN and confirm payment</strong><br>
+                                        <small class="text-muted">You'll receive an SMS confirmation from Airtel Money</small>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Confirm Your Payment</h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    
+                                    <div class="mb-4">
+                                        <label for="airtel_code" class="form-label">Airtel Money Transaction Code</label>
+                                        <input type="text" class="form-control form-control-lg" id="airtel_code" name="airtel_code" 
+                                               placeholder="e.g. ARX12345ZY" required>
+                                        <div class="form-text">
+                                            Enter the transaction code you received via SMS from Airtel Money after making the payment
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-danger btn-lg">
+                                            Verify Payment <i class="fas fa-check-circle ms-2"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <a href="{% url 'registration:payment_method' %}" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-arrow-left me-2"></i> Choose a Different Payment Method
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+    .payment-steps li {
+        padding-bottom: 15px;
+        border-bottom: 1px dashed #dee2e6;
+    }
+    
+    .payment-steps li:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+</style>
+{% endblock %}
+{% endblock %} 

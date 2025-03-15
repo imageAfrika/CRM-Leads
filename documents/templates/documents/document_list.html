@@ -68,6 +68,7 @@
         border-radius: 12px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         align-items: flex-end;
+        flex-wrap: wrap;
     }
 
     .filter-group {
@@ -75,6 +76,10 @@
     }
 
     .filter-group.type-filter {
+        width: 180px;
+    }
+
+    .filter-group.status-filter {
         width: 180px;
     }
 
@@ -86,6 +91,33 @@
         width: 160px;
     }
 
+    .filter-label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .filter-input {
+        width: 100%;
+        padding: 0.625rem 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        color: #1e293b;
+        background: white;
+        transition: all 0.2s;
+    }
+
+    .filter-input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
     .document-list {
         display: flex;
         flex-direction: column;
@@ -94,12 +126,10 @@
 
     .document-item {
         display: flex;
-        align-items: center;
-        gap: 24px;
         background: white;
-        padding: 16px;
         border-radius: 12px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
         transition: all 0.2s;
     }
 
@@ -109,46 +139,53 @@
     }
 
     .document-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
+        width: 80px;
+        background: #f1f5f9;
+        color: #64748b;
         font-size: 1.5rem;
     }
 
     .document-icon.quote {
-        background: #dbeafe;
-        color: #3b82f6;
+        background: #e0e7ff;
+        color: #4f46e5;
     }
 
     .document-icon.invoice {
         background: #dcfce7;
-        color: #22c55e;
+        color: #16a34a;
     }
 
     .document-icon.expense {
         background: #fee2e2;
-        color: #ef4444;
+        color: #dc2626;
     }
 
     .document-icon.purchase {
-        background: #f3e8ff;
-        color: #a855f7;
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .document-icon.sale {
+        background: #dbeafe;
+        color: #2563eb;
     }
 
     .document-content {
         flex: 1;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
     }
 
     .document-title {
         font-size: 1rem;
-        font-weight: 500;
+        font-weight: 600;
         color: #1e293b;
         text-decoration: none;
-        margin-bottom: 8px;
-        display: block;
     }
 
     .document-title:hover {
@@ -157,121 +194,116 @@
 
     .document-details {
         display: flex;
-        gap: 24px;
-        color: #64748b;
-        font-size: 0.875rem;
+        flex-wrap: wrap;
+        gap: 16px;
     }
 
     .document-detail {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-    }
-
-    .document-detail i {
-        color: #94a3b8;
-    }
-
-    .document-amount {
-        font-weight: 500;
-        color: #1e293b;
-    }
-
-    .document-meta {
-        display: flex;
-        align-items: center;
-        gap: 24px;
-    }
-
-    .status-badge {
-        padding: 4px 12px;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        text-transform: uppercase;
-    }
-
-    .status-badge.status-draft {
-        background: #f1f5f9;
+        font-size: 0.875rem;
         color: #64748b;
     }
 
-    .status-badge.status-pending {
-        background: #fef3c7;
-        color: #d97706;
+    .document-amount {
+        font-weight: 600;
+        color: #1e293b;
     }
 
-    .status-badge.status-approved {
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .status-draft {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .status-sent {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .status-paid {
         background: #dcfce7;
         color: #16a34a;
     }
 
-    .status-badge.status-rejected {
+    .status-overdue {
         background: #fee2e2;
         color: #dc2626;
     }
 
-    .btn-icon {
-        width: 32px;
-        height: 32px;
-        border-radius: 6px;
+    .status-cancelled {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .status-completed {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .pagination {
         display: flex;
+        justify-content: center;
+        margin-top: 24px;
+    }
+
+    .pagination-item {
+        display: inline-flex;
         align-items: center;
         justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        margin: 0 4px;
+        font-size: 0.875rem;
         color: #64748b;
-        background: #f1f5f9;
         text-decoration: none;
         transition: all 0.2s;
     }
 
-    .btn-icon:hover {
-        background: #e2e8f0;
+    .pagination-item:hover {
+        background: #f1f5f9;
         color: #1e293b;
     }
 
-    .no-documents {
-        text-align: center;
-        padding: 48px 24px;
-        color: #64748b;
+    .pagination-item.active {
+        background: #3b82f6;
+        color: white;
     }
 
-    .no-documents i {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-        color: #cbd5e1;
-    }
-
-    @media (max-width: 1024px) {
-        .document-details {
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .document-meta {
-            margin-left: 16px;
-        }
+    .pagination-item.disabled {
+        opacity: 0.5;
+        pointer-events: none;
     }
 
     @media (max-width: 768px) {
+        .document-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
         .filters-bar {
             flex-direction: column;
-            gap: 12px;
+            align-items: stretch;
         }
 
         .filter-group {
             width: 100% !important;
         }
 
-        .document-item {
+        .document-details {
             flex-direction: column;
-            align-items: flex-start;
-            gap: 16px;
-        }
-
-        .document-meta {
-            margin-left: 0;
-            width: 100%;
-            justify-content: space-between;
+            gap: 8px;
         }
     }
 </style>
@@ -288,7 +320,7 @@
             <a href="{% url 'expenses:expense_create' %}" class="action-button">
                 <i class="fas fa-plus"></i> New Expense
             </a>
-            <a href="{% url 'purchases:purchase_create' %}" class="action-button">
+            <a href="{% url 'products:purchase_create' %}" class="action-button">
                 <i class="fas fa-plus"></i> New Purchase
             </a>
         </div>
@@ -296,22 +328,43 @@
 
     <div class="filters-bar">
         <div class="filter-group type-filter">
-            <label for="type">Document Type</label>
-            <select id="type" name="type" class="form-control">
+            <label for="type" class="filter-label">Document Type</label>
+            <select id="type" name="type" class="filter-input">
                 <option value="">All Types</option>
-                <option value="QUOTE" {% if current_type == 'QUOTE' %}selected{% endif %}>Quotes</option>
-                <option value="INVOICE" {% if current_type == 'INVOICE' %}selected{% endif %}>Invoices</option>
-                <option value="EXPENSE" {% if current_type == 'EXPENSE' %}selected{% endif %}>Expenses</option>
-                <option value="PURCHASE" {% if current_type == 'PURCHASE' %}selected{% endif %}>Purchases</option>
+                {% for type_code, type_name in document_types %}
+                <option value="{{ type_code }}" {% if current_type == type_code %}selected{% endif %}>
+                    {{ type_name }}s
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group status-filter">
+            <label for="status" class="filter-label">Status</label>
+            <select id="status" name="status" class="filter-input">
+                <option value="">All Statuses</option>
+                {% for status_code, status_name in status_choices %}
+                <option value="{{ status_code }}" {% if current_status == status_code %}selected{% endif %}>
+                    {{ status_name }}
+                </option>
+                {% endfor %}
             </select>
         </div>
         <div class="filter-group search-filter">
-            <label for="search">Search</label>
-            <input type="text" id="search" name="search" class="form-control" placeholder="Search documents..." value="{{ request.GET.search }}">
+            <label for="search" class="filter-label">Search</label>
+            <input type="text" id="search" name="search" class="filter-input" placeholder="Search documents..." value="{{ request.GET.search }}">
         </div>
         <div class="filter-group date-filter">
-            <label for="date">Date</label>
-            <input type="date" id="date" name="date" class="form-control" value="{{ request.GET.date }}">
+            <label for="start_date" class="filter-label">From</label>
+            <input type="date" id="start_date" name="start_date" class="filter-input" value="{{ request.GET.start_date }}">
+        </div>
+        <div class="filter-group date-filter">
+            <label for="end_date" class="filter-label">To</label>
+            <input type="date" id="end_date" name="end_date" class="filter-input" value="{{ request.GET.end_date }}">
+        </div>
+        <div class="filter-group">
+            <button type="button" id="applyFilters" class="action-button">
+                <i class="fas fa-filter"></i> Apply Filters
+            </button>
         </div>
     </div>
 
@@ -327,17 +380,31 @@
                     <i class="fas fa-receipt"></i>
                 {% elif document.document_type == 'PURCHASE' %}
                     <i class="fas fa-shopping-cart"></i>
-                {% elif document.document_type == 'DELIVERY' %}
+                {% elif document.document_type == 'SALE' %}
+                    <i class="fas fa-shopping-bag"></i>
+                {% elif document.document_type == 'DELIVERY_NOTE' %}
                     <i class="fas fa-truck"></i>
-                {% elif document.document_type == 'JOBCARD' %}
-                    <i class="fas fa-tools"></i>
                 {% elif document.document_type == 'RECEIPT' %}
                     <i class="fas fa-file-alt"></i>
+                {% else %}
+                    <i class="fas fa-file"></i>
                 {% endif %}
             </div>
             <div class="document-content">
                 <a href="{% url 'documents:document_detail' document.pk %}" class="document-title">
-                    {{ document.title|default:document.get_document_number }}
+                    {% if document.document_type == 'INVOICE' %}
+                        Invoice #{{ document.invoice_number }}
+                    {% elif document.document_type == 'QUOTE' and document.quote %}
+                        Quote #{{ document.quote.quote_number }}
+                    {% elif document.document_type == 'PURCHASE' and document.purchase %}
+                        Purchase #{{ document.purchase.reference_number }}
+                    {% elif document.document_type == 'EXPENSE' and document.expense %}
+                        Expense #{{ document.expense.reference_number }}
+                    {% elif document.document_type == 'SALE' and document.sale %}
+                        Sale #{{ document.sale.reference_number }}
+                    {% else %}
+                        {{ document.get_document_type_display }} #{{ document.id }}
+                    {% endif %}
                 </a>
                 <div class="document-details">
                     <div class="document-detail">
@@ -350,66 +417,97 @@
                     </div>
                     <div class="document-detail">
                         <i class="fas fa-calendar"></i>
-                        {{ document.created_at|date:"d M Y" }}
+                        {{ document.document_date|date:"d M Y" }}
                     </div>
                     <div class="document-detail">
                         <i class="fas fa-money-bill"></i>
                         <span class="document-amount">KES {{ document.total_amount|floatformat:2 }}</span>
                     </div>
-                    {% if document.project %}
                     <div class="document-detail">
-                        <i class="fas fa-project-diagram"></i>
-                        {{ document.project.name }}
+                        <i class="fas fa-circle"></i>
+                        <span class="status-badge status-{{ document.status|lower }}">
+                            {{ document.get_status_display }}
+                        </span>
                     </div>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="document-meta">
-                <span class="status-badge status-{{ document.status|lower }}">
-                    {{ document.get_status_display }}
-                </span>
-                <div class="document-actions">
-                    <a href="{% url 'documents:document_detail' document.pk %}" class="btn-icon" title="View">
-                        <i class="fas fa-eye"></i>
-                    </a>
-                    <a href="#" class="btn-icon download-document" data-id="{{ document.pk }}" title="Download">
-                        <i class="fas fa-download"></i>
-                    </a>
-                    <a href="{% url 'documents:document_edit' document.pk %}" class="btn-icon" title="Edit">
-                        <i class="fas fa-edit"></i>
-                    </a>
                 </div>
             </div>
         </div>
         {% empty %}
-        <div class="no-documents">
-            <i class="fas fa-folder-open"></i>
-            <p>No documents found</p>
+        <div class="document-item" style="justify-content: center; padding: 32px;">
+            <div class="text-center">
+                <i class="fas fa-file-alt" style="font-size: 3rem; color: #e2e8f0; margin-bottom: 16px;"></i>
+                <p style="color: #64748b; margin-bottom: 16px;">No documents found</p>
+                <div class="document-actions" style="justify-content: center;">
+                    <a href="{% url 'documents:quote_create' %}" class="action-button">
+                        <i class="fas fa-plus"></i> Create Quote
+                    </a>
+                </div>
+            </div>
         </div>
         {% endfor %}
     </div>
+
+    {% if is_paginated %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page=1{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}" class="pagination-item">
+            <i class="fas fa-angle-double-left"></i>
+        </a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}" class="pagination-item">
+            <i class="fas fa-angle-left"></i>
+        </a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <span class="pagination-item active">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?page={{ num }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}" class="pagination-item">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}" class="pagination-item">
+            <i class="fas fa-angle-right"></i>
+        </a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}" class="pagination-item">
+            <i class="fas fa-angle-double-right"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const typeSelect = document.getElementById('type');
+    // Filter functionality
+    const typeFilter = document.getElementById('type');
+    const statusFilter = document.getElementById('status');
     const searchInput = document.getElementById('search');
-    const dateInput = document.getElementById('date');
-
-    function updateFilters() {
-        const params = new URLSearchParams(window.location.search);
-        if (typeSelect.value) params.set('type', typeSelect.value);
-        if (searchInput.value) params.set('search', searchInput.value);
-        if (dateInput.value) params.set('date', dateInput.value);
-        window.location.href = `${window.location.pathname}?${params.toString()}`;
-    }
-
-    typeSelect.addEventListener('change', updateFilters);
-    searchInput.addEventListener('change', updateFilters);
-    dateInput.addEventListener('change', updateFilters);
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    const applyFiltersBtn = document.getElementById('applyFilters');
+    
+    applyFiltersBtn.addEventListener('click', function() {
+        const params = new URLSearchParams();
+        
+        if (typeFilter.value) params.append('type', typeFilter.value);
+        if (statusFilter.value) params.append('status', statusFilter.value);
+        if (searchInput.value) params.append('search', searchInput.value);
+        if (startDateInput.value) params.append('start_date', startDateInput.value);
+        if (endDateInput.value) params.append('end_date', endDateInput.value);
+        
+        window.location.href = `?${params.toString()}`;
+    });
+    
+    // Allow pressing Enter in search field
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            applyFiltersBtn.click();
+        }
+    });
 });
 </script>
 {% endblock %}
-</rewritten_file>

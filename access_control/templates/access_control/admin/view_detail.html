@@ -1,0 +1,105 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+<link rel="stylesheet" href="{% static "admin/css/forms.css" %}">
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-form{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'access_control:admin_index' %}">{% translate 'Access Control' %}</a>
+&rsaquo; <a href="{% url 'access_control:admin_views' %}">{% translate 'Views' %}</a>
+&rsaquo; {{ view_obj.name }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <h2>{% translate "View Details" %}</h2>
+        <div class="form-row">
+            <div>
+                <div class="form-row">
+                    <label>{% translate "Name" %}:</label>
+                    <div class="readonly">{{ view_obj.name }}</div>
+                </div>
+                <div class="form-row">
+                    <label>{% translate "App Name" %}:</label>
+                    <div class="readonly">{{ view_obj.app_name }}</div>
+                </div>
+                <div class="form-row">
+                    <label>{% translate "View Name" %}:</label>
+                    <div class="readonly">{{ view_obj.view_name }}</div>
+                </div>
+                <div class="form-row">
+                    <label>{% translate "URL Pattern" %}:</label>
+                    <div class="readonly">{{ view_obj.url_pattern|default:"-" }}</div>
+                </div>
+                <div class="form-row">
+                    <label>{% translate "Description" %}:</label>
+                    <div class="readonly">{{ view_obj.description|default:"-"|linebreaksbr }}</div>
+                </div>
+                <div class="form-row">
+                    <label>{% translate "Created At" %}:</label>
+                    <div class="readonly">{{ view_obj.created_at }}</div>
+                </div>
+                <div class="form-row">
+                    <label>{% translate "Updated At" %}:</label>
+                    <div class="readonly">{{ view_obj.updated_at }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="module">
+        <h2>{% translate "Users with Permission" %}</h2>
+        {% if permissions %}
+            <table id="permissions_list">
+                <thead>
+                    <tr>
+                        <th>{% translate "User" %}</th>
+                        <th>{% translate "Granted By" %}</th>
+                        <th>{% translate "Granted At" %}</th>
+                        <th>{% translate "Status" %}</th>
+                        <th>{% translate "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for permission in permissions %}
+                    <tr class="{% cycle 'row1' 'row2' %}">
+                        <td>{{ permission.user.username }}</td>
+                        <td>{{ permission.granted_by.username|default:"-" }}</td>
+                        <td>{{ permission.granted_at }}</td>
+                        <td>
+                            {% if permission.is_active %}
+                                <img src="{% static "admin/img/icon-yes.svg" %}" alt="True">
+                            {% else %}
+                                <img src="{% static "admin/img/icon-no.svg" %}" alt="False">
+                            {% endif %}
+                        </td>
+                        <td class="nowrap">
+                            <a href="{% url 'access_control:admin_permission_detail' permission.id %}" class="button">{% translate "View" %}</a>
+                            {% if permission.is_active %}
+                                <a href="{% url 'access_control:admin_permission_toggle' permission.id %}?next={{ request.path }}" class="button">{% translate "Revoke" %}</a>
+                            {% else %}
+                                <a href="{% url 'access_control:admin_permission_toggle' permission.id %}?next={{ request.path }}" class="button">{% translate "Grant" %}</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>{% translate "No users have permission for this view." %}</p>
+        {% endif %}
+    </div>
+
+    <div class="submit-row">
+        <a href="{% url 'access_control:admin_view_edit' view_obj.id %}" class="button">{% translate "Edit" %}</a>
+        <a href="{% url 'access_control:admin_view_delete' view_obj.id %}" class="button delete">{% translate "Delete" %}</a>
+    </div>
+</div>
+{% endblock %} 

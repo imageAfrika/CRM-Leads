@@ -1,0 +1,54 @@
+{% extends 'banking/base.html' %}
+{% load static %}
+
+{% block banking_content %}
+<div class="content-header">
+    <h2 class="content-title">Make a Payment</h2>
+    <a href="{% url 'banking:account_detail' account.account_number %}" class="btn secondary-btn">
+        <i class="fas fa-arrow-left"></i> Back to Account
+    </a>
+</div>
+
+<div class="account-overview">
+    <div class="overview-item">
+        <span class="label">Account Number:</span>
+        <span class="value">{{ account.account_number }}</span>
+    </div>
+    <div class="overview-item">
+        <span class="label">Current Balance:</span>
+        <span class="value">${{ account.balance }}</span>
+    </div>
+</div>
+
+<div class="form-container">
+    <form method="post" class="banking-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="payee" class="form-label">Payee (Recipient)</label>
+            <input type="text" id="payee" name="payee" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="amount" class="form-label">Amount ($)</label>
+            <input type="number" id="amount" name="amount" step="0.01" min="0.01" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="description" class="form-label">Description</label>
+            <input type="text" id="description" name="description" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="pin" class="form-label">PIN</label>
+            <input type="password" id="pin" name="pin" class="form-control" required pattern="[0-9]{4}" maxlength="4">
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn primary-btn">
+                <i class="fas fa-paper-plane"></i> Make Payment
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %} 

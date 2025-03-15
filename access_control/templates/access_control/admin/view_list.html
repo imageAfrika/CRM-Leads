@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% translate "Views" %} | {% translate "Access Control Admin" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'access_control/css/admin.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'access_control/js/admin.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <h1>{% translate "Views" %}</h1>
+    </div>
+    
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a> &rsaquo; 
+        <a href="{% url 'access_control:admin_index' %}">{% translate 'Access Control' %}</a> &rsaquo; 
+        {% translate 'Views' %}
+    </div>
+    
+    <div id="alerts-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                    <button type="button" class="alert-close">&times;</button>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <div class="flex flex-between flex-center">
+                <span>{% translate "All Views" %}</span>
+                <a href="{% url 'access_control:admin_view_add' %}" class="btn">{% translate "Add View" %}</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Search -->
+            <form id="search-form" class="search-container mb-4" method="get">
+                <input type="text" id="search-input" name="q" value="{{ search_query }}" placeholder="{% translate 'Search views...' %}" class="search-input">
+                <button type="submit" class="btn search-button">{% translate "Search" %}</button>
+                {% if search_query %}
+                    <button type="button" id="clear-search" class="btn btn-secondary">{% translate "Clear" %}</button>
+                {% endif %}
+            </form>
+            
+            <!-- Results -->
+            <table>
+                <thead>
+                    <tr>
+                        <th class="sortable" data-column="name">
+                            <a href="?o={% if ordering == 'name' %}-name{% else %}name{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">{% translate 'Name' %}</a>
+                            {% if ordering == 'name' %}
+                                <span class="sorted-asc">▲</span>
+                            {% elif ordering == '-name' %}
+                                <span class="sorted-desc">▼</span>
+                            {% endif %}
+                        </th>
+                        <th class="sortable" data-column="app_name">
+                            <a href="?o={% if ordering == 'app_name' %}-app_name{% else %}app_name{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">{% translate 'App' %}</a>
+                            {% if ordering == 'app_name' %}
+                                <span class="sorted-asc">▲</span>
+                            {% elif ordering == '-app_name' %}
+                                <span class="sorted-desc">▼</span>
+                            {% endif %}
+                        </th>
+                        <th class="sortable" data-column="view_name">
+                            <a href="?o={% if ordering == 'view_name' %}-view_name{% else %}view_name{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">{% translate 'View' %}</a>
+                            {% if ordering == 'view_name' %}
+                                <span class="sorted-asc">▲</span>
+                            {% elif ordering == '-view_name' %}
+                                <span class="sorted-desc">▼</span>
+                            {% endif %}
+                        </th>
+                        <th class="sortable" data-column="user_count">
+                            <a href="?o={% if ordering == 'user_count' %}-user_count{% else %}user_count{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">{% translate 'Users' %}</a>
+                            {% if ordering == 'user_count' %}
+                                <span class="sorted-asc">▲</span>
+                            {% elif ordering == '-user_count' %}
+                                <span class="sorted-desc">▼</span>
+                            {% endif %}
+                        </th>
+                        <th>{% translate 'URL Pattern' %}</th>
+                        <th>{% translate 'Actions' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for view in views %}
+                    <tr>
+                        <td>{{ view.name }}</td>
+                        <td>{{ view.app_name }}</td>
+                        <td>{{ view.view_name }}</td>
+                        <td>{{ view.user_count }}</td>
+                        <td>{{ view.url_pattern|default:"-" }}</td>
+                        <td class="action-buttons">
+                            <a href="{% url 'access_control:admin_view_detail' view.id %}" class="btn btn-secondary">{% translate "View" %}</a>
+                            <a href="{% url 'access_control:admin_view_edit' view.id %}" class="btn">{% translate "Edit" %}</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">{% translate "No views found." %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="flex flex-between mt-4">
+        <div>
+            <p>{{ page_obj.paginator.count }} {% translate 'views' %}</p>
+        </div>
+        <div>
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li><a href="?page=1{% if ordering %}&o={{ ordering }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">&laquo;</a></li>
+                    <li><a href="?page={{ page_obj.previous_page_number }}{% if ordering %}&o={{ ordering }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">{% translate 'Previous' %}</a></li>
+                {% endif %}
+                
+                {% for i in page_obj.paginator.page_range %}
+                    {% if page_obj.number == i %}
+                        <li class="active"><a href="#">{{ i }}</a></li>
+                    {% elif i > page_obj.number|add:'-5' and i < page_obj.number|add:'5' %}
+                        <li><a href="?page={{ i }}{% if ordering %}&o={{ ordering }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <li><a href="?page={{ page_obj.next_page_number }}{% if ordering %}&o={{ ordering }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">{% translate 'Next' %}</a></li>
+                    <li><a href="?page={{ page_obj.paginator.num_pages }}{% if ordering %}&o={{ ordering }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">&raquo;</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

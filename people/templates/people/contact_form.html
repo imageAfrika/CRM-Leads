@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/people_styles.css' %}">
+{% endblock %}
+
+{% block title %}Contact People{% endblock %}
+{% block header_title %}Contact People{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>
+            <i class="fas fa-envelope"></i> Contact People
+        </h2>
+    </div>
+    <div class="card-body">
+        <form method="post" class="form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.recipients.id_for_label }}" class="form-label">Recipients *</label>
+                
+                {% if preselected_person %}
+                <div class="recipients-list">
+                    <div class="recipient-item">
+                        {% if preselected_person.profile_picture %}
+                        <img src="{{ preselected_person.profile_picture.url }}" alt="{{ preselected_person.full_name }}" class="recipient-avatar">
+                        {% else %}
+                        <i class="fas fa-user-circle"></i>
+                        {% endif %}
+                        <span class="recipient-name">{{ preselected_person.full_name }}</span>
+                    </div>
+                </div>
+                <input type="hidden" name="{{ form.recipients.name }}" value="{{ preselected_person.id }}">
+                {% else %}
+                <div class="recipients-selector">
+                    {% for person in form.recipients.field.queryset %}
+                    <div class="recipient-option">
+                        <input type="checkbox" id="person_{{ person.id }}" name="{{ form.recipients.name }}" value="{{ person.id }}" 
+                               {% if person.id in selected_recipients %}checked{% endif %}>
+                        <label for="person_{{ person.id }}">{{ person.full_name }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                {% if form.recipients.errors %}
+                <div class="error-message">
+                    {{ form.recipients.errors }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.contact_type.id_for_label }}" class="form-label">Contact Method *</label>
+                <select name="{{ form.contact_type.name }}" id="{{ form.contact_type.id_for_label }}" class="form-input {% if form.contact_type.errors %}error{% endif %}" required>
+                    {% for value, text in form.contact_type.field.choices %}
+                    <option value="{{ value }}" {% if form.contact_type.value == value %}selected{% endif %}>{{ text }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.contact_type.errors %}
+                <div class="error-message">
+                    {{ form.contact_type.errors }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.subject.id_for_label }}" class="form-label">Subject *</label>
+                <input type="text" name="{{ form.subject.name }}" id="{{ form.subject.id_for_label }}" class="form-input {% if form.subject.errors %}error{% endif %}" value="{{ form.subject.value|default:'' }}" required>
+                {% if form.subject.errors %}
+                <div class="error-message">
+                    {{ form.subject.errors }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.message.id_for_label }}" class="form-label">Message *</label>
+                <textarea name="{{ form.message.name }}" id="{{ form.message.id_for_label }}" class="form-input {% if form.message.errors %}error{% endif %}" rows="5" required>{{ form.message.value|default:'' }}</textarea>
+                {% if form.message.errors %}
+                <div class="error-message">
+                    {{ form.message.errors }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group" style="text-align: right;">
+                <a href="{% url 'people:people_list' %}" class="button button-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="button button-primary">
+                    <i class="fas fa-paper-plane"></i> Send Message
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Show/hide recipients based on contact type
+    document.addEventListener('DOMContentLoaded', function() {
+        const contactTypeSelect = document.getElementById('id_contact_type');
+        const recipientOptions = document.querySelectorAll('.recipients-container label');
+        
+        function filterRecipients() {
+            const contactType = contactTypeSelect.value;
+            
+            recipientOptions.forEach(option => {
+                const label = option.textContent.trim();
+                const parentDiv = option.parentElement;
+                
+                if (contactType === 'email' && !label.includes('@')) {
+                    parentDiv.classList.add('disabled-option');
+                } else if (contactType === 'telegram' && !label.includes('@')) {
+                    parentDiv.classList.add('disabled-option');
+                } else {
+                    parentDiv.classList.remove('disabled-option');
+                }
+            });
+        }
+        
+        contactTypeSelect.addEventListener('change', filterRecipients);
+        filterRecipients();
+    });
+</script>
+{% endblock %}
