@@ -1,0 +1,78 @@
+{% extends "site_admin/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_group_management.css' %}">
+{% endblock %}
+
+{% block title %}Group Management | Site Admin{% endblock %}
+{% block header_title %}Group Management{% endblock %}
+{% block content_title %}Group Management{% endblock %}
+
+{% block object_tools %}
+<div class="object-tools">
+    <a href="{% url 'admin:auth_group_add' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add Group
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="admin-list-view">
+    <div class="filter-bar">
+        <form method="get" class="search-form">
+            <div class="search-input-group">
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search groups..." class="search-input">
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            {% if request.GET.q %}
+            <a href="?" class="btn btn-sm btn-outline">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if groups %}
+    <div class="group-list-container">
+        {% for group in groups %}
+        <div class="group-card">
+            <div class="group-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="group-info">
+                <h3 class="group-name">{{ group.name }}</h3>
+                <p class="group-count">
+                    <i class="fas fa-user"></i> 
+                    {{ group.user_count }} user{{ group.user_count|pluralize }}
+                </p>
+            </div>
+            <div class="group-actions">
+                <a href="{% url 'admin:auth_group_change' group.pk %}" class="btn btn-sm btn-outline" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'admin:auth_group_delete' group.pk %}" class="btn btn-sm btn-outline btn-danger" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-list">
+        <div class="empty-icon">
+            <i class="fas fa-user-tag"></i>
+        </div>
+        <p class="empty-text">No groups found.</p>
+        {% if request.GET.q %}
+        <p class="empty-help">Try adjusting your search criteria.</p>
+        {% endif %}
+        <div class="empty-actions">
+            <a href="{% url 'admin:auth_group_add' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Group
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

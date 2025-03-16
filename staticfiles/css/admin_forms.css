@@ -1,0 +1,231 @@
+/* Form specific styles */
+
+/* Forms */
+.form-container {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: var(--spacing-lg);
+}
+
+.form-fields {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+@media (min-width: 768px) {
+    .form-fields {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+}
+
+.form-field {
+    margin-bottom: var(--spacing-md);
+}
+
+.field-label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-weight: 500;
+}
+
+.required-indicator {
+    color: var(--danger);
+    margin-left: 2px;
+}
+
+.field-input input,
+.field-input select,
+.field-input textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-family: var(--font-family);
+    font-size: 14px;
+}
+
+.field-input input:focus,
+.field-input select:focus,
+.field-input textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+}
+
+.help-text {
+    font-size: 12px;
+    color: var(--gray);
+    margin-top: 4px;
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: flex-end;
+    border-top: 1px solid #eee;
+    padding-top: var(--spacing-md);
+}
+
+.has-error .field-input input,
+.has-error .field-input select,
+.has-error .field-input textarea {
+    border-color: var(--danger);
+}
+
+.error-message {
+    color: var(--danger);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Inline formsets */
+.inline-formsets {
+    margin-top: var(--spacing-lg);
+    border-top: 1px solid #eee;
+    padding-top: var(--spacing-md);
+}
+
+.inline-formset {
+    margin-bottom: var(--spacing-lg);
+    background-color: var(--light);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+}
+
+.inline-formset h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.empty-form {
+    display: none;
+}
+
+.inline-forms {
+    margin-bottom: var(--spacing-md);
+}
+
+.inline-form {
+    background-color: white;
+    border: 1px solid #eee;
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    position: relative;
+}
+
+.inline-form.marked-for-deletion {
+    opacity: 0.5;
+    background-color: #fff9f9;
+    border-color: #ffdddd;
+}
+
+.delete-inline-item {
+    position: absolute;
+    right: var(--spacing-md);
+    top: var(--spacing-md);
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 16px;
+    padding: var(--spacing-xs);
+}
+
+.inline-action-buttons {
+    margin-top: var(--spacing-md);
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Auto-sizing textarea styles */
+textarea {
+    min-height: 100px;
+    resize: none;
+    overflow: hidden;
+}
+
+/* Custom file input */
+.custom-file {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    margin-bottom: var(--spacing-md);
+}
+
+.custom-file input[type="file"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.custom-file-label {
+    display: block;
+    padding: 8px 12px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Dark mode styles */
+body.dark-mode input[type="text"],
+body.dark-mode input[type="email"],
+body.dark-mode input[type="password"],
+body.dark-mode input[type="number"],
+body.dark-mode input[type="date"],
+body.dark-mode input[type="datetime-local"],
+body.dark-mode select,
+body.dark-mode textarea {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #e2e8f0;
+}
+
+body.dark-mode input:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus {
+    border-color: var(--info);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+}
+
+body.dark-mode .form-actions {
+    border-top-color: #4b5563;
+}
+
+body.dark-mode .inline-formset {
+    background-color: #2d3748;
+    border-color: #4b5563;
+}
+
+body.dark-mode .inline-formset h3 {
+    border-bottom-color: #4b5563;
+}
+
+body.dark-mode .inline-form {
+    background-color: #374151;
+    border-color: #4b5563;
+}
+
+body.dark-mode .inline-form.marked-for-deletion {
+    background-color: #3d2c2c;
+    border-color: #5e3c3c;
+}
+
+body.dark-mode .custom-file-label {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #e2e8f0;
+}

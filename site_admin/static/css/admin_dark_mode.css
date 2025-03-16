@@ -1,0 +1,198 @@
+/* Dark Mode CSS Variables for Admin */
+
+:root {
+    /* Light mode variables */
+    --body-bg: #f8f9fa;
+    --card-bg: #ffffff;
+    --body-color: #333333;
+    --text-muted: #6c757d;
+    --border-color: #dee2e6;
+    --hover-bg: #f1f5f9;
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    
+    /* Input variables */
+    --input-bg: #ffffff;
+    --input-color: #333333;
+    --input-border: #ced4da;
+    --input-focus-border: #80bdff;
+    --input-focus-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    
+    /* Table variables */
+    --table-border: #dee2e6;
+    --table-hover: rgba(0, 0, 0, 0.075);
+    
+    /* Custom variables */
+    --success-bg: rgba(39, 174, 96, 0.1);
+    --danger-bg: rgba(231, 76, 60, 0.1);
+    --warning-bg: rgba(243, 156, 18, 0.1);
+    --info-bg: rgba(52, 152, 219, 0.1);
+    
+    /* Button hover effects */
+    --primary-hover: #395673;
+    --secondary-hover: #8a9a9b;
+    --success-hover: #219355;
+    --danger-hover: #d14232;
+    --warning-hover: #db8d0f;
+    --info-hover: #2884c3;
+}
+
+html.dark-mode {
+    /* Dark mode variable overrides */
+    --body-bg: #121212;
+    --card-bg: #1e1e1e;
+    --body-color: #e0e0e0;
+    --text-muted: #a0a0a0;
+    --border-color: #333333;
+    --hover-bg: #2c2c2c;
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+    
+    /* Input variables for dark mode */
+    --input-bg: #2c2c2c;
+    --input-color: #e0e0e0;
+    --input-border: #444444;
+    --input-focus-border: #3f6791;
+    --input-focus-shadow: 0 0 0 0.2rem rgba(64, 158, 255, 0.25);
+    
+    /* Table variables */
+    --table-border: #333333;
+    --table-hover: rgba(255, 255, 255, 0.075);
+    
+    /* Custom variables */
+    --success-bg: rgba(39, 174, 96, 0.2);
+    --danger-bg: rgba(231, 76, 60, 0.2);
+    --warning-bg: rgba(243, 156, 18, 0.2);
+    --info-bg: rgba(52, 152, 219, 0.2);
+}
+
+/* Global styles for dark mode transition */
+body {
+    background-color: var(--body-bg);
+    color: var(--body-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Card and container styles */
+.card,
+.data-table-container,
+.form-container,
+.delete-container,
+.user-card,
+.user-form-container,
+.dashboard-section,
+.group-card,
+.permission-app {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    box-shadow: var(--card-shadow);
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Text elements */
+h1, h2, h3, h4, h5, h6,
+.form-title,
+.user-name,
+.group-name,
+.delete-title,
+.related-title,
+.breadcrumbs,
+.pagination-info,
+.empty-text,
+.dashboard-section-title {
+    color: var(--body-color);
+    transition: color 0.3s ease;
+}
+
+/* Muted text */
+.text-muted,
+.user-email,
+.group-count,
+.action-time,
+.form-text,
+.empty-help {
+    color: var(--text-muted);
+    transition: color 0.3s ease;
+}
+
+/* Input elements */
+input, select, textarea, .form-control {
+    background-color: var(--input-bg);
+    color: var(--input-color);
+    border-color: var(--input-border);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+input:focus, select:focus, textarea:focus, .form-control:focus {
+    border-color: var(--input-focus-border);
+    box-shadow: var(--input-focus-shadow);
+}
+
+/* Tables */
+.data-table th {
+    background-color: var(--hover-bg);
+    color: var(--body-color);
+    border-color: var(--table-border);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.data-table td {
+    color: var(--body-color);
+    border-color: var(--table-border);
+    transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.data-table tbody tr:hover {
+    background-color: var(--table-hover);
+}
+
+/* Links and buttons */
+a, .model-link, .action-link, .breadcrumbs a {
+    transition: color 0.3s ease;
+}
+
+.btn {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Filter items */
+.filter-option,
+.user-group,
+.badge {
+    background-color: var(--hover-bg);
+    color: var(--body-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Border elements */
+.form-actions,
+.delete-header,
+.form-section,
+.delete-actions,
+.related-item {
+    border-color: var(--border-color);
+    transition: border-color 0.3s ease;
+}
+
+/* Custom status backgrounds */
+.user-status.active {
+    background-color: var(--success-bg);
+}
+
+.user-status.inactive {
+    background-color: var(--danger-bg);
+}
+
+.user-status.staff {
+    background-color: var(--info-bg);
+}
+
+.delete-message {
+    background-color: var(--danger-bg);
+}
+
+/* Input group */
+.input-group-text {
+    background-color: var(--hover-bg);
+    border-color: var(--input-border);
+    color: var(--body-color);
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+} 

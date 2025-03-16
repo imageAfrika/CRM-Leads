@@ -1,0 +1,90 @@
+{% extends "site_admin/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_user_management.css' %}">
+{% endblock %}
+
+{% block title %}User Management | Site Admin{% endblock %}
+{% block header_title %}User Management{% endblock %}
+{% block content_title %}User Management{% endblock %}
+
+{% block object_tools %}
+<div class="object-tools">
+    <a href="{% url 'admin:auth_user_add' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add User
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="admin-list-view">
+    <div class="filter-bar">
+        <form method="get" class="search-form">
+            <div class="search-input-group">
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search users..." class="search-input">
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            {% if request.GET.q %}
+            <a href="?" class="btn btn-sm btn-outline">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if users %}
+    <div class="user-list-container">
+        {% for user in users %}
+        <div class="user-card">
+            <div class="user-avatar">
+                {{ user.username|first|upper }}
+            </div>
+            <div class="user-info">
+                <h3 class="user-name">{{ user.username }}</h3>
+                <p class="user-email">{{ user.email|default:"No email provided" }}</p>
+                <div class="user-status">
+                    {% if user.is_active %}
+                    <span class="user-active"><i class="fas fa-circle"></i> Active</span>
+                    {% else %}
+                    <span class="user-inactive"><i class="fas fa-circle"></i> Inactive</span>
+                    {% endif %}
+                    
+                    {% if user.is_staff %}
+                    <span class="user-staff"><i class="fas fa-user-shield"></i> Staff</span>
+                    {% endif %}
+                    
+                    {% if user.is_superuser %}
+                    <span class="user-superuser"><i class="fas fa-crown"></i> Superuser</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="user-actions">
+                <a href="{% url 'admin:auth_user_change' user.pk %}" class="btn btn-sm btn-outline" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'admin:auth_user_delete' user.pk %}" class="btn btn-sm btn-outline btn-danger" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-list">
+        <div class="empty-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <p class="empty-text">No users found.</p>
+        {% if request.GET.q %}
+        <p class="empty-help">Try adjusting your search criteria.</p>
+        {% endif %}
+        <div class="empty-actions">
+            <a href="{% url 'admin:auth_user_add' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add User
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

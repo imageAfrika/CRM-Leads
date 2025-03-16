@@ -1,0 +1,71 @@
+{% extends "site_admin/base.html" %}
+{% load static %}
+{% load site_admin_tags %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_forms.css' %}">
+{% endblock %}
+
+{% block title %}{% if is_add %}Add{% else %}Change{% endif %} {{ model_verbose_name }} | Site Admin{% endblock %}
+{% block header_title %}{% if is_add %}Add{% else %}Change{% endif %} {{ model_verbose_name }}{% endblock %}
+{% block content_title %}{% if is_add %}Add{% else %}Change{% endif %} {{ model_verbose_name }}{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h2>{% if is_add %}Add{% else %}Change{% endif %} {{ model_verbose_name }}</h2>
+    <div class="object-tools">
+        {% if not is_add and has_delete_permission %}
+        <a href="{{ delete_url }}" class="btn btn-danger btn-delete">
+            <i class="fas fa-trash-alt"></i> Delete
+        </a>
+        {% endif %}
+        
+        <a href="{% url 'site_admin:model_list' app_label=app_label model_name=model_name %}" class="btn btn-secondary">
+            <i class="fas fa-list"></i> Back to list
+        </a>
+    </div>
+</div>
+
+<div class="form-container">
+    <form method="post" enctype="multipart/form-data" class="site-admin-form">
+        {% csrf_token %}
+        
+        <div class="form-fields">
+            {% for field in form %}
+            <div class="form-field {% if field.errors %}has-error{% endif %}">
+                <div class="field-label">
+                    {{ field.label }}
+                    {% if field.field.required %}
+                    <span class="required-indicator">*</span>
+                    {% endif %}
+                </div>
+                
+                <div class="field-input">
+                    {{ field }}
+                    
+                    {% if field.help_text %}
+                    <div class="help-text">{{ field.help_text }}</div>
+                    {% endif %}
+                    
+                    {% if field.errors %}
+                    {% for error in field.errors %}
+                    <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> {% if is_add %}Add{% else %}Save changes{% endif %} {{ model_verbose_name }}
+            </button>
+            
+            <a href="{% url 'site_admin:model_list' app_label=app_label model_name=model_name %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

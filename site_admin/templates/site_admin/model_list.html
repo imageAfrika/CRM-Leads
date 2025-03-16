@@ -1,0 +1,178 @@
+{% extends "site_admin/base.html" %}
+{% load static %}
+{% load site_admin_tags %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_model_list.css' %}">
+{% endblock %}
+
+{% block title %}{{ model_verbose_name_plural|capfirst }} | Site Admin{% endblock %}
+{% block header_title %}{{ model_verbose_name_plural|capfirst }}{% endblock %}
+
+{% block breadcrumbs %}
+&gt; <a href="{% url 'site_admin:model_list' app_label=app_label model_name=model_name %}">{{ model_verbose_name_plural|capfirst }}</a>
+{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h2>{{ model_verbose_name_plural|capfirst }}</h2>
+    <div class="object-tools">
+        <button type="button" class="btn btn-secondary filter-toggle" title="Toggle filters">
+            <i class="fas fa-filter"></i> Filters
+        </button>
+        
+        {% if has_add_permission %}
+        <a href="{{ add_url }}" class="btn btn-success" title="Add new {{ model_verbose_name }}">
+            <i class="fas fa-plus"></i> Add {{ model_verbose_name }}
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="list-view">
+    <!-- Search and filtering -->
+    <div class="action-bar">
+        <form method="get" class="search-form">
+            <div class="search-bar">
+                <div class="search-input-wrapper">
+                    <input type="text" name="search" value="{{ search_query }}" placeholder="Search {{ model_verbose_name_plural }}..." class="form-control search-input">
+                    <button type="button" class="search-clear" title="Clear search">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <button type="submit" class="btn btn-primary" title="Search">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Filter panel -->
+    <div class="filter-panel" {% if filter_active %}class="show"{% endif %}>
+        <form method="get" class="filter-form">
+            <div class="filter-grid">
+                {% for field_name in list_display %}
+                <div class="filter-field">
+                    <label for="filter_{{ field_name }}">{{ field_name|capfirst }}</label>
+                    <input type="text" name="filter_{{ field_name }}" id="filter_{{ field_name }}" 
+                           value="{{ request.GET.filter_field_name }}" class="form-control">
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Apply Filters
+                </button>
+                <a href="{% url 'site_admin:model_list' app_label model_name %}" class="btn btn-secondary">
+                    <i class="fas fa-undo"></i> Reset
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Data display -->
+    <div class="data-table-container">
+        {% if objects %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    {% for field_name in list_display %}
+                    <th>
+                        {{ field_name|capfirst }}
+                        <a href="?sort={{ field_name }}" class="sort-link" title="Sort by {{ field_name }}">
+                            <i class="fas fa-sort"></i>
+                        </a>
+                    </th>
+                    {% endfor %}
+                    <th class="actions-column">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for object in objects %}
+                <tr data-id="{{ object.id }}">
+                    {% for field_name in list_display %}
+                    <td>
+                        {% if forloop.first %}
+                        <a href="{% url 'site_admin:model_change' app_label model_name object.id %}" title="Edit this {{ model_verbose_name }}">
+                            {{ object|getattr:field_name }}
+                        </a>
+                        {% else %}
+                        {{ object|getattr:field_name }}
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                    <td class="actions-column">
+                        <div class="action-buttons">
+                            {% if has_change_permission %}
+                            <a href="{% url 'site_admin:model_change' app_label model_name object.id %}" class="btn btn-sm btn-primary" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            {% endif %}
+                            
+                            {% if has_delete_permission %}
+                            <a href="{% url 'site_admin:model_delete' app_label model_name object.id %}" class="btn btn-sm btn-danger btn-delete" title="Delete">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Pagination -->
+        {% if objects.has_other_pages %}
+        <div class="pagination-container">
+            <ul class="pagination">
+                {% if objects.has_previous %}
+                <li><a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" title="First page">&laquo;</a></li>
+                <li><a href="?page={{ objects.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" title="Previous page">
+                    <i class="fas fa-chevron-left"></i>
+                </a></li>
+                {% endif %}
+                
+                {% for i in objects.paginator.page_range %}
+                {% if objects.number == i %}
+                <li class="active"><a href="#">{{ i }}</a></li>
+                {% elif i > objects.number|add:'-3' and i < objects.number|add:'3' %}
+                <li><a href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ i }}</a></li>
+                {% endif %}
+                {% endfor %}
+                
+                {% if objects.has_next %}
+                <li><a href="?page={{ objects.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" title="Next page">
+                    <i class="fas fa-chevron-right"></i>
+                </a></li>
+                <li><a href="?page={{ objects.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" title="Last page">&raquo;</a></li>
+                {% endif %}
+            </ul>
+            
+            <div class="pagination-info">
+                Showing {{ objects.start_index }} to {{ objects.end_index }} of {{ objects.paginator.count }} {{ model_verbose_name_plural }}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="empty-list">
+            <div class="empty-icon">
+                <i class="fas fa-database"></i>
+            </div>
+            <p class="empty-text">No {{ model_verbose_name_plural }} found</p>
+            {% if search_query %}
+            <p class="empty-help">Try a different search query or <a href="{% url 'site_admin:model_list' app_label model_name %}">clear your search</a>.</p>
+            {% else %}
+            <p class="empty-help">Get started by adding a new {{ model_verbose_name }}.</p>
+            {% if has_add_permission %}
+            <a href="{{ add_url }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add {{ model_verbose_name }}
+            </a>
+            {% endif %}
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,292 +1,371 @@
+/**
+ * Site Admin JavaScript
+ */
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Site Admin JS initialized');
+    // Sidebar toggle functionality
+    const sidebarToggle = document.querySelector('.sidebar-toggle');
+    const adminLayout = document.querySelector('.admin-layout');
     
-    // Initialize all components
-    initAlerts();
-    initToggles();
-    initSearch();
-    initSort();
-    initPermissionCheckboxes();
-});
-
-/**
- * Initialize alert messages with auto-dismiss and close buttons
- */
-function initAlerts() {
-    // Auto-dismiss alerts after 5 seconds
-    setTimeout(function() {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(function(alert) {
-            fadeOut(alert);
-        });
-    }, 5000);
-
-    // Close button for alerts
-    document.querySelectorAll('.close-alert').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            const alert = this.parentElement;
-            fadeOut(alert);
-        });
-    });
-}
-
-/**
- * Fade out element and remove it
- */
-function fadeOut(element) {
-    if (!element) return;
-    
-    let opacity = 1;
-    const timer = setInterval(function() {
-        if (opacity <= 0.1) {
-            clearInterval(timer);
-            element.style.display = 'none';
-            element.remove();
-        }
-        element.style.opacity = opacity;
-        opacity -= 0.1;
-    }, 50);
-}
-
-/**
- * Initialize toggle switches for enable/disable functionality
- */
-function initToggles() {
-    const toggles = document.querySelectorAll('.permission-toggle');
-    if (!toggles.length) return;
-
-    toggles.forEach(function(toggle) {
-        toggle.addEventListener('change', function() {
-            const userId = this.dataset.userId;
-            const viewId = this.dataset.viewId;
-            const action = this.checked ? 'grant' : 'revoke';
-            const checkbox = this;
+    if (sidebarToggle && adminLayout) {
+        sidebarToggle.addEventListener('click', function() {
+            adminLayout.classList.toggle('sidebar-collapsed');
             
-            // Show loading state
-            checkbox.disabled = true;
-            
-            // Prepare data for POST request
-            const data = new FormData();
-            data.append('user_id', userId);
-            data.append('view_id', viewId);
-            data.append('action', action);
-            
-            // Send request to update permission
-            fetch(window.location.href, {
-                method: 'POST',
-                body: data,
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                checkbox.disabled = false;
-                
-                if (data.status === 'success') {
-                    showAlert(data.message, 'success');
-                } else {
-                    // Revert the checkbox if there was an error
-                    checkbox.checked = !checkbox.checked;
-                    showAlert(data.message || 'An error occurred', 'danger');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                checkbox.disabled = false;
-                checkbox.checked = !checkbox.checked;
-                showAlert('An error occurred while updating the permission', 'danger');
-            });
+            // Store the sidebar state in localStorage
+            const isSidebarCollapsed = adminLayout.classList.contains('sidebar-collapsed');
+            localStorage.setItem('site_admin_sidebar_collapsed', isSidebarCollapsed);
         });
-    });
-}
-
-/**
- * Initialize search functionality
- */
-function initSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const clearButton = document.getElementById('clearSearch');
-    if (!searchInput || !clearButton) return;
-
-    // Search as you type
-    searchInput.addEventListener('input', function() {
-        const query = this.value.toLowerCase();
         
-        if (document.getElementById('permissionsGrid')) {
-            // For permissions grid
-            const rows = document.querySelectorAll('.user-row');
-            const headers = document.querySelectorAll('.view-column');
-            
-            // Show/hide rows based on username
-            rows.forEach(function(row) {
-                const username = row.querySelector('.user-info').textContent.toLowerCase();
-                row.style.display = username.includes(query) ? '' : 'none';
-            });
-            
-            // Show/hide columns based on view name
-            headers.forEach(function(header, index) {
-                const viewName = header.textContent.trim().toLowerCase();
-                const showColumn = viewName.includes(query);
-                
-                // Set visibility for the header
-                header.style.display = showColumn ? '' : 'none';
-                
-                // Set visibility for cells in this column
-                const cells = document.querySelectorAll(`.permission-cell:nth-child(${index + 2})`);
-                cells.forEach(cell => {
-                    cell.style.display = showColumn ? '' : 'none';
-                });
-            });
-        } else if (document.querySelector('.data-table')) {
-            // For regular tables
-            const rows = document.querySelectorAll('.data-table tbody tr');
-            
-            rows.forEach(function(row) {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(query) ? '' : 'none';
-            });
+        // Restore sidebar state from localStorage
+        const isSidebarCollapsed = localStorage.getItem('site_admin_sidebar_collapsed') === 'true';
+        if (isSidebarCollapsed) {
+            adminLayout.classList.add('sidebar-collapsed');
         }
-    });
+    }
     
-    // Clear search
-    clearButton.addEventListener('click', function() {
-        searchInput.value = '';
+    // Table row hover effects
+    const dataTableRows = document.querySelectorAll('.data-table tbody tr');
+    dataTableRows.forEach(row => {
+        row.addEventListener('mouseover', function() {
+            this.style.backgroundColor = 'rgba(44, 62, 80, 0.1)';
+        });
         
-        // Reset visibility
-        if (document.getElementById('permissionsGrid')) {
-            document.querySelectorAll('.user-row').forEach(row => {
-                row.style.display = '';
+        row.addEventListener('mouseout', function() {
+            this.style.backgroundColor = '';
+        });
+    });
+    
+    // Custom file input styling
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    fileInputs.forEach(input => {
+        const fileLabel = document.createElement('label');
+        fileLabel.classList.add('custom-file-label');
+        fileLabel.textContent = 'Choose file';
+        
+        const fileWrapper = document.createElement('div');
+        fileWrapper.classList.add('custom-file');
+        
+        // Insert the wrapper
+        input.parentNode.insertBefore(fileWrapper, input);
+        fileWrapper.appendChild(input);
+        fileWrapper.appendChild(fileLabel);
+        
+        // Update label text when file is selected
+        input.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                fileLabel.textContent = this.files[0].name;
+            } else {
+                fileLabel.textContent = 'Choose file';
+            }
+        });
+    });
+    
+    // Confirmation for delete actions
+    const deleteButtons = document.querySelectorAll('.btn-delete');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (!confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+                e.preventDefault();
+            }
+        });
+    });
+    
+    // Form validation
+    const adminForms = document.querySelectorAll('.site-admin-form');
+    adminForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    const fieldParent = field.closest('.form-field');
+                    
+                    if (fieldParent) {
+                        fieldParent.classList.add('has-error');
+                        
+                        // Create error message if it doesn't exist
+                        if (!fieldParent.querySelector('.error-message')) {
+                            const errorMsg = document.createElement('div');
+                            errorMsg.classList.add('error-message');
+                            errorMsg.textContent = 'This field is required.';
+                            fieldParent.appendChild(errorMsg);
+                        }
+                    }
+                }
             });
-            document.querySelectorAll('.view-column, .permission-cell').forEach(el => {
-                el.style.display = '';
+            
+            if (!isValid) {
+                e.preventDefault();
+                
+                // Scroll to first error
+                const firstError = form.querySelector('.has-error');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        });
+        
+        // Clear error on input
+        const formInputs = form.querySelectorAll('input, select, textarea');
+        formInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                const fieldParent = this.closest('.form-field');
+                if (fieldParent && fieldParent.classList.contains('has-error')) {
+                    fieldParent.classList.remove('has-error');
+                    
+                    const errorMsg = fieldParent.querySelector('.error-message');
+                    if (errorMsg) {
+                        errorMsg.remove();
+                    }
+                }
             });
-        } else if (document.querySelector('.data-table')) {
-            document.querySelectorAll('.data-table tbody tr').forEach(row => {
-                row.style.display = '';
+        });
+    });
+    
+    // Mobile sidebar toggle
+    const mobileToggle = document.querySelector('.mobile-sidebar-toggle');
+    if (mobileToggle) {
+        mobileToggle.addEventListener('click', function() {
+            document.body.classList.toggle('mobile-sidebar-open');
+        });
+    }
+    
+    // Initialize any tooltips
+    const tooltips = document.querySelectorAll('[data-tooltip]');
+    tooltips.forEach(tooltip => {
+        tooltip.addEventListener('mouseover', function() {
+            const tooltipText = this.getAttribute('data-tooltip');
+            
+            if (tooltipText) {
+                const tooltipEl = document.createElement('div');
+                tooltipEl.classList.add('tooltip');
+                tooltipEl.textContent = tooltipText;
+                
+                document.body.appendChild(tooltipEl);
+                
+                const rect = this.getBoundingClientRect();
+                tooltipEl.style.top = (rect.top - tooltipEl.offsetHeight - 10) + 'px';
+                tooltipEl.style.left = (rect.left + (rect.width / 2) - (tooltipEl.offsetWidth / 2)) + 'px';
+                
+                this.addEventListener('mouseout', function() {
+                    tooltipEl.remove();
+                }, { once: true });
+            }
+        });
+    });
+    
+    // Dismissible alerts
+    const alertCloseButtons = document.querySelectorAll('.alert .close');
+    alertCloseButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const alert = this.closest('.alert');
+            if (alert) {
+                alert.style.opacity = '0';
+                setTimeout(() => {
+                    alert.remove();
+                }, 300);
+            }
+        });
+    });
+    
+    // Enhanced search functionality
+    const searchForms = document.querySelectorAll('.search-form');
+    searchForms.forEach(form => {
+        const searchInput = form.querySelector('.search-input');
+        const clearButton = form.querySelector('.search-clear');
+        
+        if (searchInput && clearButton) {
+            // Show clear button only when there's text
+            searchInput.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    clearButton.style.display = 'block';
+                } else {
+                    clearButton.style.display = 'none';
+                }
+            });
+            
+            // Initialize on page load
+            if (searchInput.value.trim()) {
+                clearButton.style.display = 'block';
+            } else {
+                clearButton.style.display = 'none';
+            }
+            
+            // Clear search
+            clearButton.addEventListener('click', function() {
+                searchInput.value = '';
+                this.style.display = 'none';
+                form.submit();
             });
         }
     });
-}
-
-/**
- * Initialize table column sorting
- */
-function initSort() {
-    const sortableHeaders = document.querySelectorAll('.sortable');
-    if (!sortableHeaders.length) return;
     
-    sortableHeaders.forEach(function(header) {
-        header.addEventListener('click', function() {
-            const sortBy = this.dataset.sort;
-            const currentSortDir = this.classList.contains('sorted-asc') ? 'desc' : 'asc';
+    // Dark mode toggle
+    const darkModeToggle = document.querySelector('.dark-mode-toggle');
+    if (darkModeToggle) {
+        const toggleDarkMode = function(isDark) {
+            document.body.classList.toggle('dark-mode', isDark);
             
-            // Update URL with sort parameters
-            const url = new URL(window.location.href);
-            url.searchParams.set('sort_by', sortBy);
-            url.searchParams.set('sort_dir', currentSortDir);
-            
-            window.location.href = url.toString();
-        });
-    });
-}
-
-/**
- * Initialize permission checkboxes
- */
-function initPermissionCheckboxes() {
-    const permissionCheckboxes = document.querySelectorAll('.permission-checkbox');
-    
-    permissionCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const userId = this.getAttribute('data-user');
-            const viewId = this.getAttribute('data-view');
-            const isChecked = this.checked;
-            const csrfToken = getCookie('csrftoken');
-            
-            // Show loading indicator
-            this.classList.add('loading');
-            
-            fetch('/site-admin/update-permission/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({
-                    user_id: userId,
-                    view_id: viewId,
-                    is_active: isChecked
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Remove loading indicator
-                this.classList.remove('loading');
-                
-                if (data.success) {
-                    showAlert('success', data.message);
+            // Update icon
+            const icon = darkModeToggle.querySelector('i');
+            if (icon) {
+                if (isDark) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
                 } else {
-                    showAlert('error', data.message);
-                    // Revert the checkbox if there was an error
-                    this.checked = !isChecked;
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                // Remove loading indicator
-                this.classList.remove('loading');
-                showAlert('error', 'An error occurred. Please try again.');
-                // Revert the checkbox if there was an error
-                this.checked = !isChecked;
-            });
+            }
+            
+            // Store preference
+            localStorage.setItem('site_admin_dark_mode', isDark);
+        };
+        
+        darkModeToggle.addEventListener('click', function() {
+            const isDarkMode = !document.body.classList.contains('dark-mode');
+            toggleDarkMode(isDarkMode);
         });
+        
+        // Apply dark mode based on saved preference or system preference
+        const savedDarkMode = localStorage.getItem('site_admin_dark_mode');
+        if (savedDarkMode !== null) {
+            toggleDarkMode(savedDarkMode === 'true');
+        } else {
+            // Check system preference if no saved preference
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            toggleDarkMode(prefersDark);
+        }
+        
+        // Listen for system preference changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (localStorage.getItem('site_admin_dark_mode') === null) {
+                toggleDarkMode(e.matches);
+            }
+        });
+    }
+    
+    // User dropdown menu
+    const userDropdown = document.querySelector('.user-dropdown');
+    const userDropdownToggle = document.querySelector('.user-dropdown-toggle');
+    
+    if (userDropdown && userDropdownToggle) {
+        userDropdownToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userDropdown.classList.toggle('open');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!userDropdown.contains(e.target)) {
+                userDropdown.classList.remove('open');
+            }
+        });
+    }
+    
+    // Auto-resize textareas
+    const textareas = document.querySelectorAll('textarea.auto-resize');
+    textareas.forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+        
+        // Initialize on page load
+        textarea.style.height = 'auto';
+        textarea.style.height = (textarea.scrollHeight) + 'px';
     });
-}
-
-/**
- * Show a dynamic alert message
- */
-function showAlert(message, type = 'info') {
-    const alertsContainer = document.getElementById('alerts');
-    if (!alertsContainer) return;
     
-    const alert = document.createElement('div');
-    alert.className = `alert alert-${type}`;
-    alert.innerHTML = `
-        ${message}
-        <button type="button" class="close-alert">&times;</button>
-    `;
+    // Filter panel toggle
+    const filterToggleBtn = document.querySelector('.filter-toggle-btn');
+    const filterPanel = document.querySelector('.filter-panel');
     
-    alertsContainer.appendChild(alert);
+    if (filterToggleBtn && filterPanel) {
+        filterToggleBtn.addEventListener('click', function() {
+            filterPanel.classList.toggle('show');
+            
+            // Update button text
+            const isVisible = filterPanel.classList.contains('show');
+            this.querySelector('.filter-toggle-text').textContent = isVisible ? 'Hide Filters' : 'Show Filters';
+            
+            // Update icon
+            const icon = this.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-chevron-up', isVisible);
+                icon.classList.toggle('fa-chevron-down', !isVisible);
+            }
+        });
+    }
     
-    // Add close functionality
-    alert.querySelector('.close-alert').addEventListener('click', function() {
-        fadeOut(alert);
-    });
+    // Filter navigation toggle (for mobile)
+    const filterToggleBtnNav = document.querySelector('.filter-toggle-nav');
+    const filterPanelNav = document.querySelector('.filters-nav');
     
-    // Auto-dismiss after 5 seconds
-    setTimeout(function() {
-        fadeOut(alert);
-    }, 5000);
-}
-
-/**
- * Get cookie by name (for CSRF token)
- * @param {string} name - The cookie name
- * @return {string} The cookie value
- */
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+    if (filterToggleBtnNav && filterPanelNav) {
+        filterToggleBtnNav.addEventListener('click', function() {
+            filterPanelNav.classList.toggle('show');
+            
+            // Save state in localStorage
+            const isVisible = filterPanelNav.classList.contains('show');
+            localStorage.setItem('site_admin_filters_visible', isVisible);
+            
+            // Update button text
+            this.querySelector('.filter-toggle-text').textContent = isVisible ? 'Hide' : 'Filters';
+            
+            // Update icon
+            const icon = this.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-chevron-up', isVisible);
+                icon.classList.toggle('fa-chevron-down', !isVisible);
+            }
+        });
+        
+        // Restore state from localStorage
+        const filtersVisible = localStorage.getItem('site_admin_filters_visible') === 'true';
+        if (filtersVisible) {
+            filterPanelNav.classList.add('show');
+            filterToggleBtnNav.querySelector('.filter-toggle-text').textContent = 'Hide';
+            const icon = filterToggleBtnNav.querySelector('i');
+            if (icon) {
+                icon.classList.add('fa-chevron-up');
+                icon.classList.remove('fa-chevron-down');
             }
         }
     }
-    return cookieValue;
-} 
+    
+    // Clear button for search input
+    const toggleClearButton = function() {
+        const searchInput = document.querySelector('.filter-search-input');
+        const clearButton = document.querySelector('.filter-search-clear');
+        
+        if (searchInput && clearButton) {
+            if (searchInput.value.trim()) {
+                clearButton.style.display = 'block';
+            } else {
+                clearButton.style.display = 'none';
+            }
+        }
+    };
+    
+    const searchInput = document.querySelector('.filter-search-input');
+    const clearButton = document.querySelector('.filter-search-clear');
+    
+    if (searchInput && clearButton) {
+        // Initial state
+        toggleClearButton();
+        
+        // Update on input
+        searchInput.addEventListener('input', toggleClearButton);
+        
+        // Clear search
+        clearButton.addEventListener('click', function() {
+            searchInput.value = '';
+            toggleClearButton();
+            const searchForm = searchInput.closest('form');
+            if (searchForm) {
+                searchForm.submit();
+            }
+        });
+    }
+});

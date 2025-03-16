@@ -1,0 +1,96 @@
+/* Delete confirmation page specific styles */
+
+/* Delete confirmation */
+.delete-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.delete-confirmation {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+.delete-icon {
+    font-size: 48px;
+    color: var(--danger);
+    margin-bottom: var(--spacing-md);
+}
+
+.delete-title {
+    font-size: 24px;
+    margin-bottom: var(--spacing-md);
+    color: var(--danger);
+}
+
+.delete-warning {
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background-color: rgba(231, 76, 60, 0.1);
+    border-radius: var(--border-radius);
+}
+
+.related-objects {
+    margin-top: var(--spacing-md);
+    text-align: left;
+}
+
+.related-objects h4 {
+    margin-bottom: var(--spacing-sm);
+}
+
+.related-objects ul {
+    list-style: disc;
+    padding-left: var(--spacing-lg);
+}
+
+.object-summary {
+    margin-bottom: var(--spacing-lg);
+}
+
+.summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--spacing-sm);
+}
+
+.summary-table th,
+.summary-table td {
+    padding: var(--spacing-sm);
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.summary-table th {
+    width: 200px;
+    background-color: var(--light);
+    font-weight: 500;
+}
+
+.delete-actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+/* Dark mode styles */
+body.dark-mode .delete-confirmation {
+    background-color: #2d3748;
+}
+
+body.dark-mode .delete-warning {
+    background-color: rgba(231, 76, 60, 0.1);
+}
+
+body.dark-mode .summary-table th {
+    background-color: #374151;
+}
+
+body.dark-mode .summary-table th,
+body.dark-mode .summary-table td {
+    border-bottom-color: #4b5563;
+}

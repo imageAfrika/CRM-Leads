@@ -13,8 +13,10 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
+    
     <!-- Base CSS -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}?v={% now 'U' %}">
+    <link rel="stylesheet" href="{% static 'css/dark_mode.css' %}?v={% now 'U' %}">
     <link rel="stylesheet" href="{% static 'css/notifications.css' %}?v={% now 'U' %}">
     
     <!-- App-specific CSS -->
@@ -93,6 +95,10 @@
                     <i class="fas fa-chart-bar"></i>
                     Reports
                 </a>
+                <a href="{% url 'site_admin:login' %}" class="sidebar-link {% if app_name == 'site_admin' %}active{% endif %}">
+                    <i class="fas fa-user-shield"></i>
+                    Site Admin
+                </a>
                 <a href="{% url 'registration:registration_home' %}" class="sidebar-link {% if app_name == 'registration' %}active{% endif %}">
                     <i class="fas fa-user-plus"></i>
                     Registration
@@ -116,24 +122,50 @@
                     <span class="sidebar-toggle">
                         <i class="fas fa-bars"></i>
                     </span>
-                        <h1 class="header-title">{% block header_title %}{% endblock %}</h1>
+                    <h1 class="header-title">{% block header_title %}{% endblock %}</h1>
                 </div>
                 <div class="header-actions">
+                    <!-- Dark Mode Toggle Button -->
+                    <button class="dark-mode-toggle" title="Toggle dark mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    
                     {% if request.user.is_authenticated %}
-                    <div class="dropdown">
-                        <button class="btn btn-outline btn-sm">
-                            <i class="fas fa-user-circle"></i>
-                            {{ request.user.username }}
+                    <!-- User Dropdown Menu -->
+                    <div class="user-dropdown">
+                        <button class="user-dropdown-toggle">
+                            <div class="user-avatar">
+                                {{ request.user.username|slice:":1"|upper }}
+                            </div>
+                            <span class="user-name">{{ request.user.username }}</span>
+                            <i class="fas fa-chevron-down dropdown-icon"></i>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{% url 'authentication:profile' %}">
-                                <i class="fas fa-user-cog me-2"></i> Profile Settings
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'authentication:logout' %}">
-                                <i class="fas fa-sign-out-alt me-2"></i> Logout
-                            </a></li>
-                        </ul>
+                        <div class="user-dropdown-menu">
+                            <div class="user-dropdown-header">
+                                <div class="user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                                <div class="user-email">{{ request.user.email }}</div>
+                            </div>
+                            <a href="{% url 'authentication:profile' %}" class="user-dropdown-item">
+                                <i class="fas fa-user-cog"></i>
+                                <span>Profile Settings</span>
+                            </a>
+                            {% if request.user.is_staff %}
+                            <div class="user-dropdown-divider"></div>
+                            <a href="{% url 'admin:index' %}" class="user-dropdown-item" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                <span>Django Admin</span>
+                            </a>
+                            <a href="{% url 'site_admin:index' %}" class="user-dropdown-item">
+                                <i class="fas fa-user-shield"></i>
+                                <span>Site Admin</span>
+                            </a>
+                            {% endif %}
+                            <div class="user-dropdown-divider"></div>
+                            <a href="{% url 'authentication:logout' %}" class="user-dropdown-item logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </a>
+                        </div>
                     </div>
                     {% endif %}
                 </div>
@@ -167,26 +199,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <!-- Base JS -->
-    <script>
-        // Mobile sidebar toggle
-        document.addEventListener('DOMContentLoaded', function() {
-            const toggle = document.querySelector('.sidebar-toggle');
-            const sidebar = document.querySelector('.app-sidebar');
-            const overlay = document.querySelector('.sidebar-overlay');
-            
-            if (toggle && sidebar && overlay) {
-                toggle.addEventListener('click', function() {
-                    sidebar.classList.toggle('show');
-                    overlay.classList.toggle('show');
-                });
-                
-                overlay.addEventListener('click', function() {
-                    sidebar.classList.remove('show');
-                    overlay.classList.remove('show');
-                });
-            }
-        });
-    </script>
+    <script src="{% static 'js/base.js' %}?v={% now 'U' %}"></script>
     
     <!-- Page-specific JS -->
     {% block extra_js %}{% endblock %}

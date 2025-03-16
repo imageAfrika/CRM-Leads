@@ -1,0 +1,260 @@
+/* Model list specific styles */
+
+/* Tables */
+.data-table-container {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th {
+    background-color: var(--light);
+    padding: var(--spacing-md);
+    text-align: left;
+    font-weight: 500;
+    color: var(--gray-dark);
+    border-bottom: 1px solid #ddd;
+}
+
+.data-table td {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid #eee;
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.data-table a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.data-table a:hover {
+    text-decoration: underline;
+}
+
+.actions-column {
+    width: 100px;
+    text-align: center;
+}
+
+/* Row highlight on hover */
+.data-table tbody tr:hover {
+    background-color: rgba(44, 62, 80, 0.05);
+    transition: background-color 0.2s ease;
+}
+
+/* Empty state */
+.empty-list {
+    padding: var(--spacing-xl);
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 48px;
+    color: var(--gray-light);
+    margin-bottom: var(--spacing-md);
+}
+
+.empty-text {
+    font-size: 18px;
+    margin-bottom: var(--spacing-sm);
+    color: var(--gray);
+}
+
+.empty-help {
+    color: var(--gray);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Action buttons */
+.action-buttons {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+/* Pagination */
+.pagination-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-top: 1px solid #eee;
+}
+
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: var(--spacing-xs);
+}
+
+.pagination li {
+    margin: 0;
+}
+
+.pagination a {
+    display: block;
+    padding: 6px 12px;
+    background-color: white;
+    border: 1px solid #ddd;
+    color: var(--primary);
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.pagination a:hover {
+    background-color: var(--light);
+}
+
+.pagination li.active a {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.pagination-info {
+    color: var(--gray);
+    font-size: 14px;
+    margin-top: var(--spacing-sm);
+}
+
+/* Search form */
+.search-form {
+    position: relative;
+    margin-bottom: var(--spacing-md);
+}
+
+.search-input {
+    padding-right: 30px;
+}
+
+.search-clear {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--gray);
+    cursor: pointer;
+    display: none;
+}
+
+.search-clear:hover {
+    color: var(--danger);
+}
+
+/* Enhanced search bar */
+.search-bar {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.search-input-wrapper {
+    position: relative;
+    flex-grow: 1;
+}
+
+/* Filter panel */
+.filter-panel {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    display: none;
+}
+
+.filter-panel.show {
+    display: block;
+}
+
+.filter-toggle {
+    margin-left: var(--spacing-md);
+}
+
+/* Filter grid */
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.filter-field {
+    margin-bottom: var(--spacing-sm);
+}
+
+.filter-field label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-weight: 500;
+    color: var(--gray-dark);
+}
+
+.filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--border-color);
+}
+
+/* Sorting links */
+.sort-link {
+    margin-left: var(--spacing-xs);
+    color: var(--gray);
+    text-decoration: none;
+}
+
+.sort-link:hover {
+    color: var(--primary);
+}
+
+/* Dark mode styles */
+body.dark-mode .data-table th {
+    background-color: #374151;
+    color: #e2e8f0;
+    border-bottom-color: #4b5563;
+}
+
+body.dark-mode .data-table td {
+    border-bottom-color: #4b5563;
+}
+
+body.dark-mode .data-table tbody tr:hover {
+    background-color: rgba(226, 232, 240, 0.05);
+}
+
+body.dark-mode .pagination-info {
+    color: #a0aec0;
+}
+
+body.dark-mode .filter-panel {
+    background-color: #2d3748;
+}
+
+body.dark-mode .filter-field label {
+    color: #e2e8f0;
+}
+
+body.dark-mode .sort-link {
+    color: #a0aec0;
+}
+
+body.dark-mode .sort-link:hover {
+    color: #e2e8f0;
+}

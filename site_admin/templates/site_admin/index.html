@@ -1,0 +1,89 @@
+{% extends "site_admin/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+{% endblock %}
+
+{% block title %}Site Admin{% endblock %}
+{% block header_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h2>Dashboard</h2>
+</div>
+
+<!-- Stats Section -->
+<div class="stat-cards">
+    <div class="stat-card">
+        <div class="stat-value">{{ total_users }}</div>
+        <div class="stat-label">Users</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ total_models }}</div>
+        <div class="stat-label">Data Models</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ recent_actions_count }}</div>
+        <div class="stat-label">Recent Actions</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ total_apps }}</div>
+        <div class="stat-label">Apps</div>
+    </div>
+</div>
+
+<div class="dashboard">
+    <div class="dashboard-section">
+        <h3><i class="fas fa-th-large"></i> Applications</h3>
+        <div class="model-apps">
+            {% for app in app_list %}
+            <div class="app-card">
+                <h3 class="app-name">{{ app.verbose_name }}</h3>
+                <div class="app-models">
+                    {% for model in app.models %}
+                    <div class="model-item">
+                        <a href="{{ model.list_url }}" class="model-link">
+                            <i class="fas fa-table model-icon"></i>
+                            <span class="model-name">{{ model.verbose_name_plural }}</span>
+                        </a>
+                        
+                        {% if model.add_url %}
+                        <a href="{{ model.add_url }}" class="btn btn-sm btn-success model-add-link" title="Add {{ model.verbose_name }}">
+                            <i class="fas fa-plus"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="dashboard-section">
+        <h3><i class="fas fa-history"></i> Recent Actions</h3>
+        {% if recent_actions %}
+        <div class="recent-actions">
+            <ul class="action-list">
+                {% for action in recent_actions %}
+                <li class="action-item">
+                    <span class="action-time">{{ action.timestamp|date:"M d, Y P" }}</span>
+                    <span class="action-user">{{ action.user.username }}</span>
+                    <span class="action-type action-{{ action.action_type }}">
+                        {{ action.get_action_type_display }}
+                    </span>
+                    <span class="action-object">{{ action.content_type.model|capfirst }}: {{ action.object_repr }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% else %}
+        <div class="empty-actions">
+            <i class="fas fa-info-circle"></i>
+            No recent actions found.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

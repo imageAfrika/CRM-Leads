@@ -1,0 +1,107 @@
+body {
+    background-color: var(--body-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.login-container {
+    background-color: var(--card-bg);
+    border-radius: 5px;
+    box-shadow: var(--card-shadow);
+    width: 100%;
+    max-width: 400px;
+    padding: 30px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-header h1 {
+    font-size: 24px;
+    color: var(--body-color);
+    margin: 15px 0 0;
+    transition: color 0.3s ease;
+}
+
+.login-icon {
+    font-size: 40px;
+    color: var(--primary);
+    transition: color 0.3s ease;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: var(--body-color);
+    transition: color 0.3s ease;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid var(--input-border);
+    background-color: var(--input-bg);
+    color: var(--input-color);
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--input-focus-border);
+    outline: none;
+    box-shadow: var(--input-focus-shadow);
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--text-muted);
+    transition: color 0.3s ease;
+}
+
+.login-footer a {
+    color: var(--link-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.login-footer a:hover {
+    text-decoration: underline;
+    color: var(--link-hover-color);
+}
+
+.messages {
+    margin-bottom: 20px;
+}

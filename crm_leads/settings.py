@@ -62,7 +62,7 @@ INSTALLED_APPS = [
     'people.apps.PeopleConfig',
     'registration.apps.RegistrationConfig',
     'projects',
-    
+    'site_admin.apps.SiteAdminConfig',
 ]
 
 MIDDLEWARE = [
@@ -74,6 +74,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'authentication.middleware.ProfileAuthenticationMiddleware',
+    'site_admin.middleware.SiteAdminMiddleware',
 ]
 
 ROOT_URLCONF = 'crm_leads.urls'

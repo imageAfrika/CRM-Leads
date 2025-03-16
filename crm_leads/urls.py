@@ -21,7 +21,9 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic import RedirectView
+from . import views
 
 urlpatterns = [
     # Dashboard URL as root
@@ -32,6 +34,9 @@ urlpatterns = [
     
     # Admin URL
     path('admin/', admin.site.urls),
+    
+    # Site Admin URL
+    path('site-admin/', include('site_admin.urls')),
     
     # App URLs
     path('clients/', include('clients.urls')),
@@ -49,6 +54,9 @@ urlpatterns = [
     path('registration/', include('registration.urls')),
     # Add redirect from /dashboard/ to root
     path('dashboard/', RedirectView.as_view(url='/', permanent=True)),
+    
+    # Test URLs
+    path('dark-mode-test/', views.dark_mode_test, name='dark_mode_test'),
 ] 
 
 # Add static and media file serving in development mode

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Site Admin{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/admin_base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin_dark_mode.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <div class="admin-logo">
+                <i class="fas fa-cogs admin-logo-icon"></i>
+                <h1>Site Admin</h1>
+                <button class="sidebar-toggle" title="Toggle sidebar">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Main</div>
+                    <ul class="sidebar-menu">
+                        <li>
+                            <a href="{% url 'site_admin:index' %}" class="sidebar-item {% if request.path == '/site-admin/' %}active{% endif %}">
+                                <i class="fas fa-tachometer-alt menu-icon"></i>
+                                <span class="menu-text">Dashboard</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Administration</div>
+                    <ul class="sidebar-menu">
+                        <li>
+                            <a href="{% url 'site_admin:user_management' %}" class="sidebar-item {% if '/site-admin/users/' in request.path %}active{% endif %}">
+                                <i class="fas fa-users menu-icon"></i>
+                                <span class="menu-text">Users</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'site_admin:group_management' %}" class="sidebar-item {% if '/site-admin/groups/' in request.path %}active{% endif %}">
+                                <i class="fas fa-user-tag menu-icon"></i>
+                                <span class="menu-text">Groups</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Applications</div>
+                    <ul class="sidebar-menu">
+                        {% for app in app_list %}
+                        <li class="sidebar-app">
+                            <div class="sidebar-app-name">{{ app.verbose_name }}</div>
+                            <ul class="sidebar-model-menu">
+                                {% for model in app.models %}
+                                <li>
+                                    <a href="{{ model.list_url }}" class="sidebar-item">
+                                        <i class="fas fa-table menu-icon"></i>
+                                        <span class="menu-text">{{ model.verbose_name_plural }}</span>
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+        
+        <main class="admin-main">
+            <header class="admin-header">
+                <button class="mobile-sidebar-toggle" title="Toggle mobile menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <h1 class="header-title">{% block header_title %}Site Admin{% endblock %}</h1>
+                
+                <div class="header-actions">
+                    <button class="dark-mode-toggle" title="Toggle dark mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    
+                    <div class="user-dropdown">
+                        <button class="user-dropdown-toggle">
+                            <div class="user-avatar">
+                                {{ request.user.username|slice:":1"|upper }}
+                            </div>
+                            <span class="user-name">{{ request.user.username }}</span>
+                            <i class="fas fa-chevron-down dropdown-icon"></i>
+                        </button>
+                        <div class="user-dropdown-menu">
+                            <div class="user-dropdown-header">
+                                <div class="user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                                <div class="user-email">{{ request.user.email }}</div>
+                            </div>
+                            <a href="{% url 'admin:auth_user_change' request.user.id %}" class="user-dropdown-item">
+                                <i class="fas fa-user-cog"></i>
+                                <span>My Profile</span>
+                            </a>
+                            <div class="user-dropdown-divider"></div>
+                            <a href="{% url 'admin:index' %}" class="user-dropdown-item" target="_blank">
+                                <i class="fas fa-external-link-alt"></i>
+                                <span>Django Admin</span>
+                            </a>
+                            <a href="/" class="user-dropdown-item">
+                                <i class="fas fa-home"></i>
+                                <span>Back to Site</span>
+                            </a>
+                            <div class="user-dropdown-divider"></div>
+                            <a href="{% url 'admin:logout' %}" class="user-dropdown-item logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Log Out</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <div class="admin-content">
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle"></i>
+                        {% elif message.tags == 'error' %}
+                        <i class="fas fa-exclamation-circle"></i>
+                        {% elif message.tags == 'warning' %}
+                        <i class="fas fa-exclamation-triangle"></i>
+                        {% else %}
+                        <i class="fas fa-info-circle"></i>
+                        {% endif %}
+                        {{ message }}
+                        <button type="button" class="close" aria-label="Close">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="breadcrumbs">
+                    <a href="{% url 'site_admin:index' %}">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                    {% block breadcrumbs %}{% endblock %}
+                </div>
+                
+                {% block content %}{% endblock %}
+            </div>
+            
+            <footer class="admin-footer">
+                <p>&copy; {% now "Y" %} CRM Leads Management System | Custom Site Admin</p>
+            </footer>
+        </main>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'site_admin/js/admin.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

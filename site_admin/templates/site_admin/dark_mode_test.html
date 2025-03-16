@@ -1,0 +1,298 @@
+{% extends "site_admin/base.html" %}
+{% load static %}
+
+{% block title %}Dark Mode Test{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_user_management.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin_group_management.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin_delete.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin_forms.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin_model_list.css' %}">
+<style>
+    .test-section {
+        margin-bottom: 2rem;
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        background-color: var(--card-bg);
+    }
+    
+    .test-title {
+        font-size: 1.2rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        color: var(--body-color);
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.5rem;
+    }
+    
+    .color-swatch {
+        display: inline-block;
+        width: 100px;
+        height: 50px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+    }
+    
+    .swatch-label {
+        font-size: 12px;
+        margin-top: 5px;
+        text-align: center;
+        color: var(--body-color);
+    }
+    
+    .toggle-dark-mode {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+</style>
+{% endblock %}
+
+{% block header_title %}Dark Mode Testing Page{% endblock %}
+
+{% block breadcrumbs %}
+<span>&gt;</span>
+<a href="#">Dark Mode Test</a>
+{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h2>Dark Mode Test Page</h2>
+    <p>This page is for testing dark mode styling across various UI components.</p>
+</div>
+
+<div class="test-section">
+    <div class="test-title">Color Variables</div>
+    <div style="display: flex; flex-wrap: wrap;">
+        <div>
+            <div class="color-swatch" style="background-color: var(--body-bg);"></div>
+            <div class="swatch-label">--body-bg</div>
+        </div>
+        <div>
+            <div class="color-swatch" style="background-color: var(--card-bg);"></div>
+            <div class="swatch-label">--card-bg</div>
+        </div>
+        <div>
+            <div class="color-swatch" style="background-color: var(--hover-bg);"></div>
+            <div class="swatch-label">--hover-bg</div>
+        </div>
+        <div>
+            <div class="color-swatch" style="background-color: var(--primary);"></div>
+            <div class="swatch-label">--primary</div>
+        </div>
+        <div>
+            <div class="color-swatch" style="background-color: var(--secondary);"></div>
+            <div class="swatch-label">--secondary</div>
+        </div>
+        <div>
+            <div class="color-swatch" style="background-color: var(--success);"></div>
+            <div class="swatch-label">--success</div>
+        </div>
+        <div>
+            <div class="color-swatch" style="background-color: var(--danger);"></div>
+            <div class="swatch-label">--danger</div>
+        </div>
+        <div>
+            <div class="color-swatch" style="background-color: var(--warning);"></div>
+            <div class="swatch-label">--warning</div>
+        </div>
+        <div>
+            <div class="color-swatch" style="background-color: var(--info);"></div>
+            <div class="swatch-label">--info</div>
+        </div>
+    </div>
+</div>
+
+<div class="test-section">
+    <div class="test-title">Typography</div>
+    <h1>Heading 1</h1>
+    <h2>Heading 2</h2>
+    <h3>Heading 3</h3>
+    <h4>Heading 4</h4>
+    <h5>Heading 5</h5>
+    <h6>Heading 6</h6>
+    <p>This is a normal paragraph with <a href="#">a link</a> inside it.</p>
+    <p class="text-muted">This is muted text.</p>
+    <p><strong>Bold text</strong> and <em>emphasized text</em>.</p>
+    <blockquote>This is a blockquote</blockquote>
+</div>
+
+<div class="test-section">
+    <div class="test-title">Cards & Containers</div>
+    
+    <div class="card" style="padding: 1rem; margin-bottom: 1rem;">
+        <h3>Standard Card</h3>
+        <p>This is a standard card component.</p>
+    </div>
+    
+    <div class="data-table-container" style="margin-bottom: 1rem;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>John Doe</td>
+                    <td>john@example.com</td>
+                    <td>Admin</td>
+                </tr>
+                <tr>
+                    <td>Jane Smith</td>
+                    <td>jane@example.com</td>
+                    <td>Editor</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="user-card">
+        <div class="user-avatar">JD</div>
+        <div class="user-info">
+            <h4 class="user-name">John Doe</h4>
+            <p class="user-email">john@example.com</p>
+            <div class="user-status active">Active</div>
+        </div>
+    </div>
+</div>
+
+<div class="test-section">
+    <div class="test-title">Form Elements</div>
+    
+    <div class="form-container">
+        <h3 class="form-title">Sample Form</h3>
+        
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" class="form-control" placeholder="Enter your name">
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" class="form-control" placeholder="Enter your email">
+            <div class="form-text">We'll never share your email with anyone else.</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" class="form-control" placeholder="Enter your password">
+        </div>
+        
+        <div class="form-group">
+            <label for="role">Role</label>
+            <select id="role" class="form-control">
+                <option>Admin</option>
+                <option>Editor</option>
+                <option>Viewer</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" class="form-control" rows="3" placeholder="Enter your message"></textarea>
+        </div>
+        
+        <div class="form-check">
+            <input type="checkbox" id="remember" class="form-check-input">
+            <label for="remember" class="form-check-label">Remember me</label>
+        </div>
+        
+        <div class="form-actions">
+            <button type="button" class="btn-secondary">Cancel</button>
+            <button type="button" class="btn-primary">Submit</button>
+        </div>
+    </div>
+</div>
+
+<div class="test-section">
+    <div class="test-title">Buttons</div>
+    
+    <button class="btn-primary" style="margin-right: 1rem;">Primary</button>
+    <button class="btn-secondary" style="margin-right: 1rem;">Secondary</button>
+    <button class="btn-success" style="margin-right: 1rem; background-color: var(--success);">Success</button>
+    <button class="btn-danger" style="margin-right: 1rem;">Danger</button>
+    <button class="btn-warning" style="margin-right: 1rem; background-color: var(--warning);">Warning</button>
+    <button class="btn-info" style="margin-right: 1rem; background-color: var(--info);">Info</button>
+</div>
+
+<div class="test-section">
+    <div class="test-title">Alerts</div>
+    
+    <div class="alert alert-success" style="margin-bottom: 1rem;">
+        <i class="fas fa-check-circle"></i>
+        This is a success alert.
+    </div>
+    
+    <div class="alert alert-danger" style="margin-bottom: 1rem;">
+        <i class="fas fa-exclamation-circle"></i>
+        This is a danger alert.
+    </div>
+    
+    <div class="alert alert-warning" style="margin-bottom: 1rem;">
+        <i class="fas fa-exclamation-triangle"></i>
+        This is a warning alert.
+    </div>
+    
+    <div class="alert alert-info" style="margin-bottom: 1rem;">
+        <i class="fas fa-info-circle"></i>
+        This is an info alert.
+    </div>
+</div>
+
+<div class="test-section">
+    <div class="test-title">Delete Confirmation</div>
+    
+    <div class="delete-container" style="max-width: none;">
+        <div class="delete-header">
+            <i class="fas fa-trash delete-icon"></i>
+            <h3 class="delete-title">Delete Confirmation</h3>
+        </div>
+        
+        <div class="delete-message">
+            <p class="delete-warning">Are you sure you want to delete the following item?</p>
+            <p>This action cannot be undone and all associated data will be permanently deleted.</p>
+        </div>
+        
+        <div class="object-info">
+            <div class="object-name">Item: Sample User (john@example.com)</div>
+        </div>
+        
+        <div class="related-objects">
+            <div class="related-title">This will also delete:</div>
+            <ul class="related-list">
+                <li class="related-item">3 comments</li>
+                <li class="related-item">5 posts</li>
+                <li class="related-item">1 profile</li>
+            </ul>
+        </div>
+        
+        <div class="delete-actions">
+            <button class="btn-secondary">Cancel</button>
+            <button class="btn-delete">Delete</button>
+        </div>
+    </div>
+</div>
+
+<button class="toggle-dark-mode btn-primary">Toggle Dark Mode</button>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleButton = document.querySelector('.toggle-dark-mode');
+        
+        toggleButton.addEventListener('click', function() {
+            document.documentElement.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark-mode'));
+        });
+    });
+</script>
+{% endblock %} 

@@ -41,6 +41,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'access_control' / 'static',
     BASE_DIR / 'people' / 'static',
     BASE_DIR / 'project_management' / 'static',
+    BASE_DIR / 'site_admin' / 'static',
 ]
 
 # The absolute path to the directory where collectstatic will collect static files for deployment
@@ -68,4 +69,5 @@ INSTALLED_APPS = [
     'registration.apps.RegistrationConfig',
     'people.apps.PeopleConfig',
     'project_management.apps.ProjectManagementConfig',
+    'site_admin.apps.SiteAdminConfig',
 ]

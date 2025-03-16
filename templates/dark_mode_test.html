@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dark Mode Test{% endblock %}
+
+{% block header_title %}Dark Mode Test Page{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Dark Mode Test</h4>
+                    <button class="btn btn-primary" id="toggle-dark-mode">Toggle Dark Mode</button>
+                </div>
+                <div class="card-body">
+                    <p class="mb-4">This page demonstrates dark mode styling across different app components.</p>
+                    
+                    <h5>Color Variables</h5>
+                    <div class="d-flex flex-wrap mb-4">
+                        <div class="me-3 mb-3">
+                            <div style="width: 100px; height: 50px; background-color: var(--app-bg); border: 1px solid var(--border-color); border-radius: 4px;"></div>
+                            <div class="text-center mt-1">app-bg</div>
+                        </div>
+                        <div class="me-3 mb-3">
+                            <div style="width: 100px; height: 50px; background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 4px;"></div>
+                            <div class="text-center mt-1">card-bg</div>
+                        </div>
+                        <div class="me-3 mb-3">
+                            <div style="width: 100px; height: 50px; background-color: var(--primary-color); border: 1px solid var(--border-color); border-radius: 4px;"></div>
+                            <div class="text-center mt-1">primary-color</div>
+                        </div>
+                        <div class="me-3 mb-3">
+                            <div style="width: 100px; height: 50px; background-color: var(--hover-bg); border: 1px solid var(--border-color); border-radius: 4px;"></div>
+                            <div class="text-center mt-1">hover-bg</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Common Components -->
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>Common UI Elements</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Buttons -->
+                            <h6>Buttons</h6>
+                            <div class="mb-3">
+                                <button class="btn btn-primary me-2">Primary</button>
+                                <button class="btn btn-secondary me-2">Secondary</button>
+                                <button class="btn btn-success me-2">Success</button>
+                                <button class="btn btn-danger me-2">Danger</button>
+                                <button class="btn btn-warning me-2">Warning</button>
+                                <button class="btn btn-info me-2">Info</button>
+                            </div>
+                            
+                            <!-- Alerts -->
+                            <h6 class="mt-4">Alerts</h6>
+                            <div class="alert alert-primary mb-2">This is a primary alert</div>
+                            <div class="alert alert-secondary mb-2">This is a secondary alert</div>
+                            <div class="alert alert-success mb-2">This is a success alert</div>
+                            <div class="alert alert-danger mb-2">This is a danger alert</div>
+                            
+                            <!-- Form Elements -->
+                            <h6 class="mt-4">Form Elements</h6>
+                            <div class="mb-3">
+                                <label for="exampleInput" class="form-label">Text Input</label>
+                                <input type="text" class="form-control" id="exampleInput" placeholder="Enter text...">
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleSelect" class="form-label">Select</label>
+                                <select class="form-control" id="exampleSelect">
+                                    <option>Option 1</option>
+                                    <option>Option 2</option>
+                                    <option>Option 3</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleTextarea" class="form-label">Textarea</label>
+                                <textarea class="form-control" id="exampleTextarea" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>Tables & Lists</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Table -->
+                            <h6>Table</h6>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>John Doe</td>
+                                        <td>john@example.com</td>
+                                        <td><span class="badge bg-success">Active</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Jane Smith</td>
+                                        <td>jane@example.com</td>
+                                        <td><span class="badge bg-danger">Inactive</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Robert Johnson</td>
+                                        <td>robert@example.com</td>
+                                        <td><span class="badge bg-warning">Pending</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <!-- List Group -->
+                            <h6 class="mt-4">List Group</h6>
+                            <ul class="list-group">
+                                <li class="list-group-item">Basic item</li>
+                                <li class="list-group-item active">Active item</li>
+                                <li class="list-group-item disabled">Disabled item</li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Item with badge
+                                    <span class="badge bg-primary rounded-pill">14</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- App-Specific Components -->
+            <div class="row">
+                <!-- Leads App -->
+                <div class="col-lg-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>Leads Components</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Timeline -->
+                            <h6>Timeline</h6>
+                            <div class="timeline mb-4">
+                                <div class="timeline-item">
+                                    <div class="timeline-marker"></div>
+                                    <div class="timeline-content">
+                                        <h6>Lead Created</h6>
+                                        <p>John Doe created a new lead</p>
+                                        <small>2 hours ago</small>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-success"></div>
+                                    <div class="timeline-content">
+                                        <h6>Status Changed</h6>
+                                        <p>Lead status changed to Qualified</p>
+                                        <small>1 hour ago</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Lead Card -->
+                            <h6>Lead Card</h6>
+                            <div class="lead-card">
+                                <div class="d-flex justify-content-between">
+                                    <h6>John Smith</h6>
+                                    <span class="badge bg-new">New</span>
+                                </div>
+                                <p>john.smith@example.com</p>
+                                <small>Source: Website</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- People App -->
+                <div class="col-lg-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>People Components</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Person Card -->
+                            <div class="person-card mb-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar me-3">JS</div>
+                                    <div>
+                                        <h6 class="mb-0">Jane Smith</h6>
+                                        <p class="mb-0 text-muted">jane.smith@example.com</p>
+                                        <small>Customer since: Jan 2023</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Contact Card -->
+                            <div class="contact-card mb-4">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6>Phone</h6>
+                                        <p>(555) 123-4567</p>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-phone"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dashboard Components -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>Dashboard Components</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="stat-card total mb-4">
+                                        <div class="stat-icon primary">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-value">128</div>
+                                            <div class="stat-label">Total Customers</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-card new mb-4">
+                                        <div class="stat-icon success">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-value">$12,450</div>
+                                            <div class="stat-label">Monthly Revenue</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-card qualified mb-4">
+                                        <div class="stat-icon warning">
+                                            <i class="fas fa-tasks"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-value">43</div>
+                                            <div class="stat-label">Open Tasks</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-card won mb-4">
+                                        <div class="stat-icon danger">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-value">7</div>
+                                            <div class="stat-label">Overdue Tasks</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleDarkModeBtn = document.getElementById('toggle-dark-mode');
+        
+        toggleDarkModeBtn.addEventListener('click', function() {
+            const html = document.documentElement;
+            const isDarkMode = html.classList.contains('dark-mode');
+            
+            html.classList.toggle('dark-mode', !isDarkMode);
+            localStorage.setItem('crm_leads_dark_mode', !isDarkMode);
+            
+            // Update icon on the header dark mode toggle
+            const headerToggleIcon = document.querySelector('.dark-mode-toggle i');
+            if (headerToggleIcon) {
+                if (!isDarkMode) {
+                    headerToggleIcon.classList.remove('fa-moon');
+                    headerToggleIcon.classList.add('fa-sun');
+                } else {
+                    headerToggleIcon.classList.remove('fa-sun');
+                    headerToggleIcon.classList.add('fa-moon');
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 

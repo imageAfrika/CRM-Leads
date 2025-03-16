@@ -1,0 +1,93 @@
+{% extends "site_admin/model_form.html" %}
+{% load static %}
+
+{% block extra_js %}
+{{ block.super }}
+{% endblock %}
+
+{% block form_fields %}
+{{ block.super }}
+
+{% if inline_formsets %}
+<div class="inline-formsets">
+    {% for formset in inline_formsets %}
+    <div class="inline-formset" id="{{ formset.prefix }}-formset">
+        <h3>{{ formset.model._meta.verbose_name_plural|capfirst }}</h3>
+        
+        {{ formset.management_form }}
+        
+        <div class="inline-forms">
+            {% for form in formset.forms %}
+            <div class="inline-form {% if form.DELETE.value %}marked-for-deletion{% endif %}">
+                {% for field in form.visible_fields %}
+                <div class="form-field {% if field.errors %}has-error{% endif %}">
+                    <div class="field-label">
+                        {{ field.label }}
+                        {% if field.field.required and not field.name == 'DELETE' %}
+                        <span class="required-indicator">*</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="field-input">
+                        {{ field }}
+                        
+                        {% if field.help_text %}
+                        <div class="help-text">{{ field.help_text }}</div>
+                        {% endif %}
+                        
+                        {% if field.errors %}
+                        {% for error in field.errors %}
+                        <div class="error-message">{{ error }}</div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <button type="button" class="delete-inline-item" title="Remove this item">
+                    {% if form.DELETE.value %}
+                    <i class="fas fa-undo"></i>
+                    {% else %}
+                    <i class="fas fa-trash-alt"></i>
+                    {% endif %}
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Empty form template that will be cloned by JavaScript -->
+        <div class="empty-form">
+            {% for field in formset.empty_form.visible_fields %}
+            <div class="form-field {% if field.errors %}has-error{% endif %}">
+                <div class="field-label">
+                    {{ field.label }}
+                    {% if field.field.required and not field.name == 'DELETE' %}
+                    <span class="required-indicator">*</span>
+                    {% endif %}
+                </div>
+                
+                <div class="field-input">
+                    {{ field }}
+                    
+                    {% if field.help_text %}
+                    <div class="help-text">{{ field.help_text }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            
+            <button type="button" class="delete-inline-item" title="Remove this item">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </div>
+        
+        <div class="inline-action-buttons">
+            <button type="button" class="btn btn-sm btn-success add-inline-item">
+                <i class="fas fa-plus"></i> Add another {{ formset.model._meta.verbose_name }}
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

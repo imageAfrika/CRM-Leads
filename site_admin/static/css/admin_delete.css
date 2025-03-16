@@ -1,0 +1,139 @@
+/* Delete confirmation page styles */
+
+.delete-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: var(--spacing-lg);
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.delete-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    color: var(--danger);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-md);
+    transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.delete-icon {
+    font-size: 28px;
+    margin-right: var(--spacing-md);
+}
+
+.delete-title {
+    font-size: 22px;
+    font-weight: 500;
+    margin: 0;
+}
+
+.delete-message {
+    background-color: var(--danger-bg);
+    border-left: 4px solid var(--danger);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    color: var(--body-color);
+    border-radius: var(--border-radius);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.delete-message p {
+    margin: 0 0 var(--spacing-sm) 0;
+}
+
+.delete-message p:last-child {
+    margin-bottom: 0;
+}
+
+.delete-warning {
+    font-weight: 500;
+    color: var(--danger);
+    margin-bottom: var(--spacing-sm);
+    transition: color 0.3s ease;
+}
+
+.object-info {
+    margin-bottom: var(--spacing-lg);
+}
+
+.object-name {
+    font-weight: 500;
+    margin-bottom: var(--spacing-sm);
+    color: var(--body-color);
+    transition: color 0.3s ease;
+}
+
+.related-objects {
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.related-title {
+    font-weight: 500;
+    margin-bottom: var(--spacing-sm);
+    color: var(--body-color);
+    transition: color 0.3s ease;
+}
+
+.related-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.related-item {
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--body-color);
+    transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.related-item:last-child {
+    border-bottom: none;
+}
+
+.delete-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--spacing-md);
+    transition: border-color 0.3s ease;
+}
+
+.btn-delete {
+    background-color: var(--danger);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.btn-delete:hover {
+    background-color: var(--danger-hover);
+}
+
+.btn-cancel {
+    background-color: var(--secondary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background-color: var(--secondary-hover);
+}
