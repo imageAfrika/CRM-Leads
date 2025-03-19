@@ -14,10 +14,14 @@ urlpatterns = [
     path('quote/<int:quote_id>/generate-pdf/', views.generate_quote_pdf, name='generate_quote_pdf'),
     path('quote/get-number/', views.get_quote_number, name='get_quote_number'),
     path('quote/<int:quote_id>/generate-invoice/', views.generate_invoice_from_quote, name='generate_invoice_from_quote'),
+    path('quote/<int:quote_id>/view/', views.view_saved_quote, name='view_saved_quote'),
+    path('quote/preview/', views.quote_preview, name='quote_preview'),
+    path('quote/preview/template/', views.quote_preview_template, name='quote_preview_template'),
     path('expenditure/', views.expenditure_view, name='expenditure'),
     path('expenditure/create/', views.expenditure_create, name='expenditure_create'),
     path('expenditure/<int:pk>/edit/', views.expenditure_edit, name='expenditure_edit'),
     path('expenditure/<int:pk>/delete/', views.expenditure_delete, name='expenditure_delete'),
     path('invoices/', views.invoice_list, name='invoice_list'),
     path('<int:pk>/generate-pdf/', views.generate_document_pdf, name='generate_document_pdf'),
+
 ] 

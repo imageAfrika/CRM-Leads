@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+body {
+    font-family: 'Nunito', sans-serif;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.quote-content {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.quote-content h2 {
+    color: #333;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.client-info {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.client-info h3 {
+    color: #007bff;
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.quote-items {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.quote-items th, .quote-items td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.quote-items th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.quote-items tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+.quote-items tfoot tr:last-child {
+    font-weight: bold;
+    background-color: #e9f7fe;
+}
+
+.quote-items tfoot td {
+    border-top: 2px solid #007bff;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.terms-conditions {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.terms-conditions h3 {
+    color: #007bff;
+    margin-top: 0;
+}
+
+.terms-conditions ol {
+    padding-left: 20px;
+}
+
+.terms-conditions li, .terms-conditions p {
+    margin-bottom: 5px;
+}
+
+.quote-actions {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.quote-actions .btn {
+    margin: 0 5px;
+}
+
+@media print {
+    .quote-actions {
+        display: none;
+    }
+}

@@ -190,6 +190,111 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Initial preview update
     updatePreview();
 
+    // Preview button functionality
+    const previewButton = document.getElementById('preview-button');
+    const previewSection = document.querySelector('.preview-section');
+    
+    if (previewButton && previewSection) {
+        previewButton.addEventListener('click', function() {
+            // Toggle preview section visibility
+            if (window.innerWidth <= 768) {
+                // On mobile, toggle visibility
+                if (previewSection.style.display === 'none' || !previewSection.style.display) {
+                    previewSection.style.display = 'block';
+                    previewButton.textContent = 'Hide Preview';
+                } else {
+                    previewSection.style.display = 'none';
+                    previewButton.textContent = 'Show Preview';
+                }
+            }
+            
+            // Scroll to preview section
+            previewSection.scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        // Initialize preview section visibility for mobile
+        if (window.innerWidth <= 768) {
+            previewSection.style.display = 'none';
+            previewButton.textContent = 'Show Preview';
+        }
+    }
+
+    // Preview functionality
+    window.previewQuote = async function() {
+        // Validate form data
+        if (!document.getElementById('client').value) {
+            alert('Please select a client.');
+            return;
+        }
+        
+        // Collect items
+        const items = [];
+        document.querySelectorAll('.quote-item').forEach(item => {
+            items.push({
+                description: item.querySelector('[name="items[][description]"]').value || 'No description',
+                quantity: parseFloat(item.querySelector('[name="items[][quantity]"]').value) || 1,
+                unit_price: parseFloat(item.querySelector('[name="items[][unit_price]"]').value) || 0,
+                discount: parseFloat(item.querySelector('[name="items[][discount]"]').value) || 0
+            });
+        });
+        
+        // Set default values for required fields
+        const today = new Date();
+        const oneMonth = new Date();
+        oneMonth.setMonth(oneMonth.getMonth() + 1);
+        
+        // Format date as YYYY-MM-DD
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+        
+        // Collect form data
+        const formData = {
+            client_id: document.getElementById('client').value,
+            quote_number: document.getElementById('quote_number').value || 'PREVIEW-001',
+            title: document.getElementById('quote_title').value || 'Quote Preview',
+            description: document.getElementById('description').value || '',
+            valid_until: document.getElementById('valid_until').value || formatDate(oneMonth),
+            terms: document.getElementById('terms').value || 'Standard terms and conditions apply.',
+            tax_rate: document.getElementById('tax_rate').value || '16',
+            subtotal: document.getElementById('subtotal').value || '0',
+            tax_amount: document.getElementById('tax_amount').value || '0',
+            total_amount: document.getElementById('total_amount').value || '0',
+            items: items.length > 0 ? items : [{
+                description: 'Sample Item',
+                quantity: 1,
+                unit_price: 0,
+                discount: 0
+            }]
+        };
+
+        try {
+            // Submit the form data for preview
+            const response = await fetch('/documents/quote/preview/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                // Redirect to the preview page
+                window.location.href = data.preview_url;
+            } else {
+                alert('Error creating preview: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to create preview. Please try again.');
+        }
+    };
+
     // Handle form submission
     quoteForm.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -247,6 +352,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             const data = await response.json();
             
             if (data.success) {
+                // Show the preview link with the correct URL
+                const previewLink = document.getElementById('preview-link');
+                previewLink.href = `/documents/quote/${data.quote_id}/preview/`;
+                previewLink.style.display = 'inline-flex';
+                
+                // Redirect to the quote detail page
                 window.location.href = data.redirect_url;
             } else {
                 // Reset button state

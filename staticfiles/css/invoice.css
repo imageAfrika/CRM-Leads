@@ -1,0 +1,197 @@
+/* quote_preview.css */
+
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --border-color: #e0e0e0;
+    --bg-color: #fff;
+    --text-color: #333;
+  }
+  
+  body {
+    font-family: 'Nunito', Arial, sans-serif;
+    color: var(--text-color);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+  }
+  
+  .quote-content {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 30px;
+    background-color: var(--bg-color);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+  }
+  
+  h2 {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 10px;
+    margin-top: 0;
+    font-size: 24px;
+  }
+  
+  h3 {
+    color: var(--primary-color);
+    font-size: 18px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .client-info {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-left: 4px solid var(--secondary-color);
+    margin: 20px 0;
+  }
+  
+  .quote-items {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+  }
+  
+  .quote-items th {
+    background-color: var(--primary-color);
+    color: white;
+    text-align: left;
+    padding: 12px 8px;
+  }
+  
+  .quote-items td {
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .quote-items tfoot tr {
+    background-color: #f8f9fa;
+  }
+  
+  .quote-items tfoot td {
+    padding: 12px 8px;
+    font-weight: bold;
+  }
+  
+  .text-right {
+    text-align: right;
+  }
+  
+  .terms-conditions {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 20px 0;
+  }
+  
+  .terms-conditions ol {
+    padding-left: 20px;
+  }
+  
+  .quote-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .btn {
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    display: inline-block;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .btn-primary {
+    background-color: var(--secondary-color);
+    color: white;
+  }
+  
+  .btn-secondary {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .btn:hover {
+    opacity: 0.9;
+  }
+  
+  /* Company information at the top */
+  .company-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+  }
+  
+  .company-logo {
+    max-width: 200px;
+  }
+  
+  .company-details {
+    text-align: right;
+  }
+  
+  /* Recreate the header style similar to the PDF */
+  .document-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .document-header h2 {
+    margin: 0;
+    color: var(--primary-color);
+    border-bottom: none;
+    font-size: 24px;
+    text-transform: uppercase;
+  }
+  
+  /* Payment terms section */
+  .payment-terms {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-left: 4px solid var(--secondary-color);
+  }
+  
+  /* Bank details section */
+  .bank-details {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #c4168f;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+  }
+  
+  .bank-details h3 {
+    margin-top: 0;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .quote-content {
+      padding: 15px;
+    }
+    
+    .quote-items th, 
+    .quote-items td {
+      padding: 8px 4px;
+      font-size: 14px;
+    }
+    
+    .company-info {
+      flex-direction: column;
+    }
+    
+    .company-details {
+      text-align: left;
+      margin-top: 15px;
+    }
+  }

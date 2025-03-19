@@ -1,0 +1,297 @@
+/* Global Dark Mode CSS for all apps */
+
+/* Dark mode variables are already defined in base.css */
+
+/* Additional app-specific dark mode styles */
+
+/* Leads app dark mode */
+html.dark-mode .timeline::before {
+    background-color: var(--border-color);
+}
+
+html.dark-mode .timeline-marker {
+    background-color: var(--dark-color);
+    border-color: var(--border-color);
+}
+
+html.dark-mode .timeline-content {
+    background-color: var(--card-bg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+html.dark-mode .lead-card,
+html.dark-mode .lead-stats-card,
+html.dark-mode .lead-chart-container {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+html.dark-mode .lead-table th {
+    background-color: var(--hover-bg);
+    color: var(--light-text);
+    border-color: var(--border-color);
+}
+
+html.dark-mode .lead-table td {
+    border-color: var(--border-color);
+    color: var(--light-text);
+}
+
+html.dark-mode .lead-table tr:hover {
+    background-color: var(--hover-bg);
+}
+
+/* People app dark mode */
+html.dark-mode .person-card,
+html.dark-mode .contact-card,
+html.dark-mode .filter-card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+html.dark-mode .people-table th {
+    background-color: var(--hover-bg);
+    color: var(--light-text);
+    border-color: var(--border-color);
+}
+
+html.dark-mode .people-table td {
+    border-color: var(--border-color);
+    color: var(--light-text);
+}
+
+html.dark-mode .people-table tr:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Products app dark mode */
+html.dark-mode .product-card,
+html.dark-mode .category-card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+html.dark-mode .product-image-container {
+    background-color: var(--hover-bg);
+    border-color: var(--border-color);
+}
+
+html.dark-mode .price-tag {
+    background-color: var(--primary-dark);
+    color: var(--light-text);
+}
+
+/* Clients app dark mode */
+html.dark-mode .client-card,
+html.dark-mode .client-detail-card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+html.dark-mode .client-logo-container {
+    background-color: var(--hover-bg);
+    border-color: var(--border-color);
+}
+
+/* Sales app dark mode */
+html.dark-mode .sale-card,
+html.dark-mode .invoice-card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+html.dark-mode .sale-item-row {
+    border-color: var(--border-color);
+}
+
+html.dark-mode .sale-total {
+    background-color: var(--hover-bg);
+    color: var(--light-text);
+}
+
+/* Dashboard app dark mode */
+html.dark-mode .stat-card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+/* Calendar and scheduling dark mode */
+html.dark-mode .fc-theme-standard .fc-scrollgrid,
+html.dark-mode .fc-theme-standard td,
+html.dark-mode .fc-theme-standard th {
+    border-color: var(--border-color);
+}
+
+html.dark-mode .fc-theme-standard .fc-scrollgrid {
+    border-color: var(--border-color);
+}
+
+html.dark-mode .fc-daygrid-day.fc-day-today {
+    background-color: rgba(74, 111, 220, 0.2) !important;
+}
+
+html.dark-mode .fc-col-header-cell {
+    background-color: var(--hover-bg);
+}
+
+html.dark-mode .fc-event {
+    border-color: rgba(74, 111, 220, 0.5);
+}
+
+/* DataTables dark mode */
+html.dark-mode .dataTables_wrapper .dataTables_length,
+html.dark-mode .dataTables_wrapper .dataTables_filter,
+html.dark-mode .dataTables_wrapper .dataTables_info,
+html.dark-mode .dataTables_wrapper .dataTables_processing,
+html.dark-mode .dataTables_wrapper .dataTables_paginate {
+    color: var(--light-text);
+}
+
+html.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button {
+    color: var(--light-text) !important;
+}
+
+html.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+html.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background: var(--primary-color);
+    color: var(--light-text) !important;
+    border-color: var(--border-color);
+}
+
+html.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: var(--hover-bg);
+    color: var(--light-text) !important;
+    border-color: var(--border-color);
+}
+
+/* Modal dark mode styling */
+html.dark-mode .modal-content {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+html.dark-mode .modal-header {
+    border-bottom-color: var(--border-color);
+}
+
+html.dark-mode .modal-footer {
+    border-top-color: var(--border-color);
+}
+
+/* Dropdown menus dark mode */
+html.dark-mode .dropdown-menu {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+html.dark-mode .dropdown-item {
+    color: var(--light-text);
+}
+
+html.dark-mode .dropdown-item:hover,
+html.dark-mode .dropdown-item:focus {
+    background-color: var(--hover-bg);
+}
+
+html.dark-mode .dropdown-divider {
+    border-top-color: var(--border-color);
+}
+
+/* Notification styles for dark mode */
+html.dark-mode .notification-item {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+html.dark-mode .notification-item:hover {
+    background-color: var(--hover-bg);
+}
+
+html.dark-mode .notification-item.unread {
+    background-color: rgba(74, 111, 220, 0.1);
+}
+
+/* Bootstrap overrides for dark mode */
+html.dark-mode .card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+html.dark-mode .card-header {
+    background-color: var(--hover-bg);
+    border-bottom-color: var(--border-color);
+}
+
+html.dark-mode .card-footer {
+    background-color: var(--hover-bg);
+    border-top-color: var(--border-color);
+}
+
+html.dark-mode .list-group-item {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+html.dark-mode .table {
+    color: var(--light-text);
+}
+
+html.dark-mode .table td,
+html.dark-mode .table th {
+    border-color: var(--border-color);
+}
+
+html.dark-mode .table-hover tbody tr:hover {
+    background-color: var(--hover-bg);
+    color: var(--light-text);
+}
+
+/* Buttons in dark mode */
+html.dark-mode .btn-outline-secondary {
+    color: var(--light-text);
+    border-color: var(--secondary-color);
+}
+
+html.dark-mode .btn-outline-secondary:hover {
+    background-color: var(--secondary-color);
+    color: var(--light-text);
+}
+
+/* Form controls */
+html.dark-mode .input-group-text {
+    background-color: var(--hover-bg);
+    border-color: var(--border-color);
+    color: var(--light-text);
+}
+
+/* Tabs in dark mode */
+html.dark-mode .nav-tabs {
+    border-bottom-color: var(--border-color);
+}
+
+html.dark-mode .nav-tabs .nav-link.active {
+    color: var(--light-text);
+    background-color: var(--card-bg);
+    border-color: var(--border-color) var(--border-color) var(--card-bg);
+}
+
+html.dark-mode .nav-tabs .nav-link:hover,
+html.dark-mode .nav-tabs .nav-link:focus {
+    border-color: var(--hover-bg) var(--hover-bg) var(--border-color);
+}
+
+/* Charts dark mode */
+html.dark-mode .apexcharts-canvas,
+html.dark-mode .highcharts-container {
+    background-color: transparent !important;
+}
+
+html.dark-mode .apexcharts-title-text,
+html.dark-mode .highcharts-title text {
+    fill: var(--light-text) !important;
+}
+
+html.dark-mode .apexcharts-legend-text,
+html.dark-mode .highcharts-legend-item text {
+    color: var(--light-text) !important;
+} 

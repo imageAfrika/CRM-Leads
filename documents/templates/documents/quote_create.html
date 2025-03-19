@@ -101,6 +101,10 @@
                 <a href="{% url 'documents:document_list' %}" class="btn btn-secondary">Cancel</a>
                 <button type="submit" class="btn btn-primary">Generate Quote</button>
             </div>
+            <div class="form-actions">
+                <button type="button" id="preview-button" class="btn btn-secondary" onclick="previewQuote()">Preview Quote</button>
+                <a id="preview-link" href="#" target="_blank" class="btn btn-secondary" style="display: none;">Open Preview in New Tab</a>
+            </div>
         </form>
     </div>
 
@@ -169,6 +173,20 @@
                         </tfoot>
                     </table>
                 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+    
+   
 
                 <footer class="quote-footer">
                     <div class="terms">

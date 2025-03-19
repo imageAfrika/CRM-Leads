@@ -1,90 +1,8 @@
-{% extends "base.html" %}
 {% load static %}
-
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 {% block extra_css %}
-<style>
-    .document-detail-container {
-        padding: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-    .document-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-    }
-    .document-actions {
-        display: flex;
-        gap: 1rem;
-    }
-    .document-content {
-        background: white;
-        padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .document-info {
-        margin-bottom: 2rem;
-    }
-    .document-info p {
-        margin-bottom: 0.5rem;
-    }
-    .document-items {
-        margin-bottom: 2rem;
-    }
-    .table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 1rem;
-    }
-    .table th,
-    .table td {
-        padding: 0.75rem;
-        border-bottom: 1px solid #e2e8f0;
-    }
-    .table th {
-        background-color: #f8fafc;
-        font-weight: 600;
-        text-align: left;
-    }
-    .table tfoot td {
-        font-weight: 600;
-    }
-    .status-badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-    .status-draft { background: #f1f5f9; color: #64748b; }
-    .status-sent { background: #dbeafe; color: #2563eb; }
-    .status-paid { background: #dcfce7; color: #16a34a; }
-    .status-overdue { background: #fee2e2; color: #dc2626; }
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 0.375rem;
-        font-weight: 500;
-        text-decoration: none;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .btn-primary {
-        background-color: #2563eb;
-        color: white;
-    }
-    .btn-secondary {
-        background-color: #64748b;
-        color: white;
-    }
-    .btn:hover {
-        opacity: 0.9;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/document_detail.css' %}">
+<link rel="stylesheet" href="{% static 'css/invoice.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -117,80 +35,186 @@
         </div>
     </div>
 
-    <div class="document-content">
-        <div class="document-info">
-            <p><strong>Client:</strong> {{ document.client.name }}</p>
-            <p><strong>Date:</strong> {{ document.document_date|date:"d/m/Y" }}</p>
-            {% if document.document_type == 'INVOICE' %}
-                <p><strong>Due Date:</strong> {{ document.due_date|date:"d/m/Y" }}</p>
-            {% endif %}
-            <p><strong>Status:</strong> <span class="status-badge status-{{ document.status|lower }}">{{ document.get_status_display }}</span></p>
-            {% if document.description %}
-                <p><strong>Description:</strong> {{ document.description }}</p>
-            {% endif %}
+   
+
+
+<div class="header">
+    <div class="colored-bar">
+        <div class="orange-bar"></div>
+        <div class="pink-bar"></div>
+    </div>
+</div>
+<div class="quote-content">
+    
+    <!-- Company Header Section -->
+    <div class="company-info">
+        <!-- company details -->
+
+        <div class="logo-container">
+            <div class="logo"><img src="#" alt="Logo"></div>
+            <div class="company-info">
+                <p class="presented-by">Presented by</p>
+                <h1 class="company-name">Company Name</h1>
+                <p class="company-address">company physical address,</p>
+                <p class="company-address">Street/road, City, Country</p>
+                <p class="contact-info">Tel: phone number, cell number</p>
+                <p class="contact-info"><a href="mailto:email address" class="email">email address</a></p>
+            </div>
         </div>
 
+        <!-- document details -->
+
+        <div class="document-details">
+            <div class="left-details">
+                <div class="detail-row">
+                    <span class="detail-label">Revision:</span>
+                    <span class="detail-value">edit count</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Modified:</span>
+                    <span class="detail-value">{% now "d/m/Y" %}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">To:</span>
+                    <span class="detail-value">{{ document.client.name }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">C/o:</span>
+                    <span id="detail-value"><strong>{{ document.client.contact_person }}</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Project:</span>
+                    <span id="detail-value"><strong>{% if document.description %}{{ document.description }}{% else %}{% endif %}</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Prepared by:</span>
+                    <span id="detail-value">{% if document.created_by %}{{ document.created_by.get_full_name|default:document.created_by.username }}{% else %}{{ request.user.get_full_name|default:request.user.username }}{% endif %}</span>  <!--# to be chaned to authenticated user in session -->
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Validity:</span>
+                    <span class="detail-value">{{ quote.valid_until|date:"d/m/Y" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Tax pin:</span>
+                    <span class="detail-value">{{ quote.tax_pin }}</span>
+                </div>
+            </div>
+            
+            <div class="right-details">
+                <div class="document-title">QUOTATION</div>
+                <div class="document-number">{{ document.get_document_number }}</div>
+                <p><strong>Status:</strong> <span class="status-badge status-{{ document.status|lower }}">{{ document.get_status_display }}</span></p>
+            </div>
+        </div>
+        
+        <div class="separator"></div>
+        <div class="document-subtitle">{{ quote.description }}</div>
+
         <div class="document-items">
-            <h3>Items</h3>
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Description</th>
-                        <th>Quantity</th>
-                        <th>Unit Price</th>
-                        {% if document.document_type == 'QUOTE' %}
-                            <th>Discount</th>
-                        {% endif %}
-                        <th>Total</th>
+                        <th>ITEM</th>
+                        <th>DESCRIPTION</th>
+                        <th>QTY</th>
+                        <th>UOM</th>
+                        <th>RATES</th>
+                        <th>TOTAL</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% if document.document_type == 'QUOTE' %}
                         {% for item in document.quote.items.all %}
                         <tr>
+                            <td>{{ forloop.counter }}</td>
                             <td>{{ item.description }}</td>
                             <td>{{ item.quantity }}</td>
-                            <td>KES {{ item.unit_price|floatformat:2 }}</td>
-                            <td>{{ item.discount }}%</td>
-                            <td>KES {{ item.get_total|floatformat:2 }}</td>
+                            <td>pcs</td>
+                            <td>{{ item.unit_price|floatformat:2 }}</td>
+                            <td>{{ item.get_total|floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                     {% else %}
                         {% for item in document.items.all %}
                         <tr>
+                            <td>{{ forloop.counter }}</td>
                             <td>{{ item.description }}</td>
                             <td>{{ item.quantity }}</td>
-                            <td>KES {{ item.unit_price|floatformat:2 }}</td>
-                            <td>KES {{ item.total|floatformat:2 }}</td>
+                            <td>pcs</td>
+                            <td>{{ item.unit_price|floatformat:2 }}</td>
+                            <td>{{ item.total|floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                     {% endif %}
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="{% if document.document_type == 'QUOTE' %}4{% else %}3{% endif %}" class="text-right">
-                            <strong>Subtotal:</strong>
+                        <td colspan="5" class="text-right">
+                            <strong>SUB TOTAL</strong>
                         </td>
-                        <td>KES {{ document.subtotal|floatformat:2 }}</td>
+                        <td>{{ document.subtotal|floatformat:2 }}</td>
                     </tr>
                     <tr>
-                        <td colspan="{% if document.document_type == 'QUOTE' %}4{% else %}3{% endif %}" class="text-right">
-                            <strong>Tax ({{ document.tax_rate }}%):</strong>
+                        <td colspan="5" class="text-right">
+                            <strong>VAT{% if document.tax_rate %} ({{ document.tax_rate }}%){% endif %}</strong>
                         </td>
-                        <td>KES {{ document.tax_amount|floatformat:2 }}</td>
+                        <td>{{ document.tax_amount|floatformat:2 }}</td>
                     </tr>
                     <tr>
-                        <td colspan="{% if document.document_type == 'QUOTE' %}4{% else %}3{% endif %}" class="text-right">
-                            <strong>Total:</strong>
+                        <td colspan="5" class="text-right">
+                            <strong>GRAND TOTAL</strong>
                         </td>
-                        <td>KES {{ document.total_amount|floatformat:2 }}</td>
+                        <td>{{ document.total_amount|floatformat:2 }}</td>
                     </tr>
                 </tfoot>
             </table>
         </div>
+        
+        <!-- Payment Terms Section - Identical to PDF -->
+        <div class="payment-terms">
+            <p><strong>Payment terms:</strong> 70% with LPO 30% on completion</p>
+            <h3>BANK DETAILS</h3>
+            <p>BANK NAME: KENYA COMMERCIAL BANK LIMITED</p>
+            <p>ACCOUNT NAME: CRESCENT CONTROLS</p>
+            <p>ACCOUNT NUMBER: 1298790468</p>
+            <p>SWIFT CODE: KCBLKENX01338</p>
+        </div>
+    </div>
+    
+    <!-- Footer - Only shown in web view -->
+    <div class="document-footer">
+        <p>Quote generated on {{ document.created_at|date:"d/m/Y" }}</p>
     </div>
 </div>
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 {% endblock %}
+
+
+
 
 {% block extra_js %}
 <script>

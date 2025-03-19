@@ -18,6 +18,7 @@ import os
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from io import BytesIO
+from django.contrib import messages
 
 def generate_quote_number():
     # Get today's date in YYYYMMDD format
@@ -120,6 +121,17 @@ def quote_create(request):
             'success': False,
             'error': str(e)
         }, status=400)
+
+def view_saved_quote(request, quote_id):
+    quote = get_object_or_404(Quote, id=quote_id)
+    # Add terms_list property to the quote object
+    quote.terms_list = [term.strip() for term in quote.terms.split('\n') if term.strip()]
+    
+    # Add total property to each quote item
+    for item in quote.quoteitem_set.all():
+        item.total = item.get_total()
+        
+    return render(request, 'documents/quote_preview.html', {'quote': quote})
 
 def quote_detail(request, pk):
     quote = get_object_or_404(Quote, pk=pk)
@@ -432,3 +444,140 @@ def generate_document_pdf(request, pk):
             'success': False,
             'error': str(e)
         }, status=400)
+
+
+@require_POST
+def quote_preview(request):
+    try:
+        data = json.loads(request.body)
+        
+        # Validate required fields and provide defaults
+        client_id = data.get('client_id')
+        if not client_id:
+            return JsonResponse({
+                'success': False,
+                'error': 'Client is required'
+            }, status=400)
+            
+        # Set default values if needed
+        quote_number = data.get('quote_number') or generate_quote_number()
+        title = data.get('title', 'Quote Preview')
+        description = data.get('description', '')
+        subtotal = Decimal(str(data.get('subtotal', 0)))
+        tax_rate = Decimal(str(data.get('tax_rate', 0)))
+        tax_amount = Decimal(str(data.get('tax_amount', 0)))
+        total_amount = Decimal(str(data.get('total_amount', 0)))
+        terms = data.get('terms', '')
+        
+        # Parse the valid_until date or set default (30 days from now)
+        try:
+            if data.get('valid_until'):
+                valid_until = datetime.strptime(data['valid_until'], '%Y-%m-%d').date()
+            else:
+                valid_until = timezone.now().date() + timedelta(days=30)
+        except (ValueError, TypeError):
+            valid_until = timezone.now().date() + timedelta(days=30)
+        
+        # Create a temporary quote object (not saved to database)
+        quote = Quote(
+            client_id=client_id,
+            quote_number=quote_number,
+            title=title,
+            description=description,
+            subtotal=subtotal,
+            tax_rate=tax_rate,
+            tax_amount=tax_amount,
+            total_amount=total_amount,
+            valid_until=valid_until,
+            terms=terms
+        )
+        
+        # Store the quote in session for preview
+        request.session['preview_quote'] = {
+            'client_id': client_id,
+            'quote_number': quote.quote_number,
+            'title': quote.title,
+            'description': quote.description,
+            'subtotal': str(quote.subtotal),
+            'tax_rate': str(quote.tax_rate),
+            'tax_amount': str(quote.tax_amount),
+            'total_amount': str(quote.total_amount),
+            'valid_until': data.get('valid_until', (valid_until).strftime('%Y-%m-%d')),
+            'terms': quote.terms,
+            'items': data.get('items', [])
+        }
+        
+        return JsonResponse({
+            'success': True,
+            'preview_url': reverse('documents:quote_preview_template')
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)
+
+def quote_preview_template(request):
+    # Get the preview data from session
+    preview_data = request.session.get('preview_quote')
+    if not preview_data:
+        return redirect('documents:quote_create')
+    
+    try:
+        # Create a temporary quote object
+        quote = Quote(
+            client_id=preview_data['client_id'],
+            quote_number=preview_data['quote_number'],
+            title=preview_data['title'],
+            description=preview_data['description'],
+            subtotal=Decimal(preview_data['subtotal']),
+            tax_rate=Decimal(preview_data['tax_rate']),
+            tax_amount=Decimal(preview_data['tax_amount']),
+            total_amount=Decimal(preview_data['total_amount']),
+            valid_until=datetime.strptime(preview_data['valid_until'], '%Y-%m-%d').date(),
+            terms=preview_data['terms']
+        )
+        
+        # Format currency values
+        quote.subtotal_display = f"KES {quote.subtotal:,.2f}"
+        quote.tax_amount_display = f"KES {quote.tax_amount:,.2f}"
+        quote.total_amount_display = f"KES {quote.total_amount:,.2f}"
+        
+        # Add the client
+        try:
+            quote.client = Client.objects.get(id=preview_data['client_id'])
+        except Client.DoesNotExist:
+            # Create a temporary client if client doesn't exist
+            quote.client = Client(
+                id=0,
+                name="Preview Client",
+                email="example@example.com",
+                phone="",
+                address="Client Address"
+            )
+        
+        # Create temporary quote items - use a different attribute name to avoid conflict
+        quote.preview_items = []
+        for item_data in preview_data['items']:
+            item = QuoteItem(
+                quote=quote,
+                description=item_data.get('description', 'No description'),
+                quantity=Decimal(str(item_data.get('quantity', 1))),
+                unit_price=Decimal(str(item_data.get('unit_price', 0))),
+                discount=Decimal(str(item_data.get('discount', 0)))
+            )
+            item.total = item.get_total()
+            # Format currency values
+            item.unit_price_display = f"KES {item.unit_price:,.2f}"
+            item.total_display = f"KES {item.total:,.2f}"
+            quote.preview_items.append(item)
+        
+        # Add terms list
+        quote.terms_list = [term.strip() for term in quote.terms.split('\n') if term.strip()]
+        
+        return render(request, 'documents/quote_preview.html', {'quote': quote})
+    except Exception as e:
+        # If any error occurs, redirect back to quote create page
+        messages.error(request, f"Error generating preview: {str(e)}")
+        return redirect('documents:quote_create')

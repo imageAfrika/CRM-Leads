@@ -1,0 +1,189 @@
+
+{% load static %}
+
+{% block title %}Quote Preview{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/invoice.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <div class="colored-bar">
+        <div class="orange-bar"></div>
+        <div class="pink-bar"></div>
+    </div>
+</div>
+<div class="quote-content">
+    
+    <!-- Company Header Section -->
+    <div class="company-info">
+        <!-- company details -->
+
+        <div class="logo-container">
+            <div class="logo"><img src="#" alt="Logo"></div>
+            <div class="company-info">
+                <p class="presented-by">Presented by</p>
+                <h1 class="company-name">Company </h1>
+                <p class="company-address">company physical address,</p>
+                <p class="company-address">Street/road, City, Country</p>
+                <p class="contact-info">Tel: phone number, cell number</p>
+                <p class="contact-info"><a href="mailto:email address" class="email">email address</a></p>
+            </div>
+        </div>
+
+        <!-- document details -->
+
+        <div class="document-details">
+            <div class="left-details">
+                <div class="detail-row">
+                    <span class="detail-label">Revision:</span>
+                    <span class="detail-value">edit count</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Modified:</span>
+                    <span class="detail-value">{% now "d/m/Y" %}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">To:</span>
+                    <span class="detail-value">{{ quote.client.name }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">C/o:</span>
+                    <span id="detail-value"><strong>{{ quote.client.contact_person }}</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Project:</span>
+                    <span id="detail-value"><strong>{{ quote.title }}</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Prepared by:</span>
+                    <span id="detail-value">{{ quote.prepared_by }}</span>  <!--# to be chaned to authenticated user in session -->
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Validity:</span>
+                    <span class="detail-value">{{ quote.valid_until|date:"d/m/Y" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Tax pin:</span>
+                    <span class="detail-value">{{ quote.tax_pin }}</span>
+                </div>
+            </div>
+            
+            <div class="right-details">
+                <div class="document-title">QUOTATIONmnnn</div>
+                <div class="document-number">{{ quote.quote_number }}</div>
+            </div>
+        </div>
+        
+        <div class="separator"></div>
+        <div class="document-subtitle">{{ quote.description }}</div>
+        
+
+
+
+
+
+
+
+
+        
+    
+    <!-- Quote Items Table -->
+    <table class="quote-items">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Description</th>
+                <th>Qty</th>
+                <th>UOM</th>
+                <th>Rates</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if quote.preview_items %}
+                {% for item in quote.preview_items %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.description }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.uom|default:"pcs" }}</td>
+                    <td>{{ item.unit_price_display }}</td>
+                    <td>{{ item.total_display }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                {% for item in quote.quoteitem_set.all %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.description }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.uom|default:"pcs" }}</td>
+                    <td>KES {{ item.unit_price|floatformat:2 }}</td>
+                    <td>KES {{ item.get_total|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5" class="text-right"><strong>SUB TOTAL:</strong></td>
+                <td>{% if quote.subtotal_display %}{{ quote.subtotal_display }}{% else %}KES {{ quote.subtotal|floatformat:2 }}{% endif %}</td>
+            </tr>
+            <tr>
+                <td colspan="5" class="text-right"><strong>VAT ({{ quote.tax_rate }}%):</strong></td>
+                <td>{% if quote.tax_amount_display %}{{ quote.tax_amount_display }}{% else %}KES {{ quote.tax_amount|floatformat:2 }}{% endif %}</td>
+            </tr>
+            <tr>
+                <td colspan="5" class="text-right"><strong>GRAND TOTAL:</strong></td>
+                <td>{% if quote.total_amount_display %}{{ quote.total_amount_display }}{% else %}KES {{ quote.total_amount|floatformat:2 }}{% endif %}</td>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <!-- Payment Terms -->
+    <div class="payment-terms">
+        <p><strong>Payment terms:</strong> 70% with LPO 30% on completion</p>
+    </div>
+    
+    <!-- Bank Details -->
+    <div class="bank-details">
+        <h3>BANK DETAILS</h3>
+        <p>
+            <strong>BANK NAME:</strong> KENYA COMMERCIAL BANK LIMITED<br>
+            <strong>ACCOUNT NAME:</strong> CRESCENT CONTROLS<br>
+            <strong>ACCOUNT NUMBER:</strong> 1298790468<br>
+            <strong>SWIFT CODE:</strong> KCBLKENX01338
+        </p>
+    </div>
+    
+    <!-- Terms and Conditions -->
+    <div class="terms-conditions">
+        <h3>Terms and Conditions</h3>
+        {% if quote.terms_list %}
+            <ol>
+                {% for term in quote.terms_list %}
+                    <li>{{ term }}</li>
+                {% endfor %}
+            </ol>
+        {% else %}
+            <p>{{ quote.terms }}</p>
+        {% endif %}
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="quote-actions">
+        <a href="javascript:history.back()" class="btn btn-primary">Back to Quote Form</a>
+        {% if quote.id %}
+        <a href="{% url 'documents:quote_detail' quote.id %}" class="btn btn-primary">Back to Quote</a>
+        <a href="{% url 'documents:generate_quote_pdf' quote.id %}" class="btn btn-secondary" target="_blank">Download PDF</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/documents/quote_create.js' %}"></script>
+{% endblock %}
