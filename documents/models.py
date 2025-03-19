@@ -44,7 +44,7 @@ class Document(models.Model):
     
     # Financial information
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
-    tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=15.00)
+    tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=16.00)
     tax_amount = models.DecimalField(max_digits=10, decimal_places=2)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     
