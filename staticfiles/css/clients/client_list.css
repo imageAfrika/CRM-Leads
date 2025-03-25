@@ -14,7 +14,7 @@
 
 .header h1 {
     font-size: 2rem;
-    color: #0f172a;
+    color: var(--text-color);
     font-weight: 600;
     letter-spacing: -0.025em;
     margin: 0;
@@ -22,10 +22,11 @@
 
 /* Client List Container */
 .client-list {
-    background: white;
+    background: var(--card-bg);
     border-radius: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 3px var(--shadow-color), 0 10px 15px -3px var(--shadow-color);
     overflow: hidden;
+    border: 1px solid var(--border-color);
 }
 
 /* Table Styling */
@@ -37,13 +38,13 @@
 }
 
 .client-table th {
-    background: #f8fafc;
+    background: var(--hover-bg);
     padding: 1.25rem 1.5rem;
     text-align: left;
     font-size: 0.875rem;
     font-weight: 500;
-    color: #64748b;
-    border-bottom: 1px solid #e2e8f0;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
@@ -51,33 +52,33 @@
 .client-table td {
     padding: 1.25rem 1.5rem;
     font-size: 0.9375rem;
-    color: #334155;
-    border-bottom: 1px solid #f1f5f9;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
     vertical-align: middle;
 }
 
 .client-table tbody tr {
-    transition: all 0.2s ease-in-out;
+    transition: all var(--transition-speed) ease-in-out;
 }
 
 .client-table tbody tr:hover {
-    background-color: #f8fafc;
+    background-color: var(--hover-bg);
     transform: translateY(-1px);
 }
 
 /* Client Name Link */
 .client-name {
-    color: #2563eb;
+    color: var(--primary-color);
     text-decoration: none;
     font-weight: 500;
     display: flex;
     align-items: center;
     gap: 0.625rem;
-    transition: color 0.2s ease;
+    transition: color var(--transition-speed) ease;
 }
 
 .client-name:hover {
-    color: #1d4ed8;
+    color: var(--primary-dark);
 }
 
 .client-name i {
@@ -101,7 +102,7 @@
     border-radius: 8px;
     font-size: 0.875rem;
     font-weight: 500;
-    transition: all 0.2s ease;
+    transition: all var(--transition-speed) ease;
     text-decoration: none;
     cursor: pointer;
     border: none;
@@ -109,47 +110,47 @@
 }
 
 .btn-add {
-    background: #2563eb;
-    color: white;
+    background: var(--primary-color);
+    color: var(--light-text);
     padding: 0.75rem 1.5rem;
-    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 1px 2px rgba(var(--primary-color-rgb), 0.1);
 }
 
 .btn-add:hover {
-    background: #1d4ed8;
+    background: var(--primary-dark);
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(37, 99, 235, 0.06);
+    box-shadow: 0 4px 6px -1px rgba(var(--primary-color-rgb), 0.1), 0 2px 4px -1px rgba(var(--primary-color-rgb), 0.06);
 }
 
 .btn-edit {
-    background: #f8fafc;
-    color: #475569;
-    border: 1px solid #e2e8f0;
+    background: var(--hover-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
 }
 
 .btn-edit:hover {
-    background: #f1f5f9;
+    background: var(--card-bg);
     transform: translateY(-1px);
-    border-color: #cbd5e1;
+    border-color: var(--border-color);
 }
 
 .btn-delete {
-    background: #fef2f2;
-    color: #dc2626;
-    border: 1px solid #fee2e2;
+    background: rgba(var(--danger-color-rgb), 0.1);
+    color: var(--danger-color);
+    border: 1px solid rgba(var(--danger-color-rgb), 0.2);
 }
 
 .btn-delete:hover {
-    background: #fee2e2;
+    background: rgba(var(--danger-color-rgb), 0.2);
     transform: translateY(-1px);
-    border-color: #fecaca;
+    border-color: rgba(var(--danger-color-rgb), 0.3);
 }
 
 /* Empty State */
 .no-clients {
     text-align: center;
     padding: 4rem 2rem;
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .no-clients-content {
@@ -163,20 +164,20 @@
 
 .no-clients i {
     font-size: 3rem;
-    color: #94a3b8;
+    color: var(--text-muted);
     opacity: 0.8;
 }
 
 .no-clients h3 {
     font-size: 1.25rem;
-    color: #334155;
+    color: var(--text-color);
     font-weight: 600;
     margin: 0;
 }
 
 .no-clients p {
     margin: 0;
-    color: #64748b;
+    color: var(--text-muted);
     line-height: 1.5;
 }
 

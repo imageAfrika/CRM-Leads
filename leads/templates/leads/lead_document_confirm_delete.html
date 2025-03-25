@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Document | {{ lead.company_name }} | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Confirm Document Deletion</h3>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="card-body">
+                        <div class="alert alert-warning">
+                            <p>Are you sure you want to delete this document for lead "{{ lead.company_name }}"?</p>
+                            <p><strong>File Name:</strong> {{ document.file.name }}</p>
+                            <p><strong>Description:</strong> {{ document.description|default:"No description" }}</p>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'leads:lead_document_list' lead.pk %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Confirm Delete
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Company Details{% endblock %}
+
+{% block header_title %}Company Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Company Information</h4>
+                </div>
+                <div class="card-body">
+                    {% if company %}
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Company Name:</div>
+                            <div class="col-md-8">{{ company.name }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Phone Number:</div>
+                            <div class="col-md-8">{{ company.phone_number|default:"Not provided" }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Email:</div>
+                            <div class="col-md-8">{{ company.email|default:"Not provided" }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Tax PIN:</div>
+                            <div class="col-md-8">{{ company.tax_pin|default:"Not provided" }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Physical Address:</div>
+                            <div class="col-md-8">{{ company.physical_address|default:"Not provided" }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Postal Address:</div>
+                            <div class="col-md-8">{{ company.postal_address|default:"Not provided" }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Currency:</div>
+                            <div class="col-md-8">{{ company.currency }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Timezone:</div>
+                            <div class="col-md-8">{{ company.timezone }}</div>
+                        </div>
+                        {% if company.logo %}
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Company Logo:</div>
+                            <div class="col-md-8">
+                                <img src="{{ company.logo.url }}" alt="{{ company.name }} Logo" class="img-thumbnail" style="max-height: 100px;">
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p>No company information available. Please register a company first.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'dashboard:dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                    {% if user.is_staff or request.session.user_role == 'admin' %}
+                        <a href="#" class="btn btn-primary">Edit Company Details</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

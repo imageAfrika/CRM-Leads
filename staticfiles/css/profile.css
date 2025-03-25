@@ -1,0 +1,204 @@
+:root {
+    --profile-background: #f4f6f9;
+    --profile-card-background: #ffffff;
+    --profile-text-primary: #2c3e50;
+    --profile-text-secondary: #7f8c8d;
+    --profile-accent-color: #3498db;
+    --profile-border-color: #ecf0f1;
+    --profile-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    background-color: var(--profile-background);
+    font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+    color: var(--profile-text-primary);
+    line-height: 1.6;
+}
+
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    background-color: var(--profile-card-background);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--profile-shadow);
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 2rem;
+    border: 4px solid var(--profile-accent-color);
+}
+
+.profile-info {
+    flex-grow: 1;
+}
+
+.profile-name {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.profile-email {
+    color: var(--profile-text-secondary);
+    margin-bottom: 1rem;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.profile-stat {
+    background-color: var(--profile-border-color);
+    padding: 0.75rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.profile-stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--profile-accent-color);
+}
+
+.profile-stat-label {
+    font-size: 0.875rem;
+    color: var(--profile-text-secondary);
+}
+
+.profile-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.profile-card {
+    background-color: var(--profile-card-background);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--profile-shadow);
+}
+
+.profile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--profile-border-color);
+    padding-bottom: 0.75rem;
+}
+
+.profile-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--profile-accent-color);
+}
+
+.profile-card-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.profile-card-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--profile-border-color);
+}
+
+.profile-card-item:last-child {
+    border-bottom: none;
+}
+
+.profile-card-item-title {
+    font-weight: 500;
+}
+
+.profile-card-item-status {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.status-overdue {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+.status-open {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.profile-chart {
+    height: 250px;
+    margin-top: 1rem;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.profile-action-btn {
+    background-color: var(--profile-accent-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.profile-action-btn:hover {
+    background-color: #2980b9;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profile-avatar {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+
+    .profile-stats {
+        flex-direction: column;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --profile-background: #121212;
+        --profile-card-background: #1e1e1e;
+        --profile-text-primary: #e0e0e0;
+        --profile-text-secondary: #b0b0b0;
+        --profile-accent-color: #64b5f6;
+        --profile-border-color: #333;
+    }
+
+    body {
+        background-color: var(--profile-background);
+        color: var(--profile-text-primary);
+    }
+}

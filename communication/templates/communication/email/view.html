@@ -1,0 +1,146 @@
+{% extends 'communication/base.html' %}
+{% load static %}
+
+{% block header_title %}Email Details{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'communication:email_inbox' %}" class="btn btn-outline-secondary me-2">
+    <i class="fas fa-arrow-left"></i> Back to Inbox
+</a>
+<a href="{% url 'communication:email_compose' %}?reply_to={{ email.id }}" class="btn btn-primary">
+    <i class="fas fa-reply"></i> Reply
+</a>
+{% endblock %}
+
+{% block communication_content %}
+<div class="email-view container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 email-sidebar">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Email Folders</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{% url 'communication:email_inbox' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-inbox"></i> Inbox
+                        </a>
+                        <a href="{% url 'communication:email_sent' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-paper-plane"></i> Sent
+                        </a>
+                        <a href="{% url 'communication:email_drafts' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-file-alt"></i> Drafts
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <a href="{% url 'communication:email_compose' %}" class="btn btn-primary w-100">
+                    <i class="fas fa-plus"></i> Compose Email
+                </a>
+            </div>
+        </div>
+
+        <!-- Email Details -->
+        <div class="col-md-9 email-details">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        {{ email.subject }}
+                    </h5>
+                    <div class="email-actions">
+                        <button class="btn btn-outline-secondary btn-sm me-2" onclick="window.print()">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'communication:email_compose' %}?reply_to={{ email.id }}" class="btn btn-outline-primary btn-sm" title="Reply">
+                                <i class="fas fa-reply"></i>
+                            </a>
+                            <a href="{% url 'communication:email_compose' %}?forward={{ email.id }}" class="btn btn-outline-primary btn-sm" title="Forward">
+                                <i class="fas fa-share"></i>
+                            </a>
+                            <button class="btn btn-outline-danger btn-sm" title="Delete" data-bs-toggle="modal" data-bs-target="#deleteEmailModal">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="email-header mb-4">
+                        <div class="row mb-2">
+                            <div class="col-md-2 text-muted">From:</div>
+                            <div class="col-md-10">{{ email.sender.get_full_name|default:email.sender.username }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-2 text-muted">To:</div>
+                            <div class="col-md-10">
+                                {% for recipient in email.recipients.all %}
+                                    {{ recipient.get_full_name|default:recipient.username }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% if email.cc.all %}
+                        <div class="row mb-2">
+                            <div class="col-md-2 text-muted">CC:</div>
+                            <div class="col-md-10">
+                                {% for cc in email.cc.all %}
+                                    {{ cc.get_full_name|default:cc.username }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="row mb-2">
+                            <div class="col-md-2 text-muted">Date:</div>
+                            <div class="col-md-10">{{ email.sent_at|date:"F j, Y, g:i a" }}</div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="email-body">
+                        {{ email.body|linebreaks }}
+                    </div>
+                    
+                    {% if email.attachments.all %}
+                    <hr>
+                    <div class="email-attachments">
+                        <h6><i class="fas fa-paperclip"></i> Attachments</h6>
+                        <div class="list-group">
+                            {% for attachment in email.attachments.all %}
+                            <a href="{{ attachment.file.url }}" class="list-group-item list-group-item-action" download>
+                                <i class="fas fa-file"></i> {{ attachment.filename }} 
+                                <span class="badge bg-secondary float-end">{{ attachment.file.size|filesizeformat }}</span>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Email Modal -->
+<div class="modal fade" id="deleteEmailModal" tabindex="-1" aria-labelledby="deleteEmailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteEmailModalLabel">Delete Email</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this email?</p>
+                <p class="text-muted">Subject: {{ email.subject }}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'communication:email_delete' email.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

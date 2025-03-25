@@ -1,0 +1,181 @@
+{% extends 'communication/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block header_title %}Compose Email{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'communication:email_inbox' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left"></i> Back to Inbox
+</a>
+{% endblock %}
+
+{% block communication_content %}
+<div class="email-compose container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 email-sidebar">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Email Folders</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{% url 'communication:email_inbox' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-inbox"></i> Inbox
+                        </a>
+                        <a href="{% url 'communication:email_sent' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-paper-plane"></i> Sent
+                        </a>
+                        <a href="{% url 'communication:email_drafts' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-file-alt"></i> Drafts
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compose Email Form -->
+        <div class="col-md-9 email-compose-form">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% if is_draft %}Edit Draft{% else %}Compose New Email{% endif %}</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="email-form">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_recipients" class="form-label">To:</label>
+                            {{ form.recipients }}
+                            {% if form.recipients.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.recipients.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_cc" class="form-label">CC:</label>
+                            {{ form.cc }}
+                            {% if form.cc.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.cc.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_subject" class="form-label">Subject:</label>
+                            {{ form.subject }}
+                            {% if form.subject.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.subject.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_body" class="form-label">Message:</label>
+                            {{ form.body }}
+                            {% if form.body.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.body.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_attachments" class="form-label">Attachments:</label>
+                            {{ form.attachments }}
+                            {% if form.attachments.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.attachments.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">You can select multiple files.</div>
+                        </div>
+                        
+                        {% if existing_attachments %}
+                        <div class="mb-3">
+                            <label class="form-label">Current Attachments:</label>
+                            <div class="list-group">
+                                {% for attachment in existing_attachments %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="fas fa-file"></i> {{ attachment.filename }}
+                                        <span class="badge bg-secondary">{{ attachment.file.size|filesizeformat }}</span>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="keep_attachment_{{ attachment.id }}" id="keep_attachment_{{ attachment.id }}" checked>
+                                        <label class="form-check-label" for="keep_attachment_{{ attachment.id }}">Keep</label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Send Email
+                            </button>
+                            <button type="submit" name="save_draft" class="btn btn-secondary">
+                                <i class="fas fa-save"></i> Save as Draft
+                            </button>
+                            <button type="button" id="discard-email" class="btn btn-outline-danger">
+                                <i class="fas fa-trash"></i> Discard
+                            </button>
+                            <a href="{% url 'communication:email_inbox' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block communication_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('email-form');
+    const discardBtn = document.getElementById('discard-email');
+
+    // Discard Email functionality
+    if (discardBtn) {
+        discardBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to discard this email? Any unsaved changes will be lost.')) {
+                window.location.href = "{% url 'communication:email_inbox' %}";
+            }
+        });
+    }
+    
+    // Add file name display for attachments
+    const attachmentInput = document.getElementById('id_attachments');
+    if (attachmentInput) {
+        attachmentInput.addEventListener('change', function() {
+            let fileList = '';
+            if (this.files.length > 0) {
+                for (let i = 0; i < this.files.length; i++) {
+                    fileList += `<div class="mt-1"><i class="fas fa-paperclip"></i> ${this.files[i].name}</div>`;
+                }
+                const fileDisplay = document.createElement('div');
+                fileDisplay.className = 'selected-files mt-2';
+                fileDisplay.innerHTML = fileList;
+                
+                // Remove previous file list if exists
+                const previousList = attachmentInput.parentNode.querySelector('.selected-files');
+                if (previousList) {
+                    previousList.remove();
+                }
+                
+                attachmentInput.parentNode.appendChild(fileDisplay);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

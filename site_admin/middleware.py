@@ -16,7 +16,7 @@ class SiteAdminMiddleware:
         if request.path.startswith('/site-admin/') and not request.path.startswith('/site-admin/login/') and not request.user.is_authenticated:
             # Redirect to site admin login page if user is not authenticated
             messages.warning(request, 'Please log in to access the site administration.')
-            return redirect(reverse('site_admin:login') + '?next=' + request.path)
+            return redirect('/admin/login/?next=' + request.path)
         
         if request.path.startswith('/site-admin/') and not request.path.startswith('/site-admin/login/') and not request.user.is_staff:
             # Redirect to homepage if user is not staff

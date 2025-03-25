@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to CRM Leads{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2 text-center">
+            <h1 class="display-4 mb-4">Welcome to CRM Leads</h1>
+            <p class="lead mb-5">
+                Your comprehensive Customer Relationship Management solution 
+                designed to streamline your business processes and boost productivity.
+            </p>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Manage Leads</h5>
+                            <p class="card-text">
+                                Track and nurture your potential customers 
+                                with our advanced lead management system.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Sales Tracking</h5>
+                            <p class="card-text">
+                                Monitor your sales pipeline and 
+                                optimize your sales strategies.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Client Communication</h5>
+                            <p class="card-text">
+                                Seamless communication and 
+                                collaboration with your clients.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-5">
+                <a href="{% url 'authentication:login' %}" class="btn btn-primary btn-lg mr-3">Login</a>
+                <a href="{% url 'register_company' %}" class="btn btn-outline-primary btn-lg">Register</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #f4f6f9;
+    }
+    .card {
+        transition: transform 0.3s ease-in-out;
+    }
+    .card:hover {
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}

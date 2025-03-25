@@ -101,7 +101,7 @@
             </div>
             
             <div class="right-details">
-                <div class="document-title">QUOTATION</div>
+                <div class="document-title">{{ document.document_type }}</div>
                 <div class="document-number">{{ document.get_document_number }}</div>
                 <p><strong>Status:</strong> <span class="status-badge status-{{ document.status|lower }}">{{ document.get_status_display }}</span></p>
             </div>

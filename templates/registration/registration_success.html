@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Registration Successful{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card mt-5">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">Registration Successful!</h3>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4 class="mb-3">Your company has been registered</h4>
+                    <p>Your company profile has been created successfully with a dedicated database.</p>
+                    
+                    <div class="alert alert-info mb-4">
+                        <strong>Your domain:</strong> <span id="tenant-domain">{{ domain }}</span>
+                    </div>
+                    
+                    {% if company %}
+                    <div class="company-details mt-4">
+                        <h5>Company Details:</h5>
+                        <table class="table">
+                            <tr>
+                                <th>Company Name:</th>
+                                <td>{{ company.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Email:</th>
+                                <td>{{ company.email }}</td>
+                            </tr>
+                            <tr>
+                                <th>Subdomain:</th>
+                                <td>{{ company.subdomain_prefix }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    {% endif %}
+                    
+                    {% if tenant %}
+                    <div class="tenant-details mt-4">
+                        <h5>Database Information:</h5>
+                        <table class="table">
+                            <tr>
+                                <th>Tenant ID:</th>
+                                <td>{{ tenant.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Schema Name:</th>
+                                <td>{{ tenant.schema_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status:</th>
+                                <td>
+                                    <span class="badge bg-success">Active</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <a href="/dashboard/" class="btn btn-primary w-100">Go to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

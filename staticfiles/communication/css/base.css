@@ -1,0 +1,153 @@
+/* Communication App Base Styles */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+}
+
+/* Global Communication App Styles */
+.communication-app {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+}
+
+/* Navigation Styles */
+.communication-sidebar {
+    background-color: #ffffff;
+    border-right: 1px solid #e9ecef;
+    padding: 20px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 250px;
+    transition: all 0.3s ease;
+}
+
+.communication-sidebar .nav-link {
+    color: var(--secondary-color);
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.communication-sidebar .nav-link:hover,
+.communication-sidebar .nav-link.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Card Styles */
+.communication-card {
+    background-color: white;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+}
+
+.communication-card:hover {
+    transform: translateY(-5px);
+}
+
+.communication-card-header {
+    background-color: var(--light-color);
+    border-bottom: 1px solid #e9ecef;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* List Group Styles */
+.communication-list-group-item {
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+    padding: 15px;
+    transition: background-color 0.2s ease;
+}
+
+.communication-list-group-item:hover {
+    background-color: #f1f3f5;
+}
+
+.communication-list-group-item.unread {
+    background-color: #f0f6ff;
+    font-weight: 600;
+}
+
+/* Button Styles */
+.communication-btn {
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.communication-btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.communication-btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+/* Modal Styles */
+.communication-modal .modal-content {
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.communication-modal .modal-header {
+    background-color: var(--light-color);
+    border-bottom: none;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .communication-sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+}
+
+/* Utility Classes */
+.communication-text-muted {
+    color: var(--secondary-color);
+}
+
+.communication-badge {
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 20px;
+    padding: 3px 8px;
+    font-size: 0.8rem;
+}
+
+.communication-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.communication-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}

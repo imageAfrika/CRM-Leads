@@ -1,581 +1,190 @@
-{% extends 'base.html' %}
-{% load static %}
+ta: [5, 7, 3, 6, 2, 4],
+            backgroundColor: 'var(--success-color)'
+        }],
+        isDarkMode
+    ));
 
-{% block title %}Dashboard | {{ block.super }}{% endblock %}
+    // Toggle buttons for charts
+    document.querySelectorAll('.btn-group-sm .btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const group = this.closest('.btn-group');
+            group.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+});
+</script>
+{% endblock %}
 
 {% block extra_css %}
 <style>
-  .card {
-    border: none;
-    border-radius: 0.5rem;
-    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-    margin-bottom: 1.5rem;
-  }
-  .card-header {
-    background-color: #f8f9fc;
-    border-bottom: 1px solid #e3e6f0;
-    padding: 1rem 1.25rem;
-  }
-  .card-title {
-    margin-bottom: 0;
-    font-size: 1rem;
-    font-weight: 600;
-  }
-  .card-body {
-    padding: 1.25rem;
-  }
-  .stat-card {
-    padding: 1.5rem;
-    border-left: 4px solid;
-  }
-  .stat-card h2 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: 0.25rem;
-  }
-  .stat-card p {
-    font-size: 0.875rem;
-    margin-bottom: 0;
-  }
-  .stat-card .trend {
-    font-size: 0.75rem;
-    margin-top: 0.5rem;
-  }
-  .trend-up {
-    color: #1cc88a;
-  }
-  .trend-down {
-    color: #e74a3b;
-  }
-  .border-left-primary {
-    border-left-color: #4e73df;
-  }
-  .border-left-success {
-    border-left-color: #1cc88a;
-  }
-  .border-left-warning {
-    border-left-color: #f6c23e;
-  }
-  .border-left-danger {
-    border-left-color: #e74a3b;
-  }
-  .toggle-btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    border-radius: 0.25rem;
-    margin-left: 0.5rem;
-  }
-  .chart-container {
-    position: relative;
-    height: 20rem;
-  }
+    /* Existing dashboard styles */
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        color: var(--text-color);
+    }
+
+    .dashboard-header h1 {
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .dashboard-header p {
+        color: var(--text-muted);
+    }
+
+    /* Key Metrics Card Improvements */
+    .stat-card {
+        padding: 1.5rem;
+        border-left: none !important;
+        background-color: var(--card-bg);
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .stat-card h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--primary-color);
+        line-height: 1.2;
+    }
+
+    .stat-card p {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+        font-weight: 500;
+    }
+
+    .stat-card .trend {
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+    }
+
+    .stat-card .trend i {
+        margin-right: 0.5rem;
+    }
+
+    .stat-card-icon {
+        color: var(--text-muted);
+        opacity: 0.7;
+    }
+
+    .toggle-btn {
+        margin-left: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        background-color: var(--hover-bg);
+        color: var(--text-color);
+        border: none;
+        border-radius: 0.25rem;
+        transition: background-color 0.3s;
+    }
+
+    .toggle-btn:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row mb-4 align-items-center">
-  <div class="col">
-    <h1 class="h3 mb-0">Dashboard</h1>
-    <p class="text-muted">Welcome back, {{ request.user.get_full_name|default:request.user.username }}</p>
-  </div>
-  <div class="col-auto">
-    <div class="btn-group">
-      <button type="button" class="btn btn-outline-secondary active" data-timeline="month">Month</button>
-      <button type="button" class="btn btn-outline-secondary" data-timeline="quarter">Quarter</button>
-      <button type="button" class="btn btn-outline-secondary" data-timeline="year">Year</button>
+<div class="app-content dashboard-container">
+    <!-- Stats Cards -->
+    <div class="row g-3">
+        <!-- Quotes vs Invoices -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+                <div class="card-body stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h2 class="toggle-view count-view">${{ stats.invoices_amount|floatformat:2 }}</h2>
+                            <h2 class="toggle-view amount-view d-none">${{ stats.quotes_amount|floatformat:2 }}</h2>
+                            <p>Invoices vs Quotes</p>
+                        </div>
+                        <div class="stat-card-icon">
+                            <i class="fas fa-file-invoice fa-2x"></i>
+                            <button class="toggle-btn btn btn-sm" data-toggle="quotes-invoices">Toggle</button>
+                        </div>
+                    </div>
+                    <div class="trend">
+                        <span class="toggle-view count-view">{{ stats.invoices_count }} Invoices / {{ stats.quotes_count }} Quotes</span>
+                        <span class="toggle-view amount-view d-none">${{ stats.invoices_amount|floatformat:2 }} / ${{ stats.quotes_amount|floatformat:2 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Revenue vs Expenditure -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+                <div class="card-body stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h2>${{ stats.total_revenue|floatformat:2 }}</h2>
+                            <p>Revenue</p>
+                        </div>
+                        <div class="stat-card-icon">
+                            <i class="fas fa-dollar-sign fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="trend">
+                        <span>Expenditure: ${{ stats.total_expenditure|floatformat:2 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Purchases vs Sales -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+                <div class="card-body stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h2>${{ stats.total_sales|floatformat:2 }}</h2>
+                            <p>Sales</p>
+                        </div>
+                        <div class="stat-card-icon">
+                            <i class="fas fa-shopping-cart fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="trend">
+                        <span>Purchases: ${{ stats.total_purchases|floatformat:2 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Profit/Margin -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+                <div class="card-body stat-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h2>${{ stats.profit|floatformat:2 }}</h2>
+                            <p>Profit</p>
+                        </div>
+                        <div class="stat-card-icon">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="trend {% if stats.profit_margin > 0 %}trend-up{% else %}trend-down{% endif %}">
+                        <i class="fas {% if stats.profit_margin > 0 %}fa-arrow-up{% else %}fa-arrow-down{% endif %}"></i>
+                        <span>{{ stats.profit_margin|floatformat:2 }}% Margin</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
-
-<!-- Stats Cards -->
-<div class="row">
-  <!-- Quotes vs Invoices -->
-  <div class="col-xl-3 col-md-6">
-    <div class="card">
-      <div class="card-body stat-card border-left-primary">
-        <div class="d-flex justify-content-between">
-          <div>
-            <h2 class="toggle-view count-view">${{ stats.invoices_amount|floatformat:2 }}</h2>
-            <h2 class="toggle-view amount-view d-none">${{ stats.quotes_amount|floatformat:2 }}</h2>
-            <p class="text-muted">Invoices vs Quotes</p>
-          </div>
-          <div>
-            <i class="fas fa-file-invoice fa-2x text-gray-300"></i>
-            <button class="toggle-btn btn btn-sm btn-outline-primary" data-toggle="quotes-invoices">Toggle</button>
-          </div>
-        </div>
-        <div class="trend">
-          <span class="toggle-view count-view">{{ stats.invoices_count }} Invoices / {{ stats.quotes_count }} Quotes</span>
-          <span class="toggle-view amount-view d-none">${{ stats.invoices_amount|floatformat:2 }} / ${{ stats.quotes_amount|floatformat:2 }}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Revenue vs Expenditure -->
-  <div class="col-xl-3 col-md-6">
-    <div class="card">
-      <div class="card-body stat-card border-left-success">
-        <div class="d-flex justify-content-between">
-          <div>
-            <h2>${{ stats.total_revenue|floatformat:2 }}</h2>
-            <p class="text-muted">Revenue</p>
-          </div>
-          <div>
-            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
-          </div>
-        </div>
-        <div class="trend">
-          <span>Expenditure: ${{ stats.total_expenditure|floatformat:2 }}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Purchases vs Sales -->
-  <div class="col-xl-3 col-md-6">
-    <div class="card">
-      <div class="card-body stat-card border-left-warning">
-        <div class="d-flex justify-content-between">
-          <div>
-            <h2>${{ stats.total_sales|floatformat:2 }}</h2>
-            <p class="text-muted">Sales</p>
-          </div>
-          <div>
-            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
-          </div>
-        </div>
-        <div class="trend">
-          <span>Purchases: ${{ stats.total_purchases|floatformat:2 }}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Profit/Margin -->
-  <div class="col-xl-3 col-md-6">
-    <div class="card">
-      <div class="card-body stat-card border-left-danger">
-        <div class="d-flex justify-content-between">
-          <div>
-            <h2>${{ stats.profit|floatformat:2 }}</h2>
-            <p class="text-muted">Profit</p>
-          </div>
-          <div>
-            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
-          </div>
-        </div>
-        <div class="trend {% if stats.profit_margin > 0 %}trend-up{% else %}trend-down{% endif %}">
-          <i class="fas {% if stats.profit_margin > 0 %}fa-arrow-up{% else %}fa-arrow-down{% endif %}"></i>
-          <span>{{ stats.profit_margin|floatformat:2 }}% Margin</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Charts -->
-<div class="row">
-  <!-- Quotes vs Invoices Chart -->
-  <div class="col-xl-6">
-    <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h6 class="card-title">Quotes vs Invoices</h6>
-        <div class="btn-group btn-group-sm">
-          <button type="button" class="btn btn-outline-secondary active" data-view-type="count">Count</button>
-          <button type="button" class="btn btn-outline-secondary" data-view-type="amount">Amount</button>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="chart-container">
-          <canvas id="quotesInvoicesChart"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Revenue vs Expenditure Chart -->
-  <div class="col-xl-6">
-    <div class="card">
-      <div class="card-header">
-        <h6 class="card-title">Revenue vs Expenditure</h6>
-      </div>
-      <div class="card-body">
-        <div class="chart-container">
-          <canvas id="revenueExpenditureChart"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="row">
-  <!-- Purchases vs Sales Chart -->
-  <div class="col-xl-6">
-    <div class="card">
-      <div class="card-header">
-        <h6 class="card-title">Purchases vs Sales</h6>
-      </div>
-      <div class="card-body">
-        <div class="chart-container">
-          <canvas id="purchasesSalesChart"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Monthly Trends Chart -->
-  <div class="col-xl-6">
-    <div class="card">
-      <div class="card-header">
-        <h6 class="card-title">Monthly Trends</h6>
-      </div>
-      <div class="card-body">
-        <div class="chart-container">
-          <canvas id="monthlyTrendsChart"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Recent Clients -->
-<div class="row">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header">
-        <h6 class="card-title">Recent Clients</h6>
-      </div>
-      <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Date Added</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for client in recent_clients %}
-              <tr>
-                <td>{{ client.name }}</td>
-                <td>{{ client.email }}</td>
-                <td>{{ client.phone }}</td>
-                <td>{{ client.created_at|date:"M d, Y" }}</td>
-                <td>
-                  <a href="{% url 'clients:client_detail' client.id %}" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-eye"></i>
-                  </a>
-                </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="5" class="text-center">No clients yet</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 {% endblock %}
-
-{% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Initialize charts
-  initQuotesInvoicesChart();
-  initRevenueExpenditureChart();
-  initPurchasesSalesChart();
-  initMonthlyTrendsChart();
-  
-  // Toggle buttons for stat cards
-  const toggleButtons = document.querySelectorAll('.toggle-btn');
-  toggleButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      const targetToggle = this.dataset.toggle;
-      const viewElements = document.querySelectorAll(`.toggle-view`);
-      
-      viewElements.forEach(el => {
-        if (el.classList.contains('d-none')) {
-          el.classList.remove('d-none');
-        } else {
-          el.classList.add('d-none');
-        }
-      });
-    });
-  });
-  
-  // Timeline buttons
-  const timelineButtons = document.querySelectorAll('[data-timeline]');
-  timelineButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      // Remove active class from all buttons
-      timelineButtons.forEach(btn => btn.classList.remove('active'));
-      // Add active class to clicked button
-      this.classList.add('active');
-      
-      const timeline = this.dataset.timeline;
-      // Update charts with new timeline
-      updateCharts(timeline);
-    });
-  });
-  
-  // View type buttons (count vs amount)
-  const viewTypeButtons = document.querySelectorAll('[data-view-type]');
-  viewTypeButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      // Remove active class from all buttons in group
-      this.parentElement.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
-      // Add active class to clicked button
-      this.classList.add('active');
-      
-      const viewType = this.dataset.viewType;
-      const timeline = document.querySelector('[data-timeline].active').dataset.timeline;
-      // Update quotes vs invoices chart with new view type
-      fetchChartData('quotes_invoices', timeline, viewType)
-        .then(data => {
-          updateChart('quotesInvoicesChart', data);
-        });
-    });
-  });
-  
-  // Initialize charts with default timeline (month)
-  function initQuotesInvoicesChart() {
-    const ctx = document.getElementById('quotesInvoicesChart').getContext('2d');
-    quotesInvoicesChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: [],
-        datasets: []
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true
-          }
-        }
-      }
-    });
-    
-    // Fetch initial data
-    fetchChartData('quotes_invoices', 'month', 'count')
-      .then(data => {
-        updateChart('quotesInvoicesChart', data);
-      });
-  }
-  
-  function initRevenueExpenditureChart() {
-    const ctx = document.getElementById('revenueExpenditureChart').getContext('2d');
-    revenueExpenditureChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: []
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function(value) {
-                return '$' + value.toLocaleString();
-              }
-            }
-          }
-        },
-        interaction: {
-          mode: 'index',
-          intersect: false
-        },
-        plugins: {
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                let label = context.dataset.label || '';
-                let value = context.parsed.y || 0;
-                return label + ': $' + value.toLocaleString();
-              }
-            }
-          }
-        }
-      }
-    });
-    
-    // Fetch initial data
-    fetchChartData('revenue_expenditure', 'month')
-      .then(data => {
-        updateChart('revenueExpenditureChart', data);
-      });
-  }
-  
-  function initPurchasesSalesChart() {
-    const ctx = document.getElementById('purchasesSalesChart').getContext('2d');
-    purchasesSalesChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: []
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function(value) {
-                return '$' + value.toLocaleString();
-              }
-            }
-          }
-        },
-        interaction: {
-          mode: 'index',
-          intersect: false
-        },
-        plugins: {
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                let label = context.dataset.label || '';
-                let value = context.parsed.y || 0;
-                return label + ': $' + value.toLocaleString();
-              }
-            }
-          }
-        }
-      }
-    });
-    
-    // Fetch initial data
-    fetchChartData('purchases_sales', 'month')
-      .then(data => {
-        updateChart('purchasesSalesChart', data);
-      });
-  }
-  
-  function initMonthlyTrendsChart() {
-    const ctx = document.getElementById('monthlyTrendsChart').getContext('2d');
-    monthlyTrendsChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: {% if monthly_data.months %}{{ monthly_data.months|safe }}{% else %}[]{% endif %},
-        datasets: [
-          {
-            label: 'Revenue',
-            data: {% if monthly_data.revenue %}{{ monthly_data.revenue|safe }}{% else %}[]{% endif %},
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1,
-            tension: 0.4
-          },
-          {
-            label: 'Expenditure',
-            data: {% if monthly_data.expenditure %}{{ monthly_data.expenditure|safe }}{% else %}[]{% endif %},
-            backgroundColor: 'rgba(255, 159, 64, 0.2)',
-            borderColor: 'rgba(255, 159, 64, 1)',
-            borderWidth: 1,
-            tension: 0.4
-          },
-          {
-            label: 'Profit/Loss',
-            data: {% if monthly_data.profit %}{{ monthly_data.profit|safe }}{% else %}[]{% endif %},
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1,
-            tension: 0.4
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function(value) {
-                return '$' + value.toLocaleString();
-              }
-            }
-          }
-        },
-        interaction: {
-          mode: 'index',
-          intersect: false
-        },
-        plugins: {
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                let label = context.dataset.label || '';
-                let value = context.parsed.y || 0;
-                return label + ': $' + value.toLocaleString();
-              }
-            }
-          }
-        }
-      }
-    });
-  }
-  
-  // Update charts with new timeline
-  function updateCharts(timeline) {
-    const viewType = document.querySelector('[data-view-type].active').dataset.viewType;
-    
-    // Update quotes vs invoices chart
-    fetchChartData('quotes_invoices', timeline, viewType)
-      .then(data => {
-        updateChart('quotesInvoicesChart', data);
-      });
-    
-    // Update revenue vs expenditure chart
-    fetchChartData('revenue_expenditure', timeline)
-      .then(data => {
-        updateChart('revenueExpenditureChart', data);
-      });
-    
-    // Update purchases vs sales chart
-    fetchChartData('purchases_sales', timeline)
-      .then(data => {
-        updateChart('purchasesSalesChart', data);
-      });
-  }
-  
-  // Helper function to fetch chart data
-  function fetchChartData(chartType, timeline, viewType = null) {
-    let url = `/dashboard/api/chart-data/?type=${chartType}&timeline=${timeline}`;
-    if (viewType) {
-      url += `&view_type=${viewType}`;
-    }
-    
-    return fetch(url)
-      .then(response => response.json())
-      .catch(error => {
-        console.error('Error fetching chart data:', error);
-        return { labels: [], datasets: [] };
-      });
-  }
-  
-  // Helper function to update chart with new data
-  function updateChart(chartId, data) {
-    const chart = Chart.getChart(chartId);
-    if (chart) {
-      chart.data.labels = data.labels;
-      chart.data.datasets = data.datasets;
-      chart.update();
-    }
-  }
-});
-</script>
-{% endblock %} 

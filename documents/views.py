@@ -44,14 +44,16 @@ def generate_quote_number():
 @require_POST
 def quote_create(request):
     try:
-        data = json.loads(request.body)
+        # Debug information
+        print("Received POST data:", request.POST)
+        print("POST keys:", request.POST.keys())
         
-        # Generate a new quote number if not provided
-        quote_number = data.get('quote_number') or generate_quote_number()
+        # Use request.POST to access form data
+        quote_number = request.POST.get('quote_number') or generate_quote_number()
         
         # Parse the valid_until date
         try:
-            valid_until = datetime.strptime(data['valid_until'], '%Y-%m-%d').date()
+            valid_until = datetime.strptime(request.POST['valid_until'], '%Y-%m-%d').date()
         except (ValueError, TypeError):
             return JsonResponse({
                 'success': False,
@@ -60,28 +62,47 @@ def quote_create(request):
         
         # Create the quote
         quote = Quote.objects.create(
-            client_id=data['client_id'],
+            client_id=request.POST['client'],
             quote_number=quote_number,
-            title=data['title'],
-            description=data.get('description', ''),
-            subtotal=Decimal(str(data['subtotal'])),
-            tax_rate=Decimal(str(data['tax_rate'])),
-            tax_amount=Decimal(str(data['tax_amount'])),
-            total_amount=Decimal(str(data['total_amount'])),
+            title=request.POST['title'],
+            description=request.POST.get('description', ''),
+            subtotal=Decimal(str(request.POST['subtotal'])),
+            tax_rate=Decimal(str(request.POST['tax_rate'])),
+            tax_amount=Decimal(str(request.POST['tax_amount'])),
+            total_amount=Decimal(str(request.POST['total_amount'])),
             valid_until=valid_until,
-            terms=data.get('terms', '')
+            terms=request.POST.get('terms', '')
         )
         
-        # Create items if they exist
-        if 'items' in data and isinstance(data['items'], list):
-            for item_data in data['items']:
-                QuoteItem.objects.create(
-                    quote=quote,
-                    description=item_data['description'],
-                    quantity=Decimal(str(item_data['quantity'])),
-                    unit_price=Decimal(str(item_data['unit_price'])),
-                    discount=Decimal(str(item_data.get('discount', 0)))
-                )
+        # Parse items from JSON
+        if 'items' in request.POST:
+            try:
+                print("Items JSON:", request.POST['items'])
+                items_data = json.loads(request.POST['items'])
+                print("Parsed items data:", items_data)
+                
+                for item_data in items_data:
+                    print("Creating item:", item_data)
+                    QuoteItem.objects.create(
+                        quote=quote,
+                        description=item_data['description'],
+                        quantity=Decimal(str(item_data['quantity'])),
+                        unit_price=Decimal(str(item_data['unit_price'])),
+                        discount=Decimal(str(item_data.get('discount', 0)))
+                    )
+            except json.JSONDecodeError as e:
+                print("JSON decode error:", e)
+                return JsonResponse({
+                    'success': False,
+                    'error': f'Invalid JSON format for items: {str(e)}'
+                }, status=400)
+            except Exception as e:
+                print("Error creating items:", e)
+                # Don't return error here, just log it
+                import traceback
+                traceback.print_exc()
+        else:
+            print("No items found in POST data")
         
         # Create a document record for this quote
         document = Document.objects.create(
@@ -94,27 +115,33 @@ def quote_create(request):
             total_amount=quote.total_amount,
             document_date=timezone.now().date(),
             status='DRAFT',
-            quote=quote
+            quote=quote  # Ensure quote is saved before creating document
         )
-        
-        return JsonResponse({
-            'success': True,
-            'quote_id': quote.id,
-            'document_id': document.id,
-            'redirect_url': reverse('documents:document_detail', args=[document.id])
-        })
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'quote_id': quote.id,
+                'document_id': document.id,
+                'redirect_url': reverse('documents:document_detail', args=[document.id])
+            })
+        else:
+            return redirect('documents:quote_preview', quote_id=quote.id)
         
     except KeyError as e:
+        print("KeyError:", e)
         return JsonResponse({
             'success': False,
             'error': f'Missing required field: {str(e)}'
         }, status=400)
     except ValueError as e:
+        print("ValueError:", e)
         return JsonResponse({
             'success': False,
             'error': f'Invalid value: {str(e)}'
         }, status=400)
     except Exception as e:
+        print("Unexpected error:", e)
         import traceback
         print(traceback.format_exc())
         return JsonResponse({
@@ -157,17 +184,25 @@ class QuoteCreateView(CreateView):
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        quote = form.save()
+        # Save the quote first
+        quote = form.save(commit=False)
+        quote.save()
+        
         # Create a Document instance linked to this quote
-        Document.objects.create(
-            title=f"Quote - {quote.quote_number}",
+        document = Document.objects.create(
             document_type='QUOTE',
             client=quote.client,
             description=quote.description,
-            document_date=quote.created_at,
+            document_date=timezone.now().date(),
+            subtotal=quote.subtotal,
+            tax_rate=quote.tax_rate,
+            tax_amount=quote.tax_amount,
             total_amount=quote.total_amount,
+            status='DRAFT',
             quote=quote
         )
+        
+        messages.success(self.request, f'Quote {quote.quote_number} created successfully.')
         return redirect('documents:document_list')
 
     def form_invalid(self, form):
@@ -445,78 +480,40 @@ def generate_document_pdf(request, pk):
             'error': str(e)
         }, status=400)
 
-
-@require_POST
-def quote_preview(request):
-    try:
-        data = json.loads(request.body)
-        
-        # Validate required fields and provide defaults
-        client_id = data.get('client_id')
-        if not client_id:
-            return JsonResponse({
-                'success': False,
-                'error': 'Client is required'
-            }, status=400)
-            
-        # Set default values if needed
-        quote_number = data.get('quote_number') or generate_quote_number()
-        title = data.get('title', 'Quote Preview')
-        description = data.get('description', '')
-        subtotal = Decimal(str(data.get('subtotal', 0)))
-        tax_rate = Decimal(str(data.get('tax_rate', 0)))
-        tax_amount = Decimal(str(data.get('tax_amount', 0)))
-        total_amount = Decimal(str(data.get('total_amount', 0)))
-        terms = data.get('terms', '')
-        
-        # Parse the valid_until date or set default (30 days from now)
+def quote_preview(request, quote_id=None):
+    """
+    Render the quote preview template.
+    If quote_id is provided, it shows the existing quote.
+    If not, it shows an empty template for real-time preview.
+    """
+    context = {}
+    
+    if quote_id:
         try:
-            if data.get('valid_until'):
-                valid_until = datetime.strptime(data['valid_until'], '%Y-%m-%d').date()
-            else:
-                valid_until = timezone.now().date() + timedelta(days=30)
-        except (ValueError, TypeError):
-            valid_until = timezone.now().date() + timedelta(days=30)
-        
-        # Create a temporary quote object (not saved to database)
-        quote = Quote(
-            client_id=client_id,
-            quote_number=quote_number,
-            title=title,
-            description=description,
-            subtotal=subtotal,
-            tax_rate=tax_rate,
-            tax_amount=tax_amount,
-            total_amount=total_amount,
-            valid_until=valid_until,
-            terms=terms
-        )
-        
-        # Store the quote in session for preview
-        request.session['preview_quote'] = {
-            'client_id': client_id,
-            'quote_number': quote.quote_number,
-            'title': quote.title,
-            'description': quote.description,
-            'subtotal': str(quote.subtotal),
-            'tax_rate': str(quote.tax_rate),
-            'tax_amount': str(quote.tax_amount),
-            'total_amount': str(quote.total_amount),
-            'valid_until': data.get('valid_until', (valid_until).strftime('%Y-%m-%d')),
-            'terms': quote.terms,
-            'items': data.get('items', [])
-        }
-        
-        return JsonResponse({
-            'success': True,
-            'preview_url': reverse('documents:quote_preview_template')
-        })
-        
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        }, status=400)
+            quote = Quote.objects.get(pk=quote_id)
+            quote_items = QuoteItem.objects.filter(quote=quote)
+            
+            # Calculate item totals for display
+            for item in quote_items:
+                item.total = item.quantity * item.unit_price * (1 - item.discount / 100)
+            
+            context = {
+                'quote': quote,
+                'quote_items': quote_items
+            }
+        except Quote.DoesNotExist:
+            pass  # Will render empty template
+    
+    # Include clients for the form
+    context['clients'] = Client.objects.all().order_by('name')
+    
+    # For both cases (existing quote or new quote), render the same template
+    response = render(request, 'documents/quote_preview.html', context)
+    
+    # Add header to allow embedding in iframe from any origin
+    response['X-Frame-Options'] = 'ALLOWALL'
+    
+    return response
 
 def quote_preview_template(request):
     # Get the preview data from session

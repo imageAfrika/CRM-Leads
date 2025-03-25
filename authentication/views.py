@@ -5,6 +5,16 @@ from django.contrib import messages
 from .models import Profile
 from django.contrib.auth.models import Group
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, PasswordResetForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import TemplateView
+from django.utils import timezone
+from datetime import timedelta
+from leads.models import Lead
+from projects.models import Project
+from documents.models import Document
+from sales.models import Sale
+from communication.models import Event
+from django.db.models import Sum, Q, Count
 
 @login_required
 def profile_selection(request):
@@ -115,16 +125,58 @@ def profile_select(request, pk):
         messages.error(request, 'Profile not found.')
         return redirect('authentication:profile_selection')
 
+class ProfileView(LoginRequiredMixin, TemplateView):
+    template_name = 'authentication/profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        now = timezone.now()
+
+        # Profile Statistics
+        context['total_leads'] = Lead.objects.filter(
+            Q(assigned_to=user) | 
+            Q(created_by=user)
+        ).count()
+        
+        context['total_projects'] = Project.objects.count()
+        
+        context['total_sales'] = Sale.objects.aggregate(
+            total=Sum('total_amount')
+        )['total'] or 0
+
+        # Open and Overdue Documents
+        context['open_documents'] = Document.objects.filter(
+            status__in=['draft', 'in_progress']
+        )[:5]
+        
+        context['overdue_documents'] = Document.objects.filter(
+            due_date__lt=now,
+            status__in=['draft', 'in_progress']
+        )[:5]
+
+        # Open Leads
+        context['open_leads'] = Lead.objects.filter(
+            Q(assigned_to=user) | 
+            Q(created_by=user),
+            status__in=['new', 'in_progress']
+        )[:5]
+
+        # Upcoming Events
+        context['upcoming_events'] = Event.objects.filter(
+            user=user,
+            start_time__gte=now,
+            start_time__lte=now + timedelta(days=30)
+        )[:5]
+
+        # Open Projects
+        context['open_projects'] = Project.objects.all()[:5]
+
+        return context
+
 @login_required
 def profile_view(request):
-    role = request.session.get('user_role', None)
-    
-    # For administrator role, redirect immediately to dashboard
-    if role == 'administrator':
-        return redirect('dashboard:dashboard')
-    
-    # Otherwise render template, but with a fixed context
-    return render(request, 'authentication/profile_fixed.html', {})
+    return ProfileView.as_view()(request)
 
 @login_required
 def password_change(request):

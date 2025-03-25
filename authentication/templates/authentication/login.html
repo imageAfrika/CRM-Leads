@@ -4,11 +4,11 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
+            <div class="card login-card">
+                <div class="card-header login-header">
                     <h4 class="mb-0">Login</h4>
                 </div>
-                <div class="card-body">
+                <div class="card-body login-body">
                     <form method="post" novalidate>
                         {% csrf_token %}
                         {% for field in form %}
@@ -33,15 +33,60 @@
                         </div>
                         
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Login</button>
+                            <button type="submit" class="btn btn-primary login-button">Login</button>
                         </div>
                     </form>
                     <div class="mt-3 text-center">
-                        <a href="{% url 'authentication:password_reset' %}">Forgot Password?</a>
+                        <a href="{% url 'authentication:password_reset' %}" class="forgot-password-link">Forgot Password?</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Dark mode specific styles */
+    html.dark-mode .login-card {
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+    }
+
+    html.dark-mode .login-header {
+        background-color: var(--hover-bg);
+        border-bottom-color: var(--border-color);
+        color: var(--text-color);
+    }
+
+    html.dark-mode .login-body {
+        background-color: var(--card-bg);
+    }
+
+    html.dark-mode .login-body .form-label {
+        color: var(--text-color);
+    }
+
+    html.dark-mode .login-body .form-control {
+        background-color: var(--input-bg);
+        border-color: var(--form-border);
+        color: var(--form-text);
+    }
+
+    html.dark-mode .login-body .form-control:focus {
+        background-color: var(--input-bg);
+        border-color: var(--form-focus-border);
+        box-shadow: 0 0 0 0.25rem var(--form-focus-shadow);
+    }
+
+    html.dark-mode .login-button {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    html.dark-mode .forgot-password-link {
+        color: var(--primary-color);
+    }
+</style>
+{% endblock %}

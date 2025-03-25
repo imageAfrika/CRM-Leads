@@ -4,31 +4,27 @@ from .models import Lead, LeadActivity
 @admin.register(Lead)
 class LeadAdmin(admin.ModelAdmin):
     list_display = ['title', 'company_name', 'contact_person', 'email', 'status', 'priority', 'assigned_to']
-    list_filter = ['status', 'priority', 'source', 'assigned_to', 'created_at']
+    list_filter = ['status', 'priority', 'source', 'created_at']
     search_fields = ['title', 'company_name', 'contact_person', 'email']
     date_hierarchy = 'created_at'
-    readonly_fields = ['created_at', 'updated_at']
     fieldsets = (
         ('Basic Information', {
             'fields': ('title', 'company_name', 'contact_person', 'email', 'phone', 'website')
         }),
         ('Lead Details', {
-            'fields': ('description', 'requirements', 'estimated_value')
+            'fields': ('description', 'requirements', 'estimated_value', 'status', 'source', 'priority')
         }),
-        ('Status and Classification', {
-            'fields': ('status', 'source', 'priority')
+        ('Assignment', {
+            'fields': ('assigned_to', 'tags')
+        }),
+        ('Notes', {
+            'fields': ('notes_text',)
         }),
         ('Dates', {
             'fields': ('next_follow_up', 'created_at', 'updated_at')
         }),
-        ('Relationships', {
-            'fields': ('assigned_to', 'created_by', 'modified_by', 'converted_to_client')
-        }),
-        ('Additional Information', {
-            'fields': ('tags', 'notes'),
-            'classes': ('collapse',)
-        }),
     )
+    readonly_fields = ('created_at', 'updated_at')
 
 @admin.register(LeadActivity)
 class LeadActivityAdmin(admin.ModelAdmin):

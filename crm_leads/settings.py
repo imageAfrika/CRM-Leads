@@ -26,11 +26,12 @@ SECRET_KEY = 'django-insecure-3i00bx2nk0hshx^s2)jm7yki6sc25lb)9b09yv-#5megwq9z2w
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']  # In production, restrict this to your domains
 
 
 # Application definition
 
+# Simplified app configuration for demonstration
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -44,14 +45,14 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
     
-    # Local apps
+    # Your apps
+    'registration.apps.RegistrationConfig',  
     'authentication',
     'dashboard',
+    'leads.apps.LeadsConfig',  # Explicitly use the AppConfig
     'project_management',
     'clients.apps.ClientsConfig',
-    'leads.apps.LeadsConfig',
     'products',
-    'crm_leads',
     'sales',
     'documents',
     'expenses',
@@ -60,9 +61,9 @@ INSTALLED_APPS = [
     'reports',
     'access_control',
     'people.apps.PeopleConfig',
-    'registration.apps.RegistrationConfig',
     'projects',
     'site_admin.apps.SiteAdminConfig',
+    'communication',
 ]
 
 MIDDLEWARE = [
@@ -82,7 +83,11 @@ ROOT_URLCONF = 'crm_leads.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [
+            BASE_DIR / 'templates',
+            BASE_DIR / 'authentication' / 'templates',
+            BASE_DIR / 'communication' / 'templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -101,13 +106,13 @@ WSGI_APPLICATION = 'crm_leads.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# SQLite configuration
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -141,52 +146,51 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
+# https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+    BASE_DIR / "static",
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Make sure Django can find app-specific static files
-STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-]
+# Media files (User uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Company details for quotes
-COMPANY_NAME = "Your Company Name"
-COMPANY_ADDRESS = "Your Company Address"
-
-# Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-LOGIN_URL = 'authentication:login'
-LOGIN_REDIRECT_URL = 'authentication:profile_selection'
-
-# Message settings
-MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
-
 # Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-# Email settings
+# Authentication
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'login'
+
+# Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'smtp.gmail.com'  # Replace with your SMTP server
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your_email@gmail.com'
-EMAIL_HOST_PASSWORD = 'your_email_password'
-DEFAULT_FROM_EMAIL = 'your_email@gmail.com'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 
-# Other settings
-# Telegram Bot settings
-TELEGRAM_BOT_TOKEN = 'your_telegram_bot_token'
+# Messaging Services Configuration
+WHATSAPP_API_KEY = os.getenv('WHATSAPP_API_KEY', '')
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
+
+# Celery Configuration for Background Tasks
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+
+# Email settings (for development, use console backend)
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

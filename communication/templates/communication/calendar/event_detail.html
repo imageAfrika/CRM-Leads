@@ -1,0 +1,142 @@
+{% extends 'communication/base.html' %}
+{% load static %}
+
+{% block header_title %}Event Details{% endblock %}
+
+{% block header_actions %}
+<div class="btn-group">
+    <a href="{% url 'communication:event_edit' event.pk %}" class="btn btn-primary">
+        <i class="fas fa-edit"></i> Edit
+    </a>
+    <a href="{% url 'communication:event_delete' event.pk %}" class="btn btn-danger">
+        <i class="fas fa-trash"></i> Delete
+    </a>
+</div>
+{% endblock %}
+
+{% block communication_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{ event.title }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Event Details</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th>Title:</th>
+                                    <td>{{ event.title }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Description:</th>
+                                    <td>{{ event.description|default:'-' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Start Time:</th>
+                                    <td>{{ event.start_time|date:"M d, Y H:i" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>End Time:</th>
+                                    <td>{{ event.end_time|date:"M d, Y H:i" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Location:</th>
+                                    <td>{{ event.location|default:'-' }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Event Settings</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th>Recurrence:</th>
+                                    <td>
+                                        <span class="badge 
+                                            {% if event.recurrence_type == 'daily' %}bg-success
+                                            {% elif event.recurrence_type == 'weekly' %}bg-info
+                                            {% elif event.recurrence_type == 'monthly' %}bg-warning
+                                            {% elif event.recurrence_type == 'yearly' %}bg-primary
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ event.get_recurrence_type_display }}
+                                        </span>
+                                        {% if event.recurrence_type != 'none' %}
+                                        <small class="text-muted">
+                                            Every {{ event.recurrence_interval }} 
+                                            {{ event.get_recurrence_type_display|lower }}
+                                        </small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Reminders:</th>
+                                    <td>
+                                        {% if event.send_email_reminder %}
+                                        <span class="badge bg-info">Email</span>
+                                        {% endif %}
+                                        {% if event.send_sms_reminder %}
+                                        <span class="badge bg-success">SMS</span>
+                                        {% endif %}
+                                        {% if not event.send_email_reminder and not event.send_sms_reminder %}
+                                        <span class="text-muted">No reminders set</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Reminder Time:</th>
+                                    <td>{{ event.reminder_time }} minutes before event</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h5>Attendees</h5>
+                            {% if event.attendees.all %}
+                            <div class="list-group">
+                                {% for attendee in event.attendees.all %}
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ attendee.first_name }} {{ attendee.last_name }}</h6>
+                                        <small class="text-muted">{{ attendee.email }}</small>
+                                    </div>
+                                    <p class="mb-1">{{ attendee.phone_number|default:'-' }}</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted">No attendees added</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'communication:calendar' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Calendar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteButton = document.querySelector('.btn-danger');
+    if (deleteButton) {
+        deleteButton.addEventListener('click', function(e) {
+            const confirmed = confirm('Are you sure you want to delete this event?');
+            if (!confirmed) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

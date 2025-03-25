@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import SubscriptionPlan
+from .models import SubscriptionPlan, Company
 
 # Create your views here.
 
@@ -28,3 +28,14 @@ def subscription_plans(request):
 def app_selection(request):
     """App selection page"""
     return render(request, 'registration/app_selection.html')
+
+def company_details(request):
+    """Company details page"""
+    # Get the first company or None if no companies exist
+    company = Company.objects.first()
+    
+    context = {
+        'company': company,
+    }
+    
+    return render(request, 'registration/company_details.html', context)

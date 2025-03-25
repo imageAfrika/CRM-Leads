@@ -13,6 +13,9 @@ from django.http import Http404
 from django.forms import modelform_factory, inlineformset_factory
 from .models import AdminLog
 import json
+from django.utils import timezone
+from django.db.models import Count
+from django.contrib.auth.models import Group
 
 
 # Add login view for our site admin
@@ -128,53 +131,62 @@ def model_list(request, app_label, model_name):
     """
     View for listing objects of a specific model.
     """
-    model = apps.get_model(app_label, model_name)
+    # Get the model class
+    try:
+        model = apps.get_model(app_label, model_name)
+    except LookupError:
+        raise Http404(f"Model {app_label}.{model_name} not found")
     
     # Check permissions
     if not has_model_permission(request.user, model, 'view'):
-        raise Http404
+        messages.error(request, f"You don't have permission to view {model._meta.verbose_name_plural}")
+        return redirect('site_admin:index')
     
-    # Search functionality
-    search_query = request.GET.get('search', '')
-    if search_query:
-        # Get all text fields for searching
-        search_fields = [f.name for f in model._meta.fields if isinstance(f, (models.CharField, models.TextField))]
-        
-        # Build dynamic Q objects for search
-        q_objects = Q()
-        for field in search_fields:
-            q_objects |= Q(**{f"{field}__icontains": search_query})
-        
-        queryset = model.objects.filter(q_objects)
+    # Special handling for leads app models
+    if app_label == 'leads':
+        if model_name == 'lead':
+            # Use the lead_list view from leads app
+            from leads.views import lead_list
+            return lead_list(request)
+        elif model_name == 'leadactivity':
+            # Use created_at for ordering instead of non-existent timestamp
+            queryset = model.objects.all().order_by('-created_at')
+        elif model_name == 'leadnote':
+            queryset = model.objects.all().order_by('-created_at')
+        elif model_name == 'leaddocument':
+            queryset = model.objects.all().order_by('-created_at')
+        else:
+            queryset = model.objects.all()
     else:
+        # Default behavior for other apps
         queryset = model.objects.all()
     
-    # Order by primary key by default
-    queryset = queryset.order_by('-pk')
-    
     # Pagination
-    paginator = Paginator(queryset, 20)  # Show 20 items per page
-    page = request.GET.get('page')
-    objects = paginator.get_page(page)
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(queryset, 25)  # 25 items per page
     
-    # Determine display fields (first five fields by default)
-    fields = [f.name for f in model._meta.fields[:5]]
-    list_display = fields
+    try:
+        page_obj = paginator.page(page_number)
+    except (PageNotAnInteger, EmptyPage):
+        page_obj = paginator.page(1)
     
-    # Context
+    # Prepare context
     context = {
-        'app_label': app_label,
         'model_name': model_name,
-        'model_verbose_name': model._meta.verbose_name,
+        'app_label': app_label,
         'model_verbose_name_plural': model._meta.verbose_name_plural,
-        'objects': objects,
-        'list_display': list_display,
-        'search_query': search_query,
-        'has_add_permission': has_model_permission(request.user, model, 'add'),
-        'has_change_permission': has_model_permission(request.user, model, 'change'),
-        'has_delete_permission': has_model_permission(request.user, model, 'delete'),
-        'add_url': reverse('site_admin:model_add', kwargs={'app_label': app_label, 'model_name': model_name}),
+        'objects': page_obj,
+        'title': f'{model._meta.verbose_name_plural} List',
+        'is_paginated': paginator.num_pages > 1,
+        'paginator': paginator,
     }
+    
+    # Special handling for leads app to include additional context
+    if app_label == 'leads':
+        if model_name == 'lead':
+            # Add filter form for leads
+            from leads.forms import LeadFilterForm
+            context['form'] = LeadFilterForm(request.GET)
     
     return render(request, 'site_admin/model_list.html', context)
 
@@ -199,31 +211,33 @@ def model_add(request, app_label, model_name):
             new_object = form.save()
             
             # Log the addition
+            content_type = ContentType.objects.get_for_model(model)
             AdminLog.objects.create(
                 user=request.user,
-                content_type=ContentType.objects.get_for_model(model),
-                object_id=str(new_object.pk),
+                content_type=content_type,
+                object_id=new_object.pk,
                 object_repr=str(new_object),
-                action_flag=1,  # Addition
-                change_message=json.dumps([{'added': {}}]),
+                action_type='create',
+                timestamp=timezone.now(),
+                app_label=app_label,
+                model_name=model_name
             )
             
-            messages.success(request, f'The {model._meta.verbose_name} was added successfully.')
+            messages.success(request, f'{model._meta.verbose_name.capitalize()} created successfully.')
             return redirect('site_admin:model_list', app_label=app_label, model_name=model_name)
+        else:
+            messages.error(request, 'There was an error creating the object.')
     else:
         form = ModelForm()
     
     context = {
         'form': form,
-        'model': model,
-        'app_label': app_label,
         'model_name': model_name,
+        'app_label': app_label,
         'model_verbose_name': model._meta.verbose_name,
-        'title': f'Add {model._meta.verbose_name}',
-        'is_add': True,
     }
     
-    return render(request, 'site_admin/model_form.html', context)
+    return render(request, 'site_admin/model_add.html', context)
 
 
 @login_required(login_url='site_admin:login')

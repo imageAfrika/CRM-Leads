@@ -6,8 +6,21 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from django.http import JsonResponse
 from .models import Lead, LeadActivity, LeadNote, LeadDocument
-from .forms import LeadForm, LeadActivityForm, LeadFilterForm
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
+from .forms import (
+    LeadForm, 
+    LeadActivityForm, 
+    LeadFilterForm, 
+    LeadNoteForm, 
+    LeadDocumentForm
+)
+from django.views.generic import (
+    ListView, 
+    DetailView, 
+    CreateView, 
+    UpdateView, 
+    DeleteView, 
+    TemplateView
+)
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
@@ -38,7 +51,6 @@ def lead_list(request):
             leads = leads.filter(assigned_to=assigned_to)
         if search:
             leads = leads.filter(
-                Q(title__icontains=search) |
                 Q(company_name__icontains=search) |
                 Q(contact_person__icontains=search) |
                 Q(email__icontains=search) |
@@ -77,30 +89,30 @@ def lead_detail(request, pk):
         action = request.POST.get('action', '')
         
         if action == 'add_note':
-            content = request.POST.get('content', '')
-            if content:
-                note = LeadNote(
-                    lead=lead,
-                    content=content,
-                    created_by=request.user
-                )
+            note_form = LeadNoteForm(request.POST)
+            if note_form.is_valid():
+                note = note_form.save(commit=False)
+                note.lead = lead
+                note.created_by = request.user
                 note.save()
                 messages.success(request, 'Note added successfully.')
                 return redirect('leads:lead_detail', pk=pk)
+            else:
+                print("Note Form Errors:", note_form.errors)
+                messages.error(request, 'Error adding note. Please check the form.')
                 
         elif action == 'add_document':
-            title = request.POST.get('title', '')
-            file = request.FILES.get('file')
-            if title and file:
-                document = LeadDocument(
-                    lead=lead,
-                    title=title,
-                    file=file,
-                    created_by=request.user
-                )
+            document_form = LeadDocumentForm(request.POST, request.FILES)
+            if document_form.is_valid():
+                document = document_form.save(commit=False)
+                document.lead = lead
+                document.created_by = request.user
                 document.save()
                 messages.success(request, 'Document uploaded successfully.')
                 return redirect('leads:lead_detail', pk=pk)
+            else:
+                print("Document Form Errors:", document_form.errors)
+                messages.error(request, 'Error uploading document. Please check the form.')
         else:
             activity_form = LeadActivityForm(request.POST)
             if activity_form.is_valid():
@@ -113,9 +125,11 @@ def lead_detail(request, pk):
     
     context = {
         'lead': lead,
+        'title': f'Lead: {lead.title or lead.company_name}',
         'activities': activities,
         'activity_form': activity_form,
-        'title': f'Lead: {lead.company_name}'
+        'documents': lead.documents.all(),
+        'notes': lead.notes.all()
     }
     return render(request, 'leads/lead_detail.html', context)
 
@@ -128,15 +142,16 @@ def lead_create(request):
             lead = form.save(commit=False)
             lead.created_by = request.user
             lead.save()
-            messages.success(request, 'Lead created successfully.')
+            messages.success(request, f'Lead "{lead.title or lead.company_name}" created successfully.')
             return redirect('leads:lead_detail', pk=lead.pk)
     else:
         form = LeadForm()
     
-    return render(request, 'leads/lead_form.html', {
+    context = {
         'form': form,
         'title': 'Create Lead'
-    })
+    }
+    return render(request, 'leads/lead_form.html', context)
 
 @login_required
 @permission_required('leads.change_lead', raise_exception=True)
@@ -154,7 +169,7 @@ def lead_update(request, pk):
     return render(request, 'leads/lead_form.html', {
         'form': form,
         'lead': lead,
-        'title': f'Edit Lead: {lead.company_name}'
+        'title': f'Edit Lead: {lead.title or lead.company_name}'
     })
 
 @login_required
@@ -167,7 +182,7 @@ def lead_delete(request, pk):
         return redirect('leads:lead_list')
     return render(request, 'leads/lead_confirm_delete.html', {
         'lead': lead,
-        'title': f'Delete Lead: {lead.company_name}'
+        'title': f'Delete Lead: {lead.title or lead.company_name}'
     })
 
 @login_required
@@ -178,12 +193,12 @@ def lead_convert(request, pk):
         client = lead.convert_to_client()
         lead.status = 'CONVERTED'
         lead.save()
-        messages.success(request, f'Lead "{lead.title}" successfully converted to client.')
+        messages.success(request, f'Lead "{lead.title or lead.company_name}" successfully converted to client.')
         return redirect('clients:client_detail', pk=client.pk)
     
     return render(request, 'leads/lead_convert.html', {
         'lead': lead,
-        'title': f'Convert Lead: {lead.title}'
+        'title': f'Convert Lead: {lead.title or lead.company_name}'
     })
 
 @login_required
@@ -251,32 +266,46 @@ class LeadListView(LoginRequiredMixin, ListView):
     model = Lead
     template_name = 'leads/lead_list.html'
     context_object_name = 'leads'
+    paginate_by = 10
 
     def get_queryset(self):
         queryset = Lead.objects.all()
         form = LeadFilterForm(self.request.GET)
+
         if form.is_valid():
-            if form.cleaned_data.get('status'):
-                queryset = queryset.filter(status=form.cleaned_data['status'])
-            if form.cleaned_data.get('source'):
-                queryset = queryset.filter(source=form.cleaned_data['source'])
-            if form.cleaned_data.get('priority'):
-                queryset = queryset.filter(priority=form.cleaned_data['priority'])
-            if form.cleaned_data.get('assigned_to'):
-                queryset = queryset.filter(assigned_to=form.cleaned_data['assigned_to'])
-            if form.cleaned_data.get('search'):
-                search = form.cleaned_data['search']
+            status = form.cleaned_data.get('status')
+            source = form.cleaned_data.get('source')
+            priority = form.cleaned_data.get('priority')
+            assigned_to = form.cleaned_data.get('assigned_to')
+            date_range = form.cleaned_data.get('date_range')
+            search = form.cleaned_data.get('search')
+
+            if status:
+                queryset = queryset.filter(status=status)
+            if source:
+                queryset = queryset.filter(source=source)
+            if priority:
+                queryset = queryset.filter(priority=priority)
+            if assigned_to:
+                queryset = queryset.filter(assigned_to=assigned_to)
+            if search:
                 queryset = queryset.filter(
-                    Q(title__icontains=search) |
                     Q(company_name__icontains=search) |
                     Q(contact_person__icontains=search) |
-                    Q(email__icontains=search)
+                    Q(email__icontains=search) |
+                    Q(description__icontains=search)
                 )
-        return queryset.order_by('-created_at')
+            
+            if date_range:
+                today = timezone.now().date()
+                if date_range == 'today':
+                    queryset = queryset.filter(created_at__date=today)
+
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['filter_form'] = LeadFilterForm(self.request.GET)
+        context['form'] = LeadFilterForm(self.request.GET)
         return context
 
 class LeadDetailView(LoginRequiredMixin, DetailView):
@@ -287,19 +316,57 @@ class LeadDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['activity_form'] = LeadActivityForm()
+        context['title'] = f'Lead: {self.object.title or self.object.company_name}'
+        
+        # Explicitly fetch related notes and documents
+        context['notes'] = self.object.notes.all()
+        context['documents'] = self.object.documents.all()
+        context['activities'] = self.object.activities.all()
+        
         return context
 
     def post(self, request, *args, **kwargs):
         lead = self.get_object()
-        form = LeadActivityForm(request.POST)
-        if form.is_valid():
-            activity = form.save(commit=False)
-            activity.lead = lead
-            activity.created_by = request.user
-            activity.save()
-            messages.success(request, 'Activity added successfully.')
-        else:
-            messages.error(request, 'Error adding activity.')
+        action = request.POST.get('action', '')
+        
+        if action == 'add_note':
+            note_form = LeadNoteForm(request.POST)
+            if note_form.is_valid():
+                try:
+                    note = note_form.save(commit=False)
+                    note.lead = lead
+                    note.created_by = request.user
+                    note.save()
+                    messages.success(request, 'Note added successfully.')
+                    return redirect('leads:lead_detail', pk=lead.pk)
+                except Exception as e:
+                    print(f"Unexpected error creating note: {e}")
+                    messages.error(request, f'Unexpected error: {e}')
+            else:
+                print("Note Form Validation Errors:")
+                for field, errors in note_form.errors.items():
+                    print(f"{field}: {errors}")
+                messages.error(request, 'Error adding note. Please check the form.')
+        
+        elif action == 'add_document':
+            document_form = LeadDocumentForm(request.POST, request.FILES)
+            if document_form.is_valid():
+                try:
+                    document = document_form.save(commit=False)
+                    document.lead = lead
+                    document.created_by = request.user
+                    document.save()
+                    messages.success(request, 'Document uploaded successfully.')
+                    return redirect('leads:lead_detail', pk=lead.pk)
+                except Exception as e:
+                    print(f"Unexpected error uploading document: {e}")
+                    messages.error(request, f'Unexpected error: {e}')
+            else:
+                print("Document Form Validation Errors:")
+                for field, errors in document_form.errors.items():
+                    print(f"{field}: {errors}")
+                messages.error(request, 'Error uploading document. Please check the form.')
+        
         return redirect('leads:lead_detail', pk=lead.pk)
 
 class LeadCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
@@ -346,7 +413,7 @@ class LeadConvertView(LoginRequiredMixin, PermissionRequiredMixin, View):
         if lead.status != 'won':
             messages.error(request, 'Only won leads can be converted to clients.')
             return redirect('leads:lead_detail', pk=pk)
-        return render(request, 'leads/lead_convert.html', {'lead': lead})
+        return render(request, 'leads/lead_convert.html', {'lead': lead, 'title': f'Convert Lead: {lead.title or lead.company_name}'})
 
     def post(self, request, pk):
         lead = get_object_or_404(Lead, pk=pk)
@@ -399,3 +466,262 @@ def activity_toggle(request):
         activity.save()
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
+
+# Note Views
+class LeadNoteListView(LoginRequiredMixin, ListView):
+    model = LeadNote
+    template_name = 'leads/lead_note_list.html'
+    context_object_name = 'notes'
+
+    def get_queryset(self):
+        lead_pk = self.kwargs.get('lead_pk')
+        return LeadNote.objects.filter(lead_id=lead_pk).order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['lead'] = get_object_or_404(Lead, pk=self.kwargs.get('lead_pk'))
+        return context
+
+class LeadNoteCreateView(LoginRequiredMixin, CreateView):
+    model = LeadNote
+    form_class = LeadNoteForm
+    template_name = 'leads/lead_note_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['lead'] = get_object_or_404(Lead, pk=self.kwargs.get('lead_pk'))
+        return context
+
+    def form_valid(self, form):
+        lead = get_object_or_404(Lead, pk=self.kwargs.get('lead_pk'))
+        form.instance.lead = lead
+        form.instance.created_by = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('leads:lead_note_list', kwargs={'lead_pk': self.kwargs.get('lead_pk')})
+
+class LeadNoteDetailView(LoginRequiredMixin, DetailView):
+    model = LeadNote
+    template_name = 'leads/lead_note_detail.html'
+    context_object_name = 'note'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['lead'] = self.object.lead
+        return context
+
+class LeadNoteUpdateView(LoginRequiredMixin, UpdateView):
+    model = LeadNote
+    form_class = LeadNoteForm
+    template_name = 'leads/lead_note_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['lead'] = self.object.lead
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('leads:lead_note_list', kwargs={'lead_pk': self.object.lead.pk})
+
+class LeadNoteDeleteView(LoginRequiredMixin, DeleteView):
+    model = LeadNote
+    template_name = 'leads/lead_note_confirm_delete.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['lead'] = self.object.lead
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('leads:lead_note_list', kwargs={'lead_pk': self.object.lead.pk})
+
+# Document Views
+class LeadDocumentListView(LoginRequiredMixin, ListView):
+    model = LeadDocument
+    template_name = 'leads/lead_document_list.html'
+    context_object_name = 'documents'
+
+    def get_queryset(self):
+        lead_pk = self.kwargs.get('lead_pk')
+        return LeadDocument.objects.filter(lead_id=lead_pk).order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['lead'] = get_object_or_404(Lead, pk=self.kwargs.get('lead_pk'))
+        return context
+
+class LeadDocumentCreateView(LoginRequiredMixin, CreateView):
+    model = LeadDocument
+    form_class = LeadDocumentForm
+    template_name = 'leads/lead_document_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['lead'] = get_object_or_404(Lead, pk=self.kwargs.get('lead_pk'))
+        return context
+
+    def form_valid(self, form):
+        lead = get_object_or_404(Lead, pk=self.kwargs.get('lead_pk'))
+        form.instance.lead = lead
+        form.instance.created_by = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('leads:lead_document_list', kwargs={'lead_pk': self.kwargs.get('lead_pk')})
+
+class LeadDocumentDetailView(LoginRequiredMixin, DetailView):
+    model = LeadDocument
+    template_name = 'leads/lead_document_detail.html'
+    context_object_name = 'document'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['lead'] = self.object.lead
+        return context
+
+class LeadDocumentUpdateView(LoginRequiredMixin, UpdateView):
+    model = LeadDocument
+    form_class = LeadDocumentForm
+    template_name = 'leads/lead_document_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['lead'] = self.object.lead
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('leads:lead_document_list', kwargs={'lead_pk': self.object.lead.pk})
+
+class LeadDocumentDeleteView(LoginRequiredMixin, DeleteView):
+    model = LeadDocument
+    template_name = 'leads/lead_document_confirm_delete.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['lead'] = self.object.lead
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('leads:lead_document_list', kwargs={'lead_pk': self.object.lead.pk})
+
+@login_required
+def lead_detail_custom(request, pk):
+    lead = get_object_or_404(Lead, pk=pk)
+    notes = lead.notes.all().order_by('-created_at')
+    documents = lead.documents.all().order_by('-uploaded_at')
+    activities = lead.activities.all().order_by('-timestamp')
+    
+    context = {
+        'lead': lead,
+        'notes': notes,
+        'documents': documents,
+        'activities': activities,
+        'page_title': f"{lead.contact_person} | {lead.company_name}"
+    }
+    
+    return render(request, 'leads/lead_detail.html', context)
+
+@login_required
+def add_note(request, pk):
+    lead = get_object_or_404(Lead, pk=pk)
+    
+    if request.method == 'POST':
+        content = request.POST.get('content')
+        
+        if content:
+            note = LeadNote.objects.create(
+                lead=lead,
+                content=content,
+                created_by=request.user
+            )
+            
+            # Create activity record
+            LeadActivity.objects.create(
+                lead=lead,
+                activity_type='note',
+                description=f"Added a new note",
+                created_by=request.user
+            )
+            
+            messages.success(request, "Note added successfully.")
+        else:
+            messages.error(request, "Note content is required.")
+    
+    return redirect('leads:lead_detail_custom', pk=lead.pk)
+
+@login_required
+def add_document(request, pk):
+    lead = get_object_or_404(Lead, pk=pk)
+    
+    if request.method == 'POST':
+        description = request.POST.get('description')
+        file = request.FILES.get('file')
+        
+        if file:
+            document = LeadDocument.objects.create(
+                lead=lead,
+                file=file,
+                description=description,
+                created_by=request.user
+            )
+            
+            # Create activity record
+            LeadActivity.objects.create(
+                lead=lead,
+                activity_type='note',
+                description=f"Uploaded document: {file.name}",
+                created_by=request.user
+            )
+            
+            messages.success(request, "Document uploaded successfully.")
+        else:
+            messages.error(request, "File is required.")
+    
+    return redirect('leads:lead_detail_custom', pk=lead.pk)
+
+@login_required
+def delete_note(request, pk):
+    note = get_object_or_404(LeadNote, pk=pk)
+    lead = note.lead
+    
+    # Check if the user is authorized to delete this note
+    if note.created_by == request.user:
+        note.delete()
+        
+        # Create activity record
+        LeadActivity.objects.create(
+            lead=lead,
+            activity_type='note',
+            description=f"Deleted a note",
+            created_by=request.user
+        )
+        
+        messages.success(request, "Note deleted successfully.")
+    else:
+        messages.error(request, "You don't have permission to delete this note.")
+    
+    return redirect('leads:lead_detail_custom', pk=lead.pk)
+
+@login_required
+def delete_document(request, pk):
+    document = get_object_or_404(LeadDocument, pk=pk)
+    lead = document.lead
+    
+    # Check if the user is authorized to delete this document
+    if document.created_by == request.user:
+        document.delete()
+        
+        # Create activity record
+        LeadActivity.objects.create(
+            lead=lead,
+            activity_type='note',
+            description=f"Deleted document: {document.file.name}",
+            created_by=request.user
+        )
+        
+        messages.success(request, "Document deleted successfully.")
+    else:
+        messages.error(request, "You don't have permission to delete this document.")
+    
+    return redirect('leads:lead_detail_custom', pk=lead.pk)

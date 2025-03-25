@@ -1,88 +1,98 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load file_filters %}
 
 {% block title %}{{ lead.title }} | Leads | {{ block.super }}{% endblock %}
 
 {% block extra_css %}
-<link href="{% static 'leads/css/leads.css' %}" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'leads/css/lead_detail.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'leads/js/lead_detail.js' %}" defer></script>
 {% endblock %}
 
 {% block content %}
 <div class="leads-container">
+    <!-- Enhanced Header -->
     <div class="lead-detail-header">
-        <a href="{% url 'leads:lead_list' %}" class="lead-detail-back">
-            <i class="fas fa-arrow-left me-2"></i> Back to Leads
-        </a>
-        
-        <h1 class="lead-detail-name">{{ lead.title }}</h1>
-        <p class="lead-detail-company">{{ lead.company_name }}</p>
-        
-        <div class="lead-detail-tags">
-            <span class="lead-status {{ lead.status|lower }}">{{ lead.get_status_display }}</span>
-            <span class="lead-tag">
-                <i class="fas fa-tag me-1"></i> {{ lead.get_priority_display }} Priority
-            </span>
-            <span class="lead-tag">
-                <i class="fas fa-calendar me-1"></i> Created {{ lead.created_at|date:"M d, Y" }}
-            </span>
-        </div>
-        
-        <div class="lead-detail-actions">
-            <a href="{% url 'leads:lead_update' lead.pk %}" class="btn btn-primary">
-                <i class="fas fa-edit me-1"></i> Edit
+        <div class="lead-detail-info">
+            <a href="{% url 'leads:lead_list' %}" class="lead-detail-back">
+                <i class="fas fa-arrow-left"></i> Back to Leads
             </a>
-            {% if lead.status == 'won' %}
-            <a href="{% url 'leads:lead_convert' lead.pk %}" class="btn btn-success">
-                <i class="fas fa-exchange-alt me-1"></i> Convert to Client
-            </a>
-            {% endif %}
-            <a href="{% url 'leads:lead_delete' lead.pk %}" class="btn btn-danger">
-                <i class="fas fa-trash me-1"></i> Delete
-            </a>
+            
+            <div class="lead-title-row">
+                <h1 class="lead-detail-name">{{ lead.title }}</h1>
+                <div class="lead-detail-actions">
+                    <a href="{% url 'leads:lead_update' lead.id %}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Edit Lead
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-modal-target="addNoteModal">
+                        <i class="fas fa-sticky-note"></i> Add Note
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-modal-target="addDocumentModal">
+                        <i class="fas fa-file-upload"></i> Add Document
+                    </button>
+                </div>
+            </div>
+            
+            <p class="lead-detail-company">{{ lead.company_name }}</p>
+            
+            <div class="lead-detail-tags">
+                <span class="lead-status {{ lead.status|lower }}">{{ lead.get_status_display }}</span>
+                <span class="lead-tag">
+                    <i class="fas fa-tag"></i> {{ lead.get_priority_display }} Priority
+                </span>
+                <span class="lead-tag">
+                    <i class="fas fa-calendar"></i> Created {{ lead.created_at|date:"M d, Y" }}
+                </span>
+            </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-8">
-            <div class="lead-card mb-4">
+    <div class="lead-row">
+        <div class="lead-col-main">
+            <!-- Lead Information Card -->
+            <div class="lead-card">
                 <div class="lead-card-header">
                     <h3 class="lead-name">Lead Information</h3>
                 </div>
                 <div class="lead-card-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
+                    <div class="lead-info-row">
+                        <div class="lead-info-col">
                             <div class="lead-info-item">
                                 <span class="lead-info-label">Company</span>
                                 <span class="lead-info-value">{{ lead.company_name }}</span>
                             </div>
                         </div>
                         
-                        <div class="col-md-6">
+                        <div class="lead-info-col">
                             <div class="lead-info-item">
                                 <span class="lead-info-label">Contact Person</span>
                                 <span class="lead-info-value">{{ lead.contact_person }}</span>
                             </div>
                         </div>
                         
-                        <div class="col-md-6">
+                        <div class="lead-info-col">
                             <div class="lead-info-item">
                                 <span class="lead-info-label">Email</span>
                                 <span class="lead-info-value">
-                                    <a href="mailto:{{ lead.email }}">{{ lead.email }}</a>
+                                    <a href="mailto:{{ lead.email }}"><i class="fas fa-envelope"></i>{{ lead.email }}</a>
                                 </span>
                             </div>
                         </div>
                         
-                        <div class="col-md-6">
+                        <div class="lead-info-col">
                             <div class="lead-info-item">
                                 <span class="lead-info-label">Phone</span>
                                 <span class="lead-info-value">
-                                    <a href="tel:{{ lead.phone }}">{{ lead.phone }}</a>
+                                    <a href="tel:{{ lead.phone }}"><i class="fas fa-phone"></i>{{ lead.phone }}</a>
                                 </span>
                             </div>
                         </div>
                         
-                        <div class="col-md-6">
+                        <div class="lead-info-col">
                             <div class="lead-info-item">
                                 <span class="lead-info-label">Status</span>
                                 <span class="lead-info-value">
@@ -91,7 +101,7 @@
                             </div>
                         </div>
                         
-                        <div class="col-md-6">
+                        <div class="lead-info-col">
                             <div class="lead-info-item">
                                 <span class="lead-info-label">Priority</span>
                                 <span class="lead-info-value">
@@ -100,181 +110,225 @@
                             </div>
                         </div>
                         
-                        <div class="col-md-6">
+                        <div class="lead-info-col">
                             <div class="lead-info-item">
                                 <span class="lead-info-label">Next Follow-up</span>
                                 <span class="lead-info-value">{{ lead.next_follow_up|date:"M d, Y" }}</span>
                             </div>
                         </div>
                         
-                        <div class="col-md-6">
+                        <div class="lead-info-col">
                             <div class="lead-info-item">
                                 <span class="lead-info-label">Created By</span>
                                 <span class="lead-info-value">{{ lead.created_by.get_full_name|default:lead.created_by.username }}</span>
                             </div>
                         </div>
-                        
-                        <div class="col-12">
-                            <div class="lead-info-item">
-                                <span class="lead-info-label">Description</span>
-                                <span class="lead-info-value">{{ lead.description|linebreaks }}</span>
-                            </div>
-                        </div>
                     </div>
+                    
+                    {% if lead.description %}
+                    <div class="lead-description">
+                        <h4 class="description-title">Description</h4>
+                        <div class="description-content">{{ lead.description|linebreaks }}</div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             
-            <!-- Continue with the rest of the template, adapting to our new styling -->
-            <div class="lead-card mb-4">
-                <div class="lead-card-header">
-                    <h3 class="lead-name">Notes</h3>
-                    <button class="btn btn-sm btn-primary" id="addNoteBtn">
-                        <i class="fas fa-plus"></i> Add Note
-                    </button>
+            <!-- Notes and Documents side by side -->
+            <div class="side-by-side-cards">
+                <!-- Notes Section -->
+                <div class="lead-card">
+                    <div class="lead-card-header">
+                        <h3 class="lead-name">Notes</h3>
+                        <button type="button" class="btn btn-sm btn-primary" data-modal-target="addNoteModal">
+                            <i class="fas fa-plus"></i> Add Note
+                        </button>
+                    </div>
+                    <div class="lead-card-body">
+                        {% if notes %}
+                            {% for note in notes %}
+                                <div class="note-item">
+                                    <div class="note-header">
+                                        <div class="note-meta">
+                                            <strong>{{ note.created_by.get_full_name|default:note.created_by.username }}</strong>
+                                            <small>{{ note.created_at|date:"M d, Y" }} at {{ note.created_at|time:"H:i" }}</small>
+                                        </div>
+                                        <div class="note-actions">
+                                            {% if note.created_by == request.user %}
+                                                <a href="{% url 'leads:lead_note_detail' lead.pk note.pk %}" class="btn btn-sm btn-secondary" title="View Note">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'leads:lead_note_update' lead.pk note.pk %}" class="btn btn-sm btn-primary" title="Edit Note">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'leads:delete_note' note.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this note?')">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'leads:lead_note_detail' lead.pk note.pk %}" class="btn btn-sm btn-secondary" title="View Note">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="note-content">{{ note.content|linebreaks }}</div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <p>No notes added yet</p>
+                                <button type="button" class="btn btn-sm btn-secondary" data-modal-target="addNoteModal">
+                                    <i class="fas fa-plus"></i> Add your first note
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="lead-card-body">
-                    <!-- Notes will be loaded here -->
-                    <div id="leadNotes">
-                        {% for note in lead.notes.all %}
-                        <div class="lead-note mb-3">
-                            <div class="lead-note-header">
-                                <strong>{{ note.created_by.get_full_name|default:note.created_by.username }}</strong>
-                                <small class="text-muted">{{ note.created_at|date:"M d, Y H:i" }}</small>
+                
+                <!-- Documents Section -->
+                <div class="lead-card">
+                    <div class="lead-card-header">
+                        <h3 class="lead-name">Documents</h3>
+                        <button type="button" class="btn btn-sm btn-primary" data-modal-target="addDocumentModal">
+                            <i class="fas fa-plus"></i> Add Document
+                        </button>
+                    </div>
+                    <div class="lead-card-body">
+                        {% if documents %}
+                            {% for document in documents %}
+                                <div class="document-item">
+                                    <div class="document-header">
+                                        <div class="document-meta">
+                                            <strong>{{ document.file.name|cut:"leads/documents/"|default:"Untitled Document" }}</strong>
+                                            <small>Uploaded by {{ document.created_by.get_full_name|default:document.created_by.username }} on {{ document.created_at|date:"M d, Y" }}</small>
+                                        </div>
+                                        <div class="document-actions">
+                                            {% if document.created_by == request.user %}
+                                                <a href="{% url 'leads:delete_document' document.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this document?')">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="document-content">
+                                        {% if document.description %}
+                                            <p>{{ document.description }}</p>
+                                        {% endif %}
+                                        <a href="{{ document.file.url }}" class="document-download btn btn-sm btn-secondary" target="_blank">
+                                            <i class="fas fa-download"></i> Download Document
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <p>No documents uploaded yet</p>
+                                <button type="button" class="btn btn-sm btn-secondary" data-modal-target="addDocumentModal">
+                                    <i class="fas fa-plus"></i> Upload your first document
+                                </button>
                             </div>
-                            <div class="lead-note-body">
-                                {{ note.content|linebreaks }}
-                            </div>
-                        </div>
-                        {% empty %}
-                        <p class="text-muted">No notes yet. Add your first note!</p>
-                        {% endfor %}
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-4">
-            <div class="lead-card mb-4">
+        <div class="lead-col-sidebar">
+            <!-- Activity Timeline Card - Now taking full height -->
+            <div class="lead-card timeline-card">
                 <div class="lead-card-header">
                     <h3 class="lead-name">Activity Timeline</h3>
                 </div>
                 <div class="lead-card-body">
-                    <div class="lead-timeline">
-                        {% for activity in lead.activities.all %}
-                        <div class="lead-timeline-item">
-                            <div class="lead-timeline-marker"></div>
-                            <div class="lead-timeline-content">
-                                <div class="lead-timeline-date">{{ activity.created_at|date:"M d, Y H:i" }}</div>
-                                <div class="lead-timeline-title">{{ activity.title }}</div>
-                                <div class="lead-timeline-description">{{ activity.description }}</div>
-                            </div>
+                    {% if activities %}
+                        <div class="timeline">
+                            {% for activity in activities %}
+                                <div class="timeline-item">
+                                    <div class="timeline-content">
+                                        <div class="timeline-header">
+                                            <h4 class="timeline-title">
+                                                {% if activity.activity_type == 'note_added' %}
+                                                    <i class="fas fa-sticky-note"></i> Note Added
+                                                {% elif activity.activity_type == 'document_added' %}
+                                                    <i class="fas fa-file-upload"></i> Document Uploaded
+                                                {% elif activity.activity_type == 'status_changed' %}
+                                                    <i class="fas fa-exchange-alt"></i> Status Changed
+                                                {% elif activity.activity_type == 'created' %}
+                                                    <i class="fas fa-plus-circle"></i> Lead Created
+                                                {% elif activity.activity_type == 'updated' %}
+                                                    <i class="fas fa-edit"></i> Lead Updated
+                                                {% else %}
+                                                    <i class="fas fa-history"></i> {{ activity.get_activity_type_display }}
+                                                {% endif %}
+                                            </h4>
+                                            <span class="timeline-date">{{ activity.timestamp|date:"M d, Y" }} at {{ activity.timestamp|time:"H:i" }}</span>
+                                        </div>
+                                        <div class="timeline-body">
+                                            <p>{{ activity.description }}</p>
+                                            <small>by {{ activity.created_by.get_full_name|default:activity.created_by.username }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
-                        {% empty %}
-                        <p class="text-muted">No activity recorded yet.</p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="lead-card">
-                <div class="lead-card-header">
-                    <h3 class="lead-name">Documents</h3>
-                    <button class="btn btn-sm btn-primary" id="addDocumentBtn">
-                        <i class="fas fa-plus"></i> Add Document
-                    </button>
-                </div>
-                <div class="lead-card-body">
-                    <div id="leadDocuments">
-                        {% for document in lead.documents.all %}
-                        <div class="lead-document-item">
-                            <i class="fas fa-file me-2"></i>
-                            <a href="{{ document.file.url }}" target="_blank">{{ document.title }}</a>
-                            <small class="text-muted ms-2">{{ document.created_at|date:"M d, Y" }}</small>
+                    {% else %}
+                        <div class="empty-state">
+                            <p>No activities recorded yet</p>
                         </div>
-                        {% empty %}
-                        <p class="text-muted">No documents attached yet.</p>
-                        {% endfor %}
-                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal for adding notes -->
-<div class="modal fade" id="noteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add Note</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="noteForm" method="post" action="{% url 'leads:lead_detail' lead.pk %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="add_note">
-                    <div class="mb-3">
-                        <label for="noteContent" class="form-label">Note Content</label>
-                        <textarea class="form-control" id="noteContent" name="content" rows="4" required></textarea>
-                    </div>
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary">Save Note</button>
-                    </div>
-                </form>
-            </div>
+<!-- Add Note Modal -->
+<div class="modal-backdrop" id="addNoteModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h5 class="modal-title">Add New Note</h5>
+            <button type="button" class="modal-close" data-modal-close>×</button>
         </div>
+        <form method="post" action="{% url 'leads:add_note' lead.id %}">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="noteContent" class="form-label">Note</label>
+                    <textarea id="noteContent" name="content" class="form-control" rows="5" placeholder="Enter your note here..." required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Note</button>
+            </div>
+        </form>
     </div>
 </div>
 
-<!-- Modal for adding documents -->
-<div class="modal fade" id="documentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add Document</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="documentForm" method="post" action="{% url 'leads:lead_detail' lead.pk %}" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="add_document">
-                    <div class="mb-3">
-                        <label for="documentTitle" class="form-label">Document Title</label>
-                        <input type="text" class="form-control" id="documentTitle" name="title" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="documentFile" class="form-label">File</label>
-                        <input type="file" class="form-control" id="documentFile" name="file" required>
-                    </div>
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary">Upload Document</button>
-                    </div>
-                </form>
-            </div>
+<!-- Add Document Modal -->
+<div class="modal-backdrop" id="addDocumentModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h5 class="modal-title">Add New Document</h5>
+            <button type="button" class="modal-close" data-modal-close>×</button>
         </div>
+        <form method="post" action="{% url 'leads:add_document' lead.id %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="documentFile" class="form-label">File</label>
+                    <input type="file" id="documentFile" name="file" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="documentDescription" class="form-label">Description (Optional)</label>
+                    <textarea id="documentDescription" name="description" class="form-control" rows="3" placeholder="Enter document description..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                <button type="submit" class="btn btn-primary">Upload Document</button>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
-
-{% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize modals
-        const addNoteBtn = document.getElementById('addNoteBtn');
-        if (addNoteBtn) {
-            addNoteBtn.addEventListener('click', function() {
-                const noteModal = new bootstrap.Modal(document.getElementById('noteModal'));
-                noteModal.show();
-            });
-        }
-        
-        const addDocumentBtn = document.getElementById('addDocumentBtn');
-        if (addDocumentBtn) {
-            addDocumentBtn.addEventListener('click', function() {
-                const documentModal = new bootstrap.Modal(document.getElementById('documentModal'));
-                documentModal.show();
-            });
-        }
-    });
-</script>
-{% endblock %} 

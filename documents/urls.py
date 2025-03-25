@@ -16,6 +16,7 @@ urlpatterns = [
     path('quote/<int:quote_id>/generate-invoice/', views.generate_invoice_from_quote, name='generate_invoice_from_quote'),
     path('quote/<int:quote_id>/view/', views.view_saved_quote, name='view_saved_quote'),
     path('quote/preview/', views.quote_preview, name='quote_preview'),
+    path('quote/preview/<int:quote_id>/', views.quote_preview, name='quote_preview'),
     path('quote/preview/template/', views.quote_preview_template, name='quote_preview_template'),
     path('expenditure/', views.expenditure_view, name='expenditure'),
     path('expenditure/create/', views.expenditure_create, name='expenditure_create'),

@@ -21,47 +21,39 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.views.generic import RedirectView
-from . import views
+from django.shortcuts import render
+
+def landing_page(request):
+    return render(request, 'landing.html')
+
+def register_company(request):
+    return render(request, 'company_registration.html')
 
 urlpatterns = [
-    # Dashboard URL as root
-    path('', include('dashboard.urls')),
-    
-    # Authentication URLs
-    path('auth/', include('authentication.urls')),
-    
-    # Admin URL
+    path('', landing_page, name='landing_page'),
+    path('register/', register_company, name='register_company'),
     path('admin/', admin.site.urls),
-    
-    # Site Admin URL
-    path('site-admin/', include('site_admin.urls')),
-    
-    # App URLs
+    # Include authentication URLs
+    path('auth/', include('authentication.urls')),
+    # Include all app URLs used in the sidebar
+    path('dashboard/', include('dashboard.urls')),
+    path('people/', include('people.urls')),
     path('clients/', include('clients.urls')),
-    path('projects/', include('project_management.urls')),
     path('leads/', include('leads.urls')),
+    path('project_management/', include('project_management.urls')),
     path('products/', include('products.urls')),
-    path('purchases/', include('purchases.urls')),
     path('sales/', include('sales.urls')),
-    path('documents/', include('documents.urls')),
+    path('purchases/', include('purchases.urls')),
     path('expenses/', include('expenses.urls')),
     path('banking/', include('banking.urls')),
+    path('documents/', include('documents.urls')),
     path('reports/', include('reports.urls')),
-    path('access-control/', include('access_control.urls')),
-    path('people/', include('people.urls')),
-    path('registration/', include('registration.urls')),
-    # Add redirect from /dashboard/ to root
-    path('dashboard/', RedirectView.as_view(url='/', permanent=True)),
-    
-    # Test URLs
-    path('dark-mode-test/', views.dark_mode_test, name='dark_mode_test'),
-] 
+    path('site_admin/', include('site_admin.urls')),
+    # Registration URLs
+    path('registration/', include('registration.urls', namespace='registration')),
+    path('communication/', include('communication.urls')),  # Add communication app URLs
+]
 
-# Add static and media file serving in development mode
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-else:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

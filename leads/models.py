@@ -34,7 +34,8 @@ class Lead(models.Model):
     ]
 
     # Basic Information
-    title = models.CharField(max_length=200, default='')
+    # Restored 'title' field for additional context
+    title = models.CharField(max_length=200, default='', blank=True)
     company_name = models.CharField(max_length=200, default='')
     contact_person = models.CharField(max_length=200, default='')
     email = models.EmailField(default='')
@@ -67,7 +68,7 @@ class Lead(models.Model):
     notes_text = models.TextField(blank=True)
 
     # Field tracker
-    tracker = FieldTracker()
+    tracker = FieldTracker(fields=['assigned_to', 'status', 'priority', 'modified_by', 'next_follow_up'])
 
     class Meta:
         ordering = ['-created_at']
@@ -180,7 +181,6 @@ class LeadNote(models.Model):
 class LeadDocument(models.Model):
     """Model for lead documents/attachments"""
     lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name='documents')
-    title = models.CharField(max_length=255)
     file = models.FileField(upload_to='leads/documents/%Y/%m/')
     description = models.TextField(blank=True, null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -191,7 +191,7 @@ class LeadDocument(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.title} - {self.lead.company_name}"
+        return f"{self.file.name} - {self.lead.company_name}"
 
     def get_file_extension(self):
         """Return the file extension"""

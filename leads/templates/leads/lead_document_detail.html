@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Document Detail | {{ lead.company_name }} | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">Document Details</h3>
+                    <div class="card-tools">
+                        <a href="{% url 'leads:lead_document_update' lead.pk document.pk %}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="document-details">
+                        <div class="mb-3">
+                            <strong>Lead:</strong> 
+                            <a href="{% url 'leads:lead_detail' lead.pk %}">{{ lead.company_name }}</a>
+                        </div>
+                        <div class="mb-3">
+                            <strong>File:</strong>
+                            <a href="{{ document.file.url }}" target="_blank" class="btn btn-sm btn-info">
+                                <i class="fas fa-file"></i> {{ document.file.name }}
+                            </a>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Description:</strong>
+                            <p class="card-text">{{ document.description|default:"No description provided" }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Uploaded By:</strong> 
+                            {{ document.created_by.get_full_name|default:document.created_by.username }}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Uploaded At:</strong> 
+                            {{ document.created_at|date:"M d, Y H:i" }}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'leads:lead_document_list' lead.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Documents
+                        </a>
+                        <a href="{% url 'leads:lead_document_delete' lead.pk document.pk %}" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Delete Document
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

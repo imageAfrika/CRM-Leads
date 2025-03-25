@@ -1,0 +1,35 @@
+/* Calendar View Styles */
+.calendar-view .fc-toolbar.fc-header-toolbar {
+    margin-bottom: 20px;
+}
+
+.calendar-view .fc-event {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.calendar-view .fc-event:hover {
+    opacity: 0.8;
+}
+
+.calendar-view .fc-event-title {
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.calendar-view .fc-daygrid-day-events {
+    margin-bottom: 5px;
+}
+
+.calendar-view .fc-daygrid-day-number {
+    font-weight: bold;
+}
+
+.calendar-view .fc-today {
+    background-color: #f0f0f0 !important;
+}
+
+.calendar-view .fc-highlight {
+    background-color: rgba(0, 123, 255, 0.1);
+}

@@ -74,8 +74,8 @@
     font-size: 16px;
     margin: 0 0 var(--spacing-sm) 0;
     color: var(--primary);
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .app-name:before {
@@ -103,8 +103,8 @@
 }
 
 .model-link {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
     color: var(--body-color);
     text-decoration: none;
     flex: 1;
@@ -139,18 +139,18 @@
 
 /* Recent actions */
 .action-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .action-item {
     padding: var(--spacing-sm);
     margin-bottom: 6px;
     border-radius: 8px;
-    display: flex;
+  display: flex;
     flex-wrap: wrap;
-    align-items: center;
+  align-items: center;
     gap: var(--spacing-sm);
     background-color: var(--card-bg);
     transition: background-color 0.2s ease;
@@ -177,7 +177,7 @@
     padding: 3px 8px;
     border-radius: 20px;
     font-size: 12px;
-    font-weight: 500;
+  font-weight: 500;
     margin-right: 4px;
 }
 
@@ -215,12 +215,12 @@
 
 .stat-card {
     background: var(--card-bg);
-    border-radius: 12px;
+  border-radius: 12px;
     padding: var(--spacing-md);
-    display: flex;
+  display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  align-items: center;
+  justify-content: center;
     text-align: center;
     box-shadow: var(--card-shadow);
     transition: transform 0.2s ease;
@@ -269,4 +269,4 @@
     font-size: 32px;
     margin-bottom: var(--spacing-sm);
     opacity: 0.4;
-}
+} 

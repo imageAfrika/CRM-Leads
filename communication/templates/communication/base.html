@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block app_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'communication/css/base.css' %}?v={% now 'U' %}">
+<link rel="stylesheet" href="{% static 'communication/css/email.css' %}?v={% now 'U' %}">
+<link rel="stylesheet" href="{% static 'communication/css/calendar.css' %}?v={% now 'U' %}">
+<link rel="stylesheet" href="{% static 'communication/css/messaging.css' %}?v={% now 'U' %}">
+<link rel="stylesheet" href="{% static 'communication/css/sidebar.css' %}?v={% now 'U' %}">
+{% endblock %}
+
+{% block content %}
+<div class="app-wrapper">
+    <!-- Sidebar -->
+    <div class="app-sidebar">
+        <div class="sidebar-menu">
+            <div class="sidebar-heading">
+                Communication
+            </div>
+            <a href="{% url 'communication:email_inbox' %}" class="sidebar-link {% if request.resolver_match.view_name == 'communication:email_inbox' %}active{% endif %}">
+                <i class="fas fa-envelope"></i>
+                Emails
+            </a>
+            <a href="{% url 'communication:contact_list' %}" class="sidebar-link {% if request.resolver_match.view_name == 'communication:contact_list' %}active{% endif %}">
+                <i class="fas fa-address-book"></i>
+                Contacts
+            </a>
+            <a href="{% url 'communication:calendar' %}" class="sidebar-link {% if request.resolver_match.view_name == 'communication:calendar' %}active{% endif %}">
+                <i class="fas fa-calendar-alt"></i>
+                Calendar
+            </a>
+
+            <div class="sidebar-heading">
+                Messaging
+            </div>
+            <a href="{% url 'communication:whatsapp_messages' %}" class="sidebar-link {% if request.resolver_match.view_name == 'communication:whatsapp_messages' %}active{% endif %}">
+                <i class="fab fa-whatsapp"></i>
+                WhatsApp
+            </a>
+            <a href="{% url 'communication:telegram_messages' %}" class="sidebar-link {% if request.resolver_match.view_name == 'communication:telegram_messages' %}active{% endif %}">
+                <i class="fab fa-telegram"></i>
+                Telegram
+            </a>
+
+            <div class="sidebar-heading">
+                Notifications
+            </div>
+            <a href="{% url 'communication:notification_list' %}" class="sidebar-link {% if request.resolver_match.view_name == 'communication:notification_list' %}active{% endif %}">
+                <i class="fas fa-bell"></i>
+                Notifications
+            </a>
+        </div>
+    </div>
+
+    <!-- Sidebar Header (Mobile Toggle) -->
+    <div class="sidebar-header">
+        <a href="{% url 'communication:email_inbox' %}" class="sidebar-brand">
+            <i class="fas fa-envelope"></i>
+            <span>Communication</span>
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="app-main">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="header-left">
+                <span class="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </span>
+                <h1 class="header-title">{% block header_title %}{% endblock %}</h1>
+            </div>
+            <div class="header-actions">
+                {% block header_actions %}{% endblock %}
+            </div>
+        </div>
+        
+        <!-- Page Content -->
+        <div class="app-content">
+            {% block communication_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'communication/js/communication.js' %}?v={% now 'U' %}"></script>
+{% block communication_js %}{% endblock %}
+{% endblock %}

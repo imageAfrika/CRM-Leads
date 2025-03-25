@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}Company Details{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card mt-5">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Company Details</h3>
+                </div>
+                <div class="card-body">
+                    {% if company %}
+                    <div class="company-details">
+                        <table class="table">
+                            <tr>
+                                <th style="width: 30%;">Company Name:</th>
+                                <td>{{ company.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Email:</th>
+                                <td>{{ company.email }}</td>
+                            </tr>
+                            <tr>
+                                <th>Phone Number:</th>
+                                <td>{{ company.phone_number }}</td>
+                            </tr>
+                            <tr>
+                                <th>Tax PIN:</th>
+                                <td>{{ company.tax_pin|default:"Not provided" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Physical Address:</th>
+                                <td>{{ company.physical_address }}</td>
+                            </tr>
+                            <tr>
+                                <th>Postal Address:</th>
+                                <td>{{ company.postal_address|default:"Not provided" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Currency:</th>
+                                <td>{{ company.currency }}</td>
+                            </tr>
+                            <tr>
+                                <th>Subdomain:</th>
+                                <td>{{ company.subdomain_prefix }}</td>
+                            </tr>
+                            <tr>
+                                <th>Database Name:</th>
+                                <td>{{ company.database_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date Created:</th>
+                                <td>{{ company.date_created }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status:</th>
+                                <td>
+                                    {% if company.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <h4 class="mt-4">Subscription Details</h4>
+                        {% if subscription %}
+                        <table class="table">
+                            <tr>
+                                <th style="width: 30%;">Plan:</th>
+                                <td>{{ subscription.get_plan_display }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status:</th>
+                                <td>
+                                    <span class="badge bg-{% if subscription.status == 'active' %}success{% else %}warning{% endif %}">
+                                        {{ subscription.get_status_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Start Date:</th>
+                                <td>{{ subscription.start_date }}</td>
+                            </tr>
+                            <tr>
+                                <th>End Date:</th>
+                                <td>{{ subscription.end_date }}</td>
+                            </tr>
+                            <tr>
+                                <th>Trial:</th>
+                                <td>{% if subscription.trial %}Yes{% else %}No{% endif %}</td>
+                            </tr>
+                        </table>
+                        {% else %}
+                        <div class="alert alert-warning">No active subscription found.</div>
+                        {% endif %}
+
+                        {% if company and company.tenant %}
+                        <h4 class="mt-4">Tenant Information</h4>
+                        <table class="table">
+                            <tr>
+                                <th style="width: 30%;">Tenant Name:</th>
+                                <td>{{ company.tenant.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Schema Name:</th>
+                                <td>{{ company.tenant.schema_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Created On:</th>
+                                <td>{{ company.tenant.created_on }}</td>
+                            </tr>
+                            <tr>
+                                <th>Paid Until:</th>
+                                <td>{{ company.tenant.paid_until }}</td>
+                            </tr>
+                            <tr>
+                                <th>Trial Status:</th>
+                                <td>
+                                    {% if company.tenant.on_trial %}
+                                    <span class="badge bg-info">On Trial</span>
+                                    {% else %}
+                                    <span class="badge bg-success">Paid</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Domain:</th>
+                                <td>
+                                    {% for domain in company.tenant.domains.all %}
+                                        {{ domain.domain }}{% if domain.is_primary %} <span class="badge bg-primary">Primary</span>{% endif %}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                        </table>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <strong>No tenant information found!</strong> Your company does not have a dedicated database configured.
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-danger">Company details not found.</div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <a href="/dashboard/" class="btn btn-primary">Back to Dashboard</a>
+                    {% if company %}
+                    <a href="/registration/company/edit/" class="btn btn-secondary float-end">Edit Company</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

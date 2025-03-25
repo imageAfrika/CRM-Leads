@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Calendar{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'communication/css/base.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 sidebar">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Calendar Options</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" data-view="month">Month View</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-view="week">Week View</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-view="day">Day View</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h4>Quick Actions</h4>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'communication:add_event' %}" class="btn btn-primary btn-block mb-2">
+                        <i class="fas fa-plus"></i> New Event
+                    </a>
+                    <button class="btn btn-outline-secondary btn-block">
+                        <i class="fas fa-sync"></i> Sync Calendars
+                    </button>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h4>Upcoming Events</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        {% for event in upcoming_events %}
+                        <li class="mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span>{{ event.title }}</span>
+                                <small class="text-muted">{{ event.start_time|date:"M d" }}</small>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="text-muted">No upcoming events</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9 calendar-container">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3>My Calendar</h3>
+                    <div class="calendar-navigation">
+                        <button class="btn btn-sm btn-outline-secondary" id="prev-btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" id="next-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <button class="btn btn-sm btn-primary" id="today-btn">Today</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js"></script>
+<script src="{% static 'communication/js/communication.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        events: [
+            {% for event in events %}
+            {
+                title: '{{ event.title }}',
+                start: '{{ event.start_time|date:"Y-m-d\\TH:i:s" }}',
+                end: '{{ event.end_time|date:"Y-m-d\\TH:i:s" }}',
+                allDay: {{ event.all_day|yesno:"true,false" }},
+                color: '{{ event.color|default:"#007bff" }}'
+            },
+            {% endfor %}
+        ],
+        eventClick: function(info) {
+            window.location.href = `/communication/calendar/event/edit/${info.event.id}/`;
+        }
+    });
+    calendar.render();
+
+    // View toggle buttons
+    document.querySelectorAll('[data-view]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const view = this.dataset.view;
+            switch(view) {
+                case 'month':
+                    calendar.changeView('dayGridMonth');
+                    break;
+                case 'week':
+                    calendar.changeView('timeGridWeek');
+                    break;
+                case 'day':
+                    calendar.changeView('timeGridDay');
+                    break;
+            }
+        });
+    });
+
+    // Navigation buttons
+    document.getElementById('prev-btn').addEventListener('click', () => calendar.prev());
+    document.getElementById('next-btn').addEventListener('click', () => calendar.next());
+    document.getElementById('today-btn').addEventListener('click', () => calendar.today());
+});
+</script>
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends 'communication/base.html' %}
+{% load static %}
+
+{% block header_title %}Messaging{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'communication:message_compose' %}" class="btn btn-primary">
+    <i class="fas fa-plus"></i> New Message
+</a>
+{% endblock %}
+
+{% block communication_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Messaging Services</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="nav flex-column">
+                        <li class="nav-item mb-2">
+                            <a class="nav-link btn btn-outline-success" href="{% url 'communication:whatsapp_messages' %}">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-outline-primary" href="{% url 'communication:telegram_messages' %}">
+                                <i class="fab fa-telegram"></i> Telegram
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h4>Quick Actions</h4>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'communication:message_compose' %}" class="btn btn-primary btn-block mb-2">
+                        <i class="fas fa-plus"></i> New Message
+                    </a>
+                    <a href="{% url 'communication:contact_list' %}" class="btn btn-outline-secondary btn-block">
+                        <i class="fas fa-address-book"></i> Manage Contacts
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3>Messaging Dashboard</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fab fa-whatsapp text-success"></i> WhatsApp
+                                    </h5>
+                                    <p class="card-text">Send and receive WhatsApp messages to your contacts.</p>
+                                    <a href="{% url 'communication:whatsapp_messages' %}" class="btn btn-success">
+                                        Open WhatsApp
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fab fa-telegram text-primary"></i> Telegram
+                                    </h5>
+                                    <p class="card-text">Send and receive Telegram messages to your contacts.</p>
+                                    <a href="{% url 'communication:telegram_messages' %}" class="btn btn-primary">
+                                        Open Telegram
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'communication/css/base.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'communication/js/communication.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching
+    const tabs = document.querySelectorAll('[data-toggle="tab"]');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            
+            // Remove active classes
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('show', 'active');
+            });
+            
+            // Add active classes to current tab
+            this.classList.add('active');
+            document.querySelector(targetId).classList.add('show', 'active');
+        });
+    });
+
+    // Messaging functionality
+    const messageForms = document.querySelectorAll('.message-input form');
+    messageForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = this.querySelector('input[type="text"]');
+            const message = input.value.trim();
+            
+            if (message) {
+                const messageList = this.closest('.tab-pane').querySelector('.message-list');
+                const messageItem = document.createElement('div');
+                messageItem.classList.add('message-item', 'sent');
+                messageItem.innerHTML = `
+                    <div class="message-bubble sent">
+                        ${message}
+                        <small class="text-muted float-right ml-2">
+                            ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </small>
+                    </div>
+                `;
+                
+                messageList.appendChild(messageItem);
+                input.value = '';
+                messageList.scrollTop = messageList.scrollHeight;
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

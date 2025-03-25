@@ -1,0 +1,218 @@
+{% extends 'communication/base.html' %}
+{% load static %}
+
+{% block header_title %}
+    {% if form.instance.pk %}
+        Edit Event: {{ form.instance.title }}
+    {% else %}
+        Create New Event
+    {% endif %}
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'communication:event_list' %}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left"></i> Back to Events
+</a>
+{% endblock %}
+
+{% block communication_content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        {% if form.instance.pk %}
+                            Edit Event Details
+                        {% else %}
+                            Create New Event
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">Event Title</label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.title.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Event Color</label>
+                                {{ form.color }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Start Time</label>
+                                {{ form.start_time }}
+                                {% if form.start_time.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.start_time.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">End Time</label>
+                                {{ form.end_time }}
+                                {% if form.end_time.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.end_time.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Category</label>
+                                {{ form.category }}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Privacy</label>
+                                {{ form.privacy }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            {{ form.description }}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Location</label>
+                                {{ form.location }}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Video Conference Link</label>
+                                {{ form.video_conference_link }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    {{ form.is_recurring }}
+                                    <label class="form-check-label">
+                                        Make this a recurring event
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3" id="recurrence-options" style="display: none;">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label class="form-label">Recurrence Type</label>
+                                        {{ form.recurrence_type }}
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">Interval</label>
+                                        {{ form.recurrence_interval }}
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <label class="form-label">End Recurrence</label>
+                                    {{ form.recurrence_end_date }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Attendee Emails</label>
+                            {{ form.attendee_emails }}
+                            <small class="form-text text-muted">
+                                Enter email addresses separated by comma. Only contacts in your system can be added.
+                            </small>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check">
+                                    {{ form.send_email_reminder }}
+                                    <label class="form-check-label">
+                                        Send Email Reminder
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check">
+                                    {{ form.send_sms_reminder }}
+                                    <label class="form-check-label">
+                                        Send SMS Reminder
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check">
+                                    {{ form.send_whatsapp_reminder }}
+                                    <label class="form-check-label">
+                                        Send WhatsApp Reminder
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                {% if form.instance.pk %}
+                                    Update Event
+                                {% else %}
+                                    Create Event
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle recurring event options
+    const isRecurringCheckbox = document.querySelector('input[name="is_recurring"]');
+    const recurrenceOptions = document.getElementById('recurrence-options');
+    
+    isRecurringCheckbox.addEventListener('change', function() {
+        recurrenceOptions.style.display = this.checked ? 'block' : 'none';
+    });
+    
+    // Initial state
+    recurrenceOptions.style.display = isRecurringCheckbox.checked ? 'block' : 'none';
+    
+    // Form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+});
+</script>
+{% endblock %}

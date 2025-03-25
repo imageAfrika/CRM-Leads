@@ -1,0 +1,63 @@
+# Django and Core Dependencies
+Django==4.2.9
+django-crispy-forms==2.1
+django-filter==23.5
+Pillow==10.2.0
+
+# Email Handling
+email-validator==2.1.0
+pytz==2024.1
+
+# Messaging Services
+python-telegram-bot==20.7
+twilio==8.9.0  # For WhatsApp integration
+
+# Calendar and Event Management
+icalendar==5.0.7
+recurring-ical-events==1.0.2
+django-scheduler==0.10.1
+python-dateutil==2.9.0
+
+# Background Tasks
+celery==5.3.6
+redis==5.0.1
+django-celery-beat==2.5.0
+
+# Authentication and Security
+django-allauth==0.59.0
+social-auth-app-django==5.4.0
+
+# API and Serialization
+djangorestframework==3.14.0
+markdown==3.5.2
+django-cors-headers==4.3.1
+
+# File Handling and Storage
+django-storages==1.14.2
+boto3==1.34.28  # For cloud storage integration
+
+# Notifications
+django-notifications-hq==1.7.0
+
+# Development and Debugging
+ipython==8.22.1
+django-debug-toolbar==4.2.0
+
+# Testing
+pytest==7.4.4
+pytest-django==4.7.0
+coverage==7.4.4
+
+# Performance and Optimization
+gunicorn==21.2.0
+psycopg2-binary==2.9.9
+dj-database-url==2.1.0
+
+# Frontend Dependencies (for static files)
+fontawesome-free==6.5.1
+bootstrap==5.3.2
+flatpickr==4.6.13
+
+# Optional: Additional Utilities
+python-dotenv==1.0.0
+django-environ==0.11.2

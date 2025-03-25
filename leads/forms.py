@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Lead, LeadActivity
+from .models import Lead, LeadActivity, LeadNote, LeadDocument
 
 class LeadForm(forms.ModelForm):
     follow_up_date = forms.DateTimeField(
@@ -18,7 +18,7 @@ class LeadForm(forms.ModelForm):
             'priority', 'follow_up_date', 'assigned_to', 'tags', 'notes_text'
         ]
         widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Optional lead title'}),
             'company_name': forms.TextInput(attrs={'class': 'form-control'}),
             'contact_person': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
@@ -87,3 +87,71 @@ class LeadFilterForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Search leads...'})
     ) 
+
+class LeadNoteForm(forms.ModelForm):
+    content = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control', 
+            'rows': 4, 
+            'placeholder': 'Enter your note here...',
+            'required': 'required'
+        }),
+        max_length=1000,
+        min_length=1,
+        error_messages={
+            'required': 'Note content cannot be empty.',
+            'max_length': 'Note is too long. Maximum 1000 characters allowed.',
+            'min_length': 'Note is too short. Minimum 1 character required.'
+        }
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['content'].label = 'Note Content'
+
+    class Meta:
+        model = LeadNote
+        fields = ['content']
+
+class LeadDocumentForm(forms.ModelForm):
+    file = forms.FileField(
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'required': 'required'
+        }),
+        error_messages={
+            'required': 'Please upload a document.',
+            'invalid_extension': 'File type not supported.'
+        }
+    )
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control', 
+            'rows': 3, 
+            'placeholder': 'Optional description for the document...'
+        }),
+        required=False,
+        max_length=500,
+        error_messages={
+            'max_length': 'Description is too long. Maximum 500 characters allowed.'
+        }
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['file'].label = 'Document File'
+        self.fields['description'].label = 'Description (Optional)'
+
+    class Meta:
+        model = LeadDocument
+        fields = ['file', 'description']
+        
+    def clean_file(self):
+        file = self.cleaned_data.get('file')
+        
+        # Validate file size (max 10MB)
+        if file:
+            if file.size > 10 * 1024 * 1024:  # 10MB
+                raise forms.ValidationError("File size must be under 10MB.")
+        
+        return file

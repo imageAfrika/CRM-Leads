@@ -1,0 +1,204 @@
+{% extends 'communication/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block header_title %}
+    {% if event %}Edit Event{% else %}Add Event{% endif %}
+{% endblock %}
+
+{% block header_actions %}
+    {% if event %}
+    <a href="{% url 'communication:event_delete' event.id %}" class="btn btn-danger">
+        <i class="fas fa-trash"></i> Delete Event
+    </a>
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'communication/css/base.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block communication_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        {% if event %}Edit Event: {{ event.title }}{% else %}Create New Event{% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group mb-3">
+                            {{ form.title.label_tag }}
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.title.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 form-group mb-3">
+                                {{ form.start_time.label_tag }}
+                                {{ form.start_time }}
+                                {% if form.start_time.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.start_time.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 form-group mb-3">
+                                {{ form.end_time.label_tag }}
+                                {{ form.end_time }}
+                                {% if form.end_time.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.end_time.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.description.label_tag }}
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 form-group mb-3">
+                                {{ form.location.label_tag }}
+                                {{ form.location }}
+                                {% if form.location.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.location.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 form-group mb-3">
+                                {{ form.color.label_tag }}
+                                {{ form.color }}
+                                {% if form.color.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.color.errors %}
+                                            {{ error %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3" id="repeat-options" style="display: none;">
+                            <h5>Repeat Event</h5>
+                            <div class="row">
+                                <div class="col-md-6 form-group">
+                                    {{ form.recurrence_type.label_tag }}
+                                    {{ form.recurrence_type }}
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    {{ form.recurrence_end_date.label_tag }}
+                                    {{ form.recurrence_end_date }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.attendees.label_tag }}
+                            {{ form.attendees }}
+                            {% if form.attendees.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.attendees.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> 
+                                    {% if event %}Update Event{% else %}Create Event{% endif %}
+                                </button>
+                                <a href="{% url 'communication:calendar' %}" class="btn btn-secondary ms-2">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="{% static 'communication/js/communication.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Datetime picker initialization
+    flatpickr("#id_start_time", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        time_24hr: true
+    });
+
+    flatpickr("#id_end_time", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        time_24hr: true
+    });
+
+    flatpickr("#id_recurrence_end_date", {
+        dateFormat: "Y-m-d"
+    });
+
+    // All-day event toggle
+    const allDayToggle = document.getElementById('all-day-toggle');
+    const startTimeInput = document.getElementById('id_start_time');
+    const endTimeInput = document.getElementById('id_end_time');
+
+    allDayToggle.addEventListener('change', function() {
+        if (this.checked) {
+            startTimeInput.value = startTimeInput.value.split(' ')[0];
+            endTimeInput.value = endTimeInput.value.split(' ')[0];
+            startTimeInput.setAttribute('data-input-type', 'date');
+            endTimeInput.setAttribute('data-input-type', 'date');
+        } else {
+            startTimeInput.removeAttribute('data-input-type');
+            endTimeInput.removeAttribute('data-input-type');
+        }
+    });
+
+    // Repeat event toggle
+    const repeatToggle = document.getElementById('repeat-toggle');
+    const repeatOptions = document.getElementById('repeat-options');
+
+    repeatToggle.addEventListener('change', function() {
+        repeatOptions.style.display = this.checked ? 'block' : 'none';
+    });
+});
+</script>
+{% endblock %}

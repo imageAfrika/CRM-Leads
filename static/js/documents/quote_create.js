@@ -295,86 +295,107 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     };
 
-    // Handle form submission
-    quoteForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
+    // Add form submission handling
+    quoteForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        console.log('Form submitted');
         
         // Validate form
-        const formValid = this.checkValidity();
-        if (!formValid) {
-            this.reportValidity();
+        if (!document.getElementById('client').value) {
+            alert('Please select a client.');
             return;
         }
         
-        // Collect items
+        if (!document.getElementById('quote_title').value) {
+            alert('Please enter a quote title.');
+            return;
+        }
+        
+        // Collect items data
         const items = [];
         document.querySelectorAll('.quote-item').forEach(item => {
-            items.push({
-                description: item.querySelector('[name="items[][description]"]').value,
-                quantity: parseFloat(item.querySelector('[name="items[][quantity]"]').value),
-                unit_price: parseFloat(item.querySelector('[name="items[][unit_price]"]').value),
-                discount: parseFloat(item.querySelector('[name="items[][discount]"]').value) || 0
-            });
+            const description = item.querySelector('[name="items[][description]"]').value;
+            const quantity = item.querySelector('[name="items[][quantity]"]').value;
+            const unitPrice = item.querySelector('[name="items[][unit_price]"]').value;
+            const discount = item.querySelector('[name="items[][discount]"]').value || 0;
+            
+            // Skip empty items
+            if (description && quantity && unitPrice) {
+                items.push({
+                    description: description,
+                    quantity: quantity,
+                    unit_price: unitPrice,
+                    discount: discount
+                });
+            }
         });
         
-        // Collect form data
-        const formData = {
-            client_id: document.getElementById('client').value,
-            quote_number: document.getElementById('quote_number').value,
-            title: document.getElementById('quote_title').value,
-            description: document.getElementById('description').value,
-            valid_until: document.getElementById('valid_until').value,
-            terms: document.getElementById('terms').value,
-            tax_rate: document.getElementById('tax_rate').value,
-            subtotal: document.getElementById('subtotal').value,
-            tax_amount: document.getElementById('tax_amount').value,
-            total_amount: document.getElementById('total_amount').value,
-            items: items
-        };
-
-        try {
-            // Show loading state
-            const submitButton = quoteForm.querySelector('button[type="submit"]');
-            const originalText = submitButton.textContent;
-            submitButton.textContent = 'Processing...';
-            submitButton.disabled = true;
-            
-            // Submit the form data
-            const response = await fetch('/documents/quote/create/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                },
-                body: JSON.stringify(formData)
-            });
-
-            const data = await response.json();
-            
-            if (data.success) {
-                // Show the preview link with the correct URL
-                const previewLink = document.getElementById('preview-link');
-                previewLink.href = `/documents/quote/${data.quote_id}/preview/`;
-                previewLink.style.display = 'inline-flex';
-                
-                // Redirect to the quote detail page
-                window.location.href = data.redirect_url;
-            } else {
-                // Reset button state
-                submitButton.textContent = originalText;
-                submitButton.disabled = false;
-                
-                // Show error message
-                alert('Error creating quote: ' + data.error);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Failed to create quote. Please try again.');
-            
-            // Reset button state
-            const submitButton = quoteForm.querySelector('button[type="submit"]');
-            submitButton.textContent = 'Generate Quote';
-            submitButton.disabled = false;
+        if (items.length === 0) {
+            alert('Please add at least one item to the quote.');
+            return;
         }
+        
+        console.log('Collected items:', items);
+        
+        // Create the form data to submit
+        const formData = new FormData(quoteForm);
+        
+        // Remove the individual item fields from the form data
+        for (const [key, value] of [...formData.entries()]) {
+            if (key.startsWith('items[')) {
+                formData.delete(key);
+            }
+        }
+        
+        // Add items as a JSON string
+        formData.set('items', JSON.stringify(items));
+        
+        // Log the form data for debugging
+        console.log('Form data:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+        
+        // Submit the form
+        fetch(quoteForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (response.ok) {
+                // Check if it's a redirect or a JSON response
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json().then(data => {
+                        if (data.success) {
+                            window.location.href = data.redirect_url;
+                        } else {
+                            throw new Error(data.error || 'An error occurred');
+                        }
+                    });
+                } else {
+                    // Handle redirect
+                    window.location.href = response.url;
+                }
+            } else {
+                return response.text().then(text => {
+                    try {
+                        const data = JSON.parse(text);
+                        throw new Error(data.error || 'An error occurred');
+                    } catch (e) {
+                        throw new Error('Failed to create quote');
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error submitting form:', error);
+            alert('Error: ' + error.message);
+        });
     });
 }); 

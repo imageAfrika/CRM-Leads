@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        Edit Note | {{ lead.company_name }}
+    {% else %}
+        Add Note | {{ lead.company_name }}
+    {% endif %}
+    | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        {% if form.instance.pk %}
+                            Edit Note for Lead: {{ lead.company_name }}
+                        {% else %}
+                            Add New Note for Lead: {{ lead.company_name }}
+                        {% endif %}
+                    </h3>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="card-body">
+                        {{ form|crispy }}
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'leads:lead_note_list' lead.pk %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Notes
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> 
+                                {% if form.instance.pk %}
+                                    Update Note
+                                {% else %}
+                                    Save Note
+                                {% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

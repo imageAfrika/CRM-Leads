@@ -1,0 +1,28 @@
+INFO 2025-03-20 20:52:16,427 autoreload 22616 2300 Watching for file changes with StatReloader
+INFO 2025-03-20 20:53:47,664 autoreload 22616 2300 D:\JIMM\CRM-Leads\authentication\views.py changed, reloading.
+INFO 2025-03-20 20:53:49,184 autoreload 8368 17920 Watching for file changes with StatReloader
+INFO 2025-03-20 20:54:41,480 autoreload 8368 17920 D:\JIMM\CRM-Leads\authentication\views.py changed, reloading.
+INFO 2025-03-20 20:54:42,980 autoreload 23836 26252 Watching for file changes with StatReloader
+INFO 2025-03-20 21:07:02,354 autoreload 23836 26252 D:\JIMM\CRM-Leads\authentication\models.py changed, reloading.
+INFO 2025-03-20 21:07:04,170 autoreload 12920 24676 Watching for file changes with StatReloader
+INFO 2025-03-20 21:09:59,193 autoreload 12920 24676 D:\JIMM\CRM-Leads\authentication\models.py changed, reloading.
+INFO 2025-03-20 21:10:00,690 autoreload 22188 25556 Watching for file changes with StatReloader
+INFO 2025-03-20 21:11:12,412 autoreload 22188 25556 D:\JIMM\CRM-Leads\registration\utils.py changed, reloading.
+INFO 2025-03-20 21:11:13,915 autoreload 21308 8296 Watching for file changes with StatReloader
+INFO 2025-03-20 21:14:09,009 autoreload 21308 8296 D:\JIMM\CRM-Leads\registration\models.py changed, reloading.
+INFO 2025-03-20 21:14:10,594 autoreload 19548 22188 Watching for file changes with StatReloader
+INFO 2025-03-20 21:14:32,125 autoreload 19548 22188 D:\JIMM\CRM-Leads\registration\forms.py changed, reloading.
+INFO 2025-03-20 21:14:33,658 autoreload 21392 23108 Watching for file changes with StatReloader
+INFO 2025-03-20 21:14:51,009 autoreload 21392 23108 D:\JIMM\CRM-Leads\registration\views\registration_views.py changed, reloading.
+INFO 2025-03-20 21:14:52,497 autoreload 9992 24804 Watching for file changes with StatReloader
+INFO 2025-03-20 21:18:30,768 autoreload 25756 23220 Watching for file changes with StatReloader
+INFO 2025-03-20 21:20:39,270 autoreload 19076 24344 Watching for file changes with StatReloader
+INFO 2025-03-20 21:33:36,821 autoreload 9992 24804 D:\JIMM\CRM-Leads\authentication\models.py changed, reloading.
+INFO 2025-03-20 21:33:38,408 autoreload 7412 18728 Watching for file changes with StatReloader
+INFO 2025-03-20 21:33:49,349 autoreload 24704 3476 Watching for file changes with StatReloader
+INFO 2025-03-20 21:38:15,491 autoreload 24704 3476 D:\JIMM\CRM-Leads\registration\models.py changed, reloading.
+INFO 2025-03-20 21:38:15,986 autoreload 7412 18728 D:\JIMM\CRM-Leads\registration\models.py changed, reloading.
+INFO 2025-03-20 21:38:16,979 autoreload 16704 26432 Watching for file changes with StatReloader
+INFO 2025-03-20 21:38:17,457 autoreload 24388 4512 Watching for file changes with StatReloader
+INFO 2025-03-20 21:39:50,861 autoreload 25128 6468 Watching for file changes with StatReloader
+INFO 2025-03-20 21:49:28,291 autoreload 25128 6468 D:\JIMM\CRM-Leads\registration\models.py changed, reloading.

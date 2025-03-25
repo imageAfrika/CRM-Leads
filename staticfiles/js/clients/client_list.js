@@ -1,18 +1,18 @@
 function showDetailsModal(clientId, name, contactPerson, email, phone, address, notes) {
     document.getElementById('detailsClientName').textContent = name;
     document.getElementById('detailsContactPerson').textContent = contactPerson || 'No contact person';
-    document.getElementById('detailsEmail').textContent = email;
-    document.getElementById('detailsPhone').textContent = phone;
-    document.getElementById('detailsAddress').textContent = address;
+    document.getElementById('detailsEmail').textContent = email || 'No email';
+    document.getElementById('detailsPhone').textContent = phone || 'No phone';
+    document.getElementById('detailsAddress').textContent = address || 'No address';
     document.getElementById('detailsNotes').textContent = notes || 'No notes';
     
     document.getElementById('detailsModalBackdrop').classList.add('show');
-    document.getElementById('clientDetailsModal').style.display = 'block';
+    document.getElementById('clientDetailsModal').classList.add('show');
 }
 
 function hideDetailsModal() {
     document.getElementById('detailsModalBackdrop').classList.remove('show');
-    document.getElementById('clientDetailsModal').style.display = 'none';
+    document.getElementById('clientDetailsModal').classList.remove('show');
 }
 
 // Delete Modal Functions
