@@ -4,20 +4,144 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/clients/client_list.css' %}">
 <link rel="stylesheet" href="{% static 'css/clients/client_details_modal.css' %}">
+<style>
+    /* Telebird-inspired Clients Navbar */
+    :root {
+        --telebird-primary: #0078d4;
+        --telebird-border: #e0e4e8;
+        --navbar-height: 40px;
+    }
+
+    .clients-navbar {
+        display: flex;
+        align-items: center;
+        background-color: white;
+        border-bottom: 1px solid var(--telebird-border);
+        height: var(--navbar-height);
+        padding: 0 10px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        position: fixed;
+        top: 0;
+        left: 180px;
+        right: 120px;
+        z-index: 1000;
+    }
+
+    .clients-navbar-group {
+        display: flex;
+        align-items: center;
+    }
+
+    .clients-navbar-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 10px;
+        margin: 0 2px;
+        border: none;
+        background-color: transparent;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        color: #333;
+        font-size: 0.85rem;
+    }
+
+    .clients-navbar-button:hover {
+        background-color: rgba(0,0,0,0.05);
+    }
+
+    .clients-navbar-button.active {
+        background-color: rgba(0,120,212,0.1);
+        color: var(--telebird-primary);
+    }
+
+    .clients-navbar-button i {
+        margin-right: 4px;
+        font-size: 14px;
+    }
+
+    .clients-navbar-divider {
+        width: 1px;
+        height: 25px;
+        background-color: var(--telebird-border);
+        margin: 0 10px;
+    }
+
+    .clients-search-container {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        margin: 0 15px;
+    }
+
+    .clients-search-input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid var(--telebird-border);
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    /* Adjust container for fixed navbar */
+    .container {
+        margin-top: var(--navbar-height);
+        padding-top: 10px;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
+<div class="clients-navbar">
+    <div class="clients-navbar-group">
+        <button class="clients-navbar-button active">
+            <i class="bi bi-building"></i>Clients
+        </button>
+        <div class="clients-navbar-divider"></div>
+        <button class="clients-navbar-button">
+            <i class="bi bi-plus-circle"></i>Add Client
+        </button>
+        <button class="clients-navbar-button">
+            <i class="bi bi-filter"></i>Advanced Filters
+        </button>
+    </div>
+
+    <div class="clients-search-container">
+        <input type="text" id="global-search" class="clients-search-input" placeholder="Search clients...">
+    </div>
+
+    <div class="clients-navbar-group">
+        <button class="clients-navbar-button">
+            <i class="bi bi-download"></i>Export
+        </button>
+        <div class="clients-navbar-divider"></div>
+        <button class="clients-navbar-button">
+            <i class="bi bi-sliders"></i>Columns
+        </button>
+        <button class="clients-navbar-button">
+            <i class="bi bi-gear"></i>Settings
+        </button>
+    </div>
+</div>
+
 <div class="container">
     <div class="header">
         <h1>Client Directory</h1>
-        <a href="{% url 'clients:client_create' %}" class="btn btn-add">
-            <i class="fas fa-plus"></i> Add New Client
-        </a>
+        <div class="header-actions">
+            <div class="search-filter">
+                <input type="text" id="clientSearchInput" placeholder="Search clients..." class="search-input">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+            <span class="client-count">{{ clients.count }} clients</span>
+            <a href="{% url 'clients:client_create' %}" class="btn btn-add">
+                <i class="fas fa-plus"></i> Add New Client
+            </a>
+        </div>
     </div>
 
     <div class="client-list">
-        {% if clients %}
-            <table class="client-table">
+        <table class="client-table" id="clientTable">
+            {% if clients %}
                 <thead>
                     <tr>
                         <th>Company Name</th>
@@ -96,21 +220,21 @@
                         </tr>
                     {% endfor %}
                 </tbody>
-            </table>
-        {% else %}
-            <div class="no-clients">
-                <div class="no-clients-content">
-                    <i class="fas fa-users"></i>
-                    <div class="text-content">
-                        <h3>No Clients Yet</h3>
-                        <p>Start by adding your first client to the directory.</p>
+            {% else %}
+                <div class="no-clients">
+                    <div class="no-clients-content">
+                        <i class="fas fa-users"></i>
+                        <div class="text-content">
+                            <h3>No Clients Yet</h3>
+                            <p>Start by adding your first client to the directory.</p>
+                        </div>
+                        <a href="{% url 'clients:client_create' %}" class="btn btn-add">
+                            <i class="fas fa-plus"></i> Add New Client
+                        </a>
                     </div>
-                    <a href="{% url 'clients:client_create' %}" class="btn btn-add">
-                        <i class="fas fa-plus"></i> Add New Client
-                    </a>
                 </div>
-            </div>
-        {% endif %}
+            {% endif %}
+        </table>
     </div>
 </div>
 
@@ -199,4 +323,5 @@
 
 {% block extra_js %}
 <script src="{% static 'js/clients/client_list.js' %}"></script>
+<script src="{% static 'js/clients/client_list_search.js' %}"></script>
 {% endblock %}

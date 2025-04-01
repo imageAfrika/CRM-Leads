@@ -31,31 +31,36 @@ def register_person(request):
 @login_required
 def people_list(request):
     """List all people with search and pagination"""
-    search_query = request.GET.get('search', '')
+    name_filter = request.GET.get('name', '')
+    email_filter = request.GET.get('email', '')
     role_filter = request.GET.get('role', '')
 
     # Filter people based on search and role
     people = Person.objects.all()
-    if search_query:
+    if name_filter:
         people = people.filter(
-            Q(first_name__icontains=search_query) | 
-            Q(last_name__icontains=search_query) | 
-            Q(email__icontains=search_query)
+            Q(first_name__icontains=name_filter) | 
+            Q(last_name__icontains=name_filter)
         )
+    if email_filter:
+        people = people.filter(email__icontains=email_filter)
     if role_filter:
-        people = people.filter(role__name=role_filter)
+        people = people.filter(role__id=role_filter)
+
+    # Get all roles for filtering
+    roles = Role.objects.all()
 
     # Pagination
     paginator = Paginator(people, 12)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # Get all roles for filtering
-    roles = Role.objects.all()
-
     return render(request, 'people/people_list.html', {
+        'people': page_obj,  # Pass the page_obj as people
         'page_obj': page_obj,
-        'search_query': search_query,
+        'roles': roles,
+        'name_filter': name_filter,
+        'email_filter': email_filter,
         'role_filter': role_filter,
     })
 
@@ -139,6 +144,26 @@ def contact_people(request):
         form = ContactForm()
 
     return render(request, 'people/contact_form.html', {'form': form})
+
+@login_required
+def update_person(request, pk):
+    """View to update a person's information"""
+    person = get_object_or_404(Person, pk=pk)
+    
+    if request.method == 'POST':
+        form = PersonForm(request.POST, request.FILES, instance=person)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"{person.full_name}'s information has been updated successfully.")
+            return redirect('people:person_detail', pk=person.pk)
+    else:
+        form = PersonForm(instance=person)
+    
+    return render(request, 'people/register.html', {
+        'form': form,
+        'person': person,
+        'is_update': True
+    })
 
 # Add a debug view to check static files
 def debug_static(request):

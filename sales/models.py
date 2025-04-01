@@ -148,4 +148,36 @@ class InvoiceItem(models.Model):
     def __str__(self):
         return f"{self.description} - {self.quantity} x ${self.unit_price}"
 
-
+class Quote(models.Model):
+    STATUS_CHOICES = (
+        ('DRAFT', 'Draft'),
+        ('SENT', 'Sent'),
+        ('ACCEPTED', 'Accepted'),
+        ('REJECTED', 'Rejected'),
+        ('EXPIRED', 'Expired'),
+    )
+    
+    quote_number = models.CharField(max_length=50, unique=True)
+    client = models.ForeignKey('clients.Client', on_delete=models.CASCADE, related_name='quotes')
+    project = models.ForeignKey('project_management.Project', on_delete=models.SET_NULL, null=True, blank=True, related_name='quotes')
+    date = models.DateField(default=timezone.now)
+    expiry_date = models.DateField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='DRAFT')
+    subtotal = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=16.00)
+    total_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    
+    def __str__(self):
+        return f"Quote {self.quote_number} - {self.client.name}"
+    
+    def save(self, *args, **kwargs):
+        # Generate quote number if not already set
+        if not self.quote_number:
+            last_quote = Quote.objects.order_by('-id').first()
+            if last_quote:
+                last_number = int(last_quote.quote_number.split('-')[-1])
+                self.quote_number = f"QUOTE-{last_number + 1:04d}"
+            else:
+                self.quote_number = "QUOTE-0001"
+        
+        super().save(*args, **kwargs)

@@ -1,0 +1,64 @@
+{% extends 'communication/email/telebird_base.html' %}
+{% load static %}
+
+{% block email_content %}
+<!-- Email list panel -->
+<div class="telebird-list">
+    <div class="telebird-list-header">
+        <div class="telebird-list-title">Inbox</div>
+        <div class="telebird-filter">
+            All <i class="fas fa-chevron-down"></i>
+        </div>
+    </div>
+    
+    <ul class="telebird-messages">
+        {% for email in emails %}
+        <li class="telebird-message {% if email.is_read %}read{% endif %} {% if email.id == current_email.id %}selected{% endif %}" 
+            onclick="window.location.href='{% url 'communication:email_view' email.id %}'">
+            <div class="telebird-time">{{ email.sent_at|date:"g:i A" }}</div>
+            <div class="telebird-sender">{{ email.sender_name }}</div>
+            <div class="telebird-subject">{{ email.subject }}</div>
+            <div class="telebird-preview">{{ email.body|striptags|truncatechars:100 }}</div>
+        </li>
+        {% empty %}
+        <li class="telebird-message">
+            <div class="telebird-preview" style="text-align: center; padding: 20px 0;">No messages in your inbox</div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- Email view panel -->
+<div class="telebird-view">
+    {% if current_email %}
+    <div class="telebird-view-header">
+        <h2 class="telebird-view-subject">{{ current_email.subject }}</h2>
+        <div class="telebird-view-details">
+            <div class="telebird-sender-avatar">
+                {{ current_email.sender_name|slice:":1" }}
+            </div>
+            <div>
+                <div class="telebird-view-sender">{{ current_email.sender_name }} &lt;{{ current_email.sender_email }}&gt;</div>
+                <div class="telebird-view-recipients">To: 
+                    {% for recipient in current_email.recipients.all %}
+                    {{ recipient.email }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="telebird-view-datetime">{{ current_email.sent_at|date:"D, M j, Y g:i A" }}</div>
+        </div>
+    </div>
+    
+    <div class="telebird-view-body">
+        {{ current_email.body|safe }}
+    </div>
+    {% else %}
+    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--telebird-text-light);">
+        <div style="text-align: center;">
+            <i class="fas fa-envelope-open" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;"></i>
+            <p>Select an email to view</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

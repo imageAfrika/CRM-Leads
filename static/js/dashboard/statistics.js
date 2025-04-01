@@ -13,12 +13,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Safe JSON parse
     const safeJSONParse = (data, defaultValue = []) => {
-        if (!data || data === '[]' || data === '' || data === 'null') return defaultValue;
+        // If data is undefined, null, or an empty string, return default
+        if (!data || data === '' || data === 'null') {
+            console.warn('Empty or null data received');
+            return defaultValue;
+        }
+        
         try {
+            // Trim whitespace
+            data = data.trim();
+            
+            // If data is an empty array string, return default
+            if (data === '[]') {
+                console.warn('Empty array received');
+                return defaultValue;
+            }
+            
+            // Parse the JSON
             const parsed = JSON.parse(data);
+            
+            // If parsed result is null or empty, return default
             return parsed || defaultValue;
         } catch (e) {
-            console.error('Error parsing JSON:', e, 'Raw data:', data);
+            console.error('JSON Parsing Error:', e, 'Raw data:', data);
             return defaultValue;
         }
     };
@@ -311,6 +328,72 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     /**
+     * PURCHASES VS SALES CHART
+     */
+    const setupPurchasesVsSalesChart = () => {
+        const canvas = document.getElementById('purchasesVsSalesChart');
+        if (!canvas) {
+            console.error('Purchases vs Sales chart canvas not found');
+            return;
+        }
+        
+        // Debug logging for data attributes
+        console.log('Purchases data:', canvas.dataset.purchases);
+        console.log('Sales data:', canvas.dataset.sales);
+        console.log('Months data:', canvas.dataset.months);
+        
+        // Parse data from data attributes
+        const purchases = safeJSONParse(canvas.dataset.purchases);
+        const sales = safeJSONParse(canvas.dataset.sales);
+        const months = safeJSONParse(canvas.dataset.months);
+        
+        console.log('Parsed purchases:', purchases);
+        console.log('Parsed sales:', sales);
+        console.log('Parsed months:', months);
+        
+        // Create gradients
+        const ctx = canvas.getContext('2d');
+        const purchasesGradient = createGradient(ctx, 'rgba(239, 68, 68, 0.8)', 'rgba(239, 68, 68, 0.1)');
+        const salesGradient = createGradient(ctx, 'rgba(16, 185, 129, 0.8)', 'rgba(16, 185, 129, 0.1)');
+        
+        const chartData = {
+            labels: months,
+            datasets: [
+                {
+                    label: 'Purchases',
+                    data: purchases,
+                    backgroundColor: purchasesGradient,
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    borderWidth: 2,
+                    fill: true
+                },
+                {
+                    label: 'Sales',
+                    data: sales,
+                    backgroundColor: salesGradient,
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 2,
+                    fill: true
+                }
+            ]
+        };
+        
+        // Use line chart for monthly comparison
+        const options = {
+            ...commonOptions,
+            plugins: {
+                ...commonOptions.plugins,
+                title: {
+                    display: true,
+                    text: 'Monthly Purchases vs Sales'
+                }
+            }
+        };
+        
+        initChart('purchasesVsSalesChart', 'line', chartData, options);
+    };
+
+    /**
      * INITIALIZE ALL CHARTS
      */
     const initializeAllCharts = () => {
@@ -325,6 +408,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         setupQuotesVsInvoicesChart();
         setupRevenueVsExpenditureChart();
+        setupPurchasesVsSalesChart();
     };
     
     // Start chart initialization with a small delay to ensure DOM is fully loaded

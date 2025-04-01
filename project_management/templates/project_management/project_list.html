@@ -14,6 +14,7 @@
     <div class="page-header">
         <div class="page-title">
             <h1>Projects</h1>
+            <span class="project-count">{{ projects.count }} total projects</span>
         </div>
         <div class="page-actions">
             <a href="{% url 'project_management:project_create' %}" class="button button-primary">
@@ -57,8 +58,12 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="button button-primary">Apply Filters</button>
-                    <button type="button" class="button button-outline" id="clear-filters">Clear Filters</button>
+                    <button type="submit" class="button button-primary">
+                        <i class="fas fa-search"></i> Apply Filters
+                    </button>
+                    <button type="button" class="button button-outline" id="clear-filters">
+                        <i class="fas fa-times"></i> Clear Filters
+                    </button>
                 </div>
             </form>
         </details>
@@ -81,17 +86,28 @@
     {% if projects %}
     <section class="projects-grid">
         {% for project in projects %}
-        <article class="project-card">
+        <article class="project-card status-{{ project.status|lower }}">
             <header class="project-card-header">
                 <h2 class="project-name">{{ project.name }}</h2>
                 <span class="project-status status-{{ project.status|lower }}">
+                    {% if project.status == 'NOT_STARTED' %}
+                        <i class="fas fa-circle"></i>
+                    {% elif project.status == 'IN_PROGRESS' %}
+                        <i class="fas fa-play"></i>
+                    {% elif project.status == 'ON_HOLD' %}
+                        <i class="fas fa-pause"></i>
+                    {% elif project.status == 'COMPLETED' %}
+                        <i class="fas fa-check"></i>
+                    {% elif project.status == 'CANCELLED' %}
+                        <i class="fas fa-times"></i>
+                    {% endif %}
                     {{ project.get_status_display }}
                 </span>
             </header>
             
             <div class="project-card-body">
                 <div class="info-item">
-                    <h3>Client</h3>
+                    <h3><i class="fas fa-user"></i> Client</h3>
                     {% if project.client %}
                     <a href="{% url 'clients:client_detail' project.client.pk %}">{{ project.client.name }}</a>
                     {% else %}
@@ -100,28 +116,32 @@
                 </div>
                 
                 <div class="info-item">
-                    <h3>Timeline</h3>
+                    <h3><i class="fas fa-calendar-alt"></i> Timeline</h3>
                     <div class="timeline-dates">{{ project.start_date|date:"M d, Y" }} - {{ project.end_date|date:"M d, Y" }}</div>
                     {% if project.is_overdue %}
-                    <span class="alert-badge">Overdue</span>
+                    <span class="alert-badge">
+                        <i class="fas fa-exclamation-circle"></i> Overdue
+                    </span>
                     {% endif %}
                 </div>
                 
                 <div class="info-item">
-                    <h3>Progress</h3>
+                    <h3><i class="fas fa-tasks"></i> Progress</h3>
                     <div class="progress">
-                        <div class="progress-bar progress-{{ project.status|lower }}" 
-                             style="width: {{ project.completion_percentage }}%">
-                        </div>
-                        <span class="progress-text">{{ project.completion_percentage }}%</span>
+                        {% with percentage=project.completion_percentage|default:0 %}
+                        <div class="progress-bar progress-{{ project.status|lower }}" data-width="{{ percentage }}"></div>
+                        <span class="progress-text">{{ percentage }}%</span>
+                        {% endwith %}
                     </div>
                 </div>
                 
                 <div class="info-item">
-                    <h3>Budget</h3>
-                    <div class="budget-amount">{{ project.budget|floatformat:2 }}</div>
+                    <h3><i class="fas fa-dollar-sign"></i> Budget</h3>
+                    <div class="budget-amount">${{ project.budget|floatformat:2 }}</div>
                     {% if project.is_over_budget %}
-                    <span class="alert-badge">Over Budget</span>
+                    <span class="alert-badge">
+                        <i class="fas fa-exclamation-circle"></i> Over Budget
+                    </span>
                     {% endif %}
                 </div>
             </div>
@@ -143,7 +163,9 @@
     {% else %}
     <section class="empty-state">
         <div class="empty-content">
-            <i class="fas fa-clipboard-list empty-icon"></i>
+            <div class="empty-icon">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
             <h2>No projects found</h2>
             <p>{% if request.GET.search or request.GET.status or request.GET.priority %}
                 No projects match your search criteria. Try adjusting your filters.
@@ -171,10 +193,14 @@
                 <p class="modal-message">Are you sure you want to delete the project "<span id="project-name-to-delete"></span>"? This action cannot be undone.</p>
             </div>
             <div class="modal-footer">
-                <button class="button button-outline" id="cancel-delete">Cancel</button>
+                <button class="button button-outline" id="cancel-delete">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
                 <form id="delete-project-form" method="post" action="">
                     {% csrf_token %}
-                    <button type="submit" class="button button-danger">Delete</button>
+                    <button type="submit" class="button button-danger">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
                 </form>
             </div>
         </div>
@@ -188,6 +214,12 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Set progress bar widths based on data-width attributes
+    document.querySelectorAll('.progress-bar[data-width]').forEach(function(progressBar) {
+        const width = progressBar.getAttribute('data-width');
+        progressBar.style.width = width + '%';
+    });
+    
     // Delete modal functionality
     const deleteButtons = document.querySelectorAll('.delete-project');
     const deleteModal = document.getElementById('delete-modal');

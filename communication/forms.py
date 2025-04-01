@@ -406,3 +406,83 @@ class NotificationForm(forms.ModelForm):
         if commit:
             notification.save()
         return notification
+
+class EmailForm(forms.ModelForm):
+    """Form for composing emails for the Telebird interface"""
+    recipients = forms.ModelMultipleChoiceField(
+        queryset=User.objects.all(),
+        widget=forms.SelectMultiple(attrs={'class': 'form-control select2'}),
+        help_text="Select one or more recipients"
+    )
+    
+    class Meta:
+        model = Email
+        fields = ['recipients', 'subject', 'body']
+        widgets = {
+            'subject': forms.TextInput(attrs={'class': 'form-control'}),
+            'body': forms.Textarea(attrs={'class': 'form-control', 'rows': 10}),
+        }
+
+class EmailSettingsForm(forms.Form):
+    """
+    Form for managing email client settings
+    """
+    THEME_CHOICES = [
+        ('light', 'Light Theme'),
+        ('dark', 'Dark Theme'),
+        ('ocean', 'Ocean Blue'),
+        ('forest', 'Forest Green'),
+    ]
+
+    LANGUAGE_CHOICES = [
+        ('en', 'English'),
+        ('fr', 'French'),
+        ('es', 'Spanish'),
+        ('de', 'German'),
+        ('zh', 'Chinese'),
+    ]
+
+    display_name = forms.CharField(
+        label='Display Name',
+        max_length=100,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Your display name for emails'
+        })
+    )
+
+    signature = forms.CharField(
+        label='Email Signature',
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Optional email signature',
+            'rows': 3
+        })
+    )
+
+    theme = forms.ChoiceField(
+        label='Email Client Theme',
+        choices=THEME_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        })
+    )
+
+    language = forms.ChoiceField(
+        label='Language',
+        choices=LANGUAGE_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        })
+    )
+
+    def clean_signature(self):
+        """
+        Validate email signature length
+        """
+        signature = self.cleaned_data.get('signature', '')
+        if len(signature) > 500:
+            raise forms.ValidationError('Signature must be 500 characters or less.')
+        return signature

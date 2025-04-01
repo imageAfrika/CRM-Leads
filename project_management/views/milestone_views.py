@@ -16,7 +16,7 @@ def milestone_create(request, project_pk):
             milestone.project = project
             milestone.save()
             messages.success(request, 'Milestone added successfully.')
-            return redirect('project_management:detail', pk=project_pk)
+            return redirect('project_management:project_detail', pk=project_pk)
     else:
         form = ProjectMilestoneForm()
     
@@ -34,7 +34,7 @@ def milestone_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Milestone updated successfully.')
-            return redirect('project_management:detail', pk=milestone.project.pk)
+            return redirect('project_management:project_detail', pk=milestone.project.pk)
     else:
         form = ProjectMilestoneForm(instance=milestone)
     
@@ -52,7 +52,7 @@ def milestone_delete(request, pk):
     if request.method == 'POST':
         milestone.delete()
         messages.success(request, 'Milestone deleted successfully.')
-        return redirect('project_management:detail', pk=project_pk)
+        return redirect('project_management:project_detail', pk=project_pk)
     return JsonResponse({'status': 'error'}, status=405)
 
 @login_required

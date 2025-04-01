@@ -1,0 +1,150 @@
+{% extends 'communication/email/telebird_base.html' %}
+{% load static %}
+
+{% block email_content %}
+<!-- Email list panel -->
+<div class="telebird-list">
+    <div class="telebird-list-header">
+        <div class="telebird-list-title">{{ active_tab|title }}</div>
+        <div class="telebird-filter">
+            All <i class="fas fa-chevron-down"></i>
+        </div>
+    </div>
+    
+    <ul class="telebird-messages">
+        {% for email in emails %}
+        <li class="telebird-message {% if email.is_read %}read{% endif %} {% if email.id == current_email.id %}selected{% endif %}" 
+            onclick="window.location.href='{% url 'communication:email_view_telebird' email.id %}'">
+            <div class="telebird-time">{{ email.sent_at|date:"g:i A" }}</div>
+            <div class="telebird-sender">{{ email.sender_name }}</div>
+            <div class="telebird-subject">{{ email.subject }}</div>
+            <div class="telebird-preview">{{ email.body|striptags|truncatechars:100 }}</div>
+        </li>
+        {% empty %}
+        <li class="telebird-message">
+            <div class="telebird-preview" style="text-align: center; padding: 20px 0;">No messages in your {{ active_tab }}</div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- Email view panel -->
+<div class="telebird-view">
+    {% if current_email %}
+    <div class="telebird-view-header">
+        <h2 class="telebird-view-subject">{{ current_email.subject }}</h2>
+        <div class="telebird-view-details">
+            <div class="telebird-sender-avatar">
+                {{ current_email.sender_name|slice:":1" }}
+            </div>
+            <div>
+                <div class="telebird-view-sender">{{ current_email.sender_name }} &lt;{{ current_email.sender_email }}&gt;</div>
+                <div class="telebird-view-recipients">To: 
+                    {% for recipient in current_email.recipients.all %}
+                    {{ recipient.email }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="telebird-view-datetime">{{ current_email.sent_at|date:"D, M j, Y g:i A" }}</div>
+        </div>
+    </div>
+    
+    <div class="telebird-view-body">
+        {{ current_email.body|safe }}
+    </div>
+    
+    <div class="telebird-view-actions">
+        <a href="{% url 'communication:email_compose_telebird' %}?reply_to={{ current_email.id }}" class="telebird-btn">
+            <i class="fas fa-reply"></i> Reply
+        </a>
+        
+        <a href="{% url 'communication:email_compose_telebird' %}?forward={{ current_email.id }}" class="telebird-btn">
+            <i class="fas fa-share"></i> Forward
+        </a>
+        
+        <form method="post" action="{% url 'communication:email_delete_telebird' current_email.id %}" style="display: inline-block;">
+            {% csrf_token %}
+            <input type="hidden" name="redirect_to" value="{{ active_tab }}">
+            <button type="submit" class="telebird-btn">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+        </form>
+    </div>
+    
+    {% if current_email.attachments.all %}
+    <div class="telebird-attachments">
+        <h3 class="telebird-attachments-title">Attachments</h3>
+        <div class="telebird-attachments-list">
+            {% for attachment in current_email.attachments.all %}
+            <a href="{{ attachment.file.url }}" class="telebird-attachment" download>
+                <i class="fas fa-file"></i>
+                <span>{{ attachment.filename }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--telebird-text-light);">
+        <div style="text-align: center;">
+            <i class="fas fa-envelope-open" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;"></i>
+            <p>Select an email to view</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .telebird-view-actions {
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid var(--telebird-border);
+        display: flex;
+        gap: 8px;
+    }
+    
+    .telebird-attachments {
+        margin-top: 24px;
+        padding: 16px;
+        background-color: var(--telebird-light);
+        border-radius: 4px;
+    }
+    
+    .telebird-attachments-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: var(--telebird-text);
+    }
+    
+    .telebird-attachments-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .telebird-attachment {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background-color: white;
+        border: 1px solid var(--telebird-border);
+        border-radius: 4px;
+        text-decoration: none;
+        color: var(--telebird-text);
+        font-size: 13px;
+        transition: all 0.15s ease;
+    }
+    
+    .telebird-attachment:hover {
+        background-color: var(--telebird-hover);
+        border-color: var(--telebird-text-light);
+    }
+    
+    .telebird-attachment i {
+        color: var(--telebird-primary);
+    }
+</style>
+{% endblock %} 

@@ -8,6 +8,8 @@ urlpatterns = [
     path('<int:pk>/', views.DocumentDetailView.as_view(), name='document_detail'),
     path('<int:pk>/edit/', views.DocumentUpdateView.as_view(), name='document_edit'),
     path('<int:pk>/download/', views.document_download, name='document_download'),
+    path('share/', views.share_document, name='share_document'),
+    path('<int:pk>/delete/', views.delete_document, name='document_delete'),
     path('quote/new/', views.QuoteCreateView.as_view(), name='quote_create'),
     path('quote/create/', views.quote_create, name='quote_create_function'),
     path('quote/<int:pk>/', views.quote_detail, name='quote_detail'),
@@ -24,5 +26,4 @@ urlpatterns = [
     path('expenditure/<int:pk>/delete/', views.expenditure_delete, name='expenditure_delete'),
     path('invoices/', views.invoice_list, name='invoice_list'),
     path('<int:pk>/generate-pdf/', views.generate_document_pdf, name='generate_document_pdf'),
-
-] 
+]

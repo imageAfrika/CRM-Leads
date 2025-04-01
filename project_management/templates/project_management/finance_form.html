@@ -1,0 +1,70 @@
+{% extends 'project_management/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ project.name }}{% endblock %}
+
+{% block header %}
+<div class="detail-header">
+    <h1 class="project-name">{{ project.name }}</h1>
+    <div class="detail-actions">
+        <a href="{% url 'project_management:project_finances' project.pk %}" class="button button-outline">
+            <i class="fas fa-arrow-left"></i> Back to Finances
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h2>{{ title }}</h2>
+        </div>
+        
+        <form method="post" class="form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.date.id_for_label }}">Date</label>
+                {{ form.date }}
+                {% if form.date.errors %}
+                    <div class="error-message">{{ form.date.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="error-message">{{ form.description.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.transaction_type.id_for_label }}">Transaction Type</label>
+                {{ form.transaction_type }}
+                {% if form.transaction_type.errors %}
+                    <div class="error-message">{{ form.transaction_type.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.amount.id_for_label }}">Amount</label>
+                {{ form.amount }}
+                {% if form.amount.errors %}
+                    <div class="error-message">{{ form.amount.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-actions">
+                <a href="{% url 'project_management:project_finances' project.pk %}" class="button button-outline">
+                    Cancel
+                </a>
+                <button type="submit" class="button button-primary">
+                    Save Transaction
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

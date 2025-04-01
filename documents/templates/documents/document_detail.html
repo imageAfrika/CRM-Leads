@@ -3,6 +3,31 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/document_detail.css' %}">
 <link rel="stylesheet" href="{% static 'css/invoice.css' %}">
+<style>
+    .share-options {
+        display: flex;
+        justify-content: space-around;
+        gap: 16px;
+    }
+    
+    .share-options .btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        border-radius: 8px;
+    }
+    
+    .btn-telegram {
+        background-color: #0088cc;
+        color: white;
+    }
+    
+    .btn-email {
+        background-color: #4a90e2;
+        color: white;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -22,6 +47,9 @@
             <a href="{% url 'documents:document_download' document.id %}" class="btn btn-secondary">
                 <i class="fas fa-download"></i> Download PDF
             </a>
+            <button id="shareDocumentBtn" class="btn btn-secondary" data-document-id="{{ document.id }}">
+                <i class="fas fa-share-alt"></i> Share
+            </button>
             {% if document.document_type == 'QUOTE' and document.status == 'SENT' %}
             <button class="btn btn-primary" id="generateInvoiceBtn" data-quote-id="{{ document.quote.id }}">
                 <i class="fas fa-file-invoice"></i> Generate Invoice
@@ -245,6 +273,120 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Share Document functionality
+    const shareDocumentBtn = document.getElementById('shareDocumentBtn');
+    const shareModal = document.getElementById('shareDocumentModal');
+    const shareForm = document.getElementById('shareDocumentForm');
+    
+    if (shareDocumentBtn) {
+        shareDocumentBtn.addEventListener('click', function() {
+            console.log('Share button clicked');
+            // Reset modal
+            if (shareForm) {
+                shareForm.style.display = 'none';
+            }
+            document.querySelector('.share-options').style.display = 'flex';
+            document.querySelector('.telegram-details').style.display = 'none';
+            document.querySelector('.email-details').style.display = 'none';
+            
+            // Set document ID
+            document.getElementById('shareDocumentId').value = this.dataset.documentId;
+            
+            // Show modal
+            const bootstrapModal = new bootstrap.Modal(shareModal);
+            bootstrapModal.show();
+        });
+    }
+    
+    const shareMethodButtons = document.querySelectorAll('.share-options button');
+    shareMethodButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const shareMethod = this.dataset.shareMethod;
+            
+            // Hide share options
+            document.querySelector('.share-options').style.display = 'none';
+            
+            // Show form
+            shareForm.style.display = 'block';
+            document.getElementById('shareMethod').value = shareMethod;
+            
+            // Show specific details
+            if (shareMethod === 'telegram') {
+                document.querySelector('.telegram-details').style.display = 'block';
+            } else if (shareMethod === 'email') {
+                document.querySelector('.email-details').style.display = 'block';
+            }
+        });
+    });
+    
+    if (shareForm) {
+        shareForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch("{% url 'documents:share_document' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Document shared successfully!');
+                    const bootstrapModal = bootstrap.Modal.getInstance(shareModal);
+                    bootstrapModal.hide();
+                } else {
+                    alert('Failed to share document: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while sharing the document.');
+            });
+        });
+    }
 });
 </script>
+
+<!-- Share Document Modal -->
+<div id="shareDocumentModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Share Document</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="share-options">
+                    <button class="btn btn-telegram" data-share-method="telegram">
+                        <i class="fab fa-telegram"></i> Share via Telegram
+                    </button>
+                    <button class="btn btn-email" data-share-method="email">
+                        <i class="fas fa-envelope"></i> Share via Email
+                    </button>
+                </div>
+                <form id="shareDocumentForm" class="mt-3" style="display:none;">
+                    <input type="hidden" name="document_id" id="shareDocumentId">
+                    <input type="hidden" name="share_method" id="shareMethod">
+                    
+                    <div class="form-group telegram-details" style="display:none;">
+                        <label for="telegramUsername">Telegram Username</label>
+                        <input type="text" class="form-control" id="telegramUsername" name="telegram_username" placeholder="@username">
+                    </div>
+                    
+                    <div class="form-group email-details" style="display:none;">
+                        <label for="recipientEmail">Recipient Email</label>
+                        <input type="email" class="form-control" id="recipientEmail" name="recipient_email" placeholder="Enter email address">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary mt-2">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %} 

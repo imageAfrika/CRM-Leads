@@ -1,14 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.db.models import Sum, Count, Q
 from django.utils import timezone
 from datetime import datetime, timedelta
-from .models import Project, ProjectDocument, ProjectNote, ProjectMilestone
+from .models import Project, ProjectDocument, ProjectNote, ProjectMilestone, Transaction
 from .forms import (
     ProjectForm, ProjectDocumentForm, ProjectNoteForm,
-    ProjectMilestoneForm, ProjectFilterForm
+    ProjectMilestoneForm, ProjectFilterForm, TransactionForm
 )
 
 @login_required
@@ -163,8 +163,30 @@ def project_dashboard(request):
     total_expenses = sum(project.get_total_expenses() for project in Project.objects.all())
     total_invoices = sum(project.get_total_invoices() for project in Project.objects.all())
 
-    # Get recent projects
-    recent_projects = Project.objects.order_by('-created_at')[:5]
+    # Get recent projects (last 30 days)
+    recent_projects = Project.objects.filter(
+        created_at__gte=timezone.now() - timedelta(days=30)
+    ).order_by('-created_at')[:5]
+
+    # Get real-time project data - active projects with recent updates
+    realtime_projects = Project.objects.filter(
+        status='in_progress',
+        updated_at__gte=timezone.now() - timedelta(hours=24)
+    ).order_by('-updated_at')[:5]
+
+    # Get projects with recent milestones completed
+    recent_milestone_projects = Project.objects.filter(
+        milestones__completed_date__gte=timezone.now() - timedelta(days=7),
+        milestones__is_completed=True
+    ).distinct().order_by('-milestones__completed_date')[:5]
+
+    # Get projects with financial transactions in last 7 days
+    recent_transaction_projects = Project.objects.filter(
+        transactions__date__gte=timezone.now().date() - timedelta(days=7)
+    ).annotate(
+        recent_transaction_count=Count('transactions'),
+        latest_transaction=models.Max('transactions__date')
+    ).order_by('-latest_transaction')[:5]
 
     # Get upcoming milestones
     upcoming_milestones = ProjectMilestone.objects.filter(
@@ -185,6 +207,9 @@ def project_dashboard(request):
         'total_invoices': total_invoices,
         'recent_projects': recent_projects,
         'upcoming_milestones': upcoming_milestones,
+        'realtime_projects': realtime_projects,
+        'recent_milestone_projects': recent_milestone_projects,
+        'recent_transaction_projects': recent_transaction_projects,
         'title': 'Project Dashboard'
     }
     return render(request, 'project_management/project_dashboard.html', context)
@@ -337,3 +362,104 @@ def milestone_toggle(request, pk):
         'is_completed': milestone.is_completed,
         'completion_percentage': milestone.completion_percentage
     })
+
+# Financial management views
+@login_required
+def project_finances(request, pk):
+    """View project finances with transactions"""
+    project = get_object_or_404(Project, pk=pk)
+    transactions = Transaction.objects.filter(project=project).order_by('-date')
+    
+    context = {
+        'project': project,
+        'transactions': transactions,
+        'title': f'Project Finances: {project.name}'
+    }
+    return render(request, 'project_management/project_finances.html', context)
+
+def finance_detail(request, pk):
+    transaction = get_object_or_404(Transaction, pk=pk)
+    context = {
+        'transaction': transaction,
+    }
+    return render(request, 'project_management/transaction_detail.html', context)
+
+def finance_get(request, pk):
+    """API endpoint to get transaction data for the edit form"""
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return HttpResponseBadRequest('Invalid request')
+        
+    transaction = get_object_or_404(Transaction, pk=pk)
+    data = {
+        'date': transaction.date.strftime('%Y-%m-%d'),
+        'description': transaction.description,
+        'transaction_type': transaction.transaction_type,
+        'amount': float(transaction.amount),
+    }
+    
+    return JsonResponse(data)
+
+def finance_create(request, project_pk):
+    """Create a new transaction for a project"""
+    project = get_object_or_404(Project, pk=project_pk)
+    
+    if request.method == 'POST':
+        form = TransactionForm(request.POST)
+        if form.is_valid():
+            transaction = form.save(commit=False)
+            transaction.project = project
+            transaction.save()
+            
+            messages.success(request, "Transaction added successfully.")
+            
+            # For AJAX requests, return JSON response
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'success'})
+                
+            return redirect('project_management:project_finances', pk=project.pk)
+    else:
+        form = TransactionForm()
+    
+    context = {
+        'form': form,
+        'project': project,
+        'title': 'Add Transaction'
+    }
+    return render(request, 'project_management/finance_form.html', context)
+
+def finance_update(request, pk):
+    transaction = get_object_or_404(Transaction, pk=pk)
+    
+    if request.method == 'POST':
+        form = TransactionForm(request.POST, instance=transaction)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Transaction updated successfully.")
+            
+            # For AJAX requests, return simple success response
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'success'})
+                
+            return redirect('project_management:project_finances', pk=transaction.project.pk)
+    else:
+        form = TransactionForm(instance=transaction)
+    
+    context = {
+        'form': form,
+        'transaction': transaction,
+    }
+    return render(request, 'project_management/finance_form.html', context)
+
+@login_required
+def finance_delete(request, pk):
+    """Delete a transaction"""
+    transaction = get_object_or_404(Transaction, pk=pk)
+    project_pk = transaction.project.pk
+    
+    if request.method == 'POST':
+        transaction.delete()
+        messages.success(request, "Transaction deleted successfully.")
+        return redirect('project_management:project_finances', pk=project_pk)
+    
+    # If not POST, return JSON error
+    return JsonResponse({'status': 'error'}, status=405)

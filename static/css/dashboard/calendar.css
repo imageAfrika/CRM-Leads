@@ -173,6 +173,10 @@
     width: 100%;
 }
 
+body {
+    font-family: 'Nunito', sans-serif;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 1366px) {
     #calendar {

@@ -1,0 +1,368 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Telebird Email Inbox{% endblock %}
+
+{% block app_css %}
+    <!-- Telebird Email Specific Styles -->
+    <link rel="stylesheet" href="{% static 'communication/css/telebird_email.css' %}?v={% now "U" %}">
+{% endblock %}
+
+{% block content %}
+<div class="telebird-email-container">
+    <!-- Top Navigation -->
+    <div class="telebird-top-nav">
+        <div class="nav-left">
+            <div class="telebird-logo">
+                <img src="{% static 'communication/images/telebird-logo.png' %}" alt="Telebird Logo">
+                <h3>Telebird Email</h3>
+            </div>
+            
+            <div class="telebird-mail-actions">
+                <div class="btn-group" role="group" aria-label="Email Primary Actions">
+                    <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-plus"></i> Compose
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#composeEmailModal">
+                            <i class="fas fa-envelope"></i> New Email
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#composeCalendarInviteModal">
+                            <i class="fas fa-calendar-plus"></i> Calendar Invite
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#composeGroupModal">
+                            <i class="fas fa-users"></i> Group Email
+                        </a></li>
+                    </ul>
+                </div>
+
+                <div class="btn-group" role="group" aria-label="Email Secondary Actions">
+                    <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">
+                            <i class="fas fa-archive"></i> Archive
+                        </a></li>
+                        <li><a class="dropdown-item" href="#">
+                            <i class="fas fa-trash"></i> Delete
+                        </a></li>
+                        <li><a class="dropdown-item" href="#">
+                            <i class="fas fa-tag"></i> Add Label
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#">
+                            <i class="fas fa-filter"></i> Filter
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nav-center">
+            <div class="telebird-search-container">
+                <div class="search-wrapper">
+                    <div class="search-icon-wrapper">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <input type="text" 
+                           placeholder="Search in Telebird" 
+                           class="form-control search-input" 
+                           id="globalSearchInput"
+                           data-bs-toggle="dropdown" 
+                           aria-expanded="false"
+                           autocomplete="off">
+                    <div class="search-filters-wrapper">
+                        <div class="dropdown search-filters-dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="searchFiltersDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-filter"></i>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="searchFiltersDropdown">
+                                <li class="dropdown-header">Search In</li>
+                                <li>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="searchEmails" checked>
+                                        <label class="form-check-label" for="searchEmails">
+                                            Emails
+                                        </label>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="searchContacts">
+                                        <label class="form-check-label" for="searchContacts">
+                                            Contacts
+                                        </label>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="searchFiles">
+                                        <label class="form-check-label" for="searchFiles">
+                                            Files
+                                        </label>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <div class="d-grid">
+                                        <button class="btn btn-sm btn-primary">Apply Filters</button>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dropdown-menu search-results-dropdown" aria-labelledby="globalSearchInput">
+                    <div class="search-results-header">
+                        <span>Search Results</span>
+                        <small class="text-muted">Press Enter for more</small>
+                    </div>
+                    <div class="search-results-body">
+                        <div class="search-result-category">
+                            <div class="category-header">
+                                <i class="fas fa-envelope"></i> Emails
+                            </div>
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Project Update Meeting</h6>
+                                        <small>3 days ago</small>
+                                    </div>
+                                    <p class="mb-1 text-muted">Sender: John Doe</p>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="search-result-category">
+                            <div class="category-header">
+                                <i class="fas fa-users"></i> Contacts
+                            </div>
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <div class="d-flex align-items-center">
+                                        <img src="{% static 'communication/images/default-avatar.png' %}" class="rounded-circle me-3" width="40" height="40">
+                                        <div>
+                                            <h6 class="mb-1">Jane Smith</h6>
+                                            <p class="mb-0 text-muted">jane.smith@company.com</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nav-right">
+            <div class="telebird-quick-actions">
+                <div class="btn-group" role="group" aria-label="Quick Actions">
+                    <button class="btn btn-outline-secondary" title="Calendar">
+                        <i class="fas fa-calendar"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" title="Contacts">
+                        <i class="fas fa-address-book"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" title="Tasks">
+                        <i class="fas fa-tasks"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="telebird-mail-stats">
+                <div class="stat-item" title="Unread Emails">
+                    <i class="fas fa-envelope"></i>
+                    <span class="badge bg-primary">{{ unread_count }}</span>
+                </div>
+                <div class="stat-item" title="Total Emails">
+                    <i class="fas fa-inbox"></i>
+                    <span class="badge bg-secondary">{{ emails.count }}</span>
+                </div>
+            </div>
+            
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="{{ user.profile.avatar.url|default:'/static/communication/images/default-avatar.png' }}" alt="{{ user.username }}" class="user-avatar">
+                    {{ user.get_full_name }}
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                    <li><a class="dropdown-item" href="{% url 'communication:email_settings' %}">
+                        <i class="fas fa-cog"></i> Email Settings
+                    </a></li>
+                    <li><a class="dropdown-item" href="{% url 'dashboard:profile' %}">
+                        <i class="fas fa-user"></i> Profile
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{% url 'authentication:logout' %}">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="telebird-sidebar">
+        <div class="telebird-sidebar-actions">
+            <button id="telebird-compose-btn" class="btn btn-primary" data-compose-url="{% url 'communication:email_compose_telebird' %}">
+                <i class="fas fa-plus"></i> Add Email
+            </button>
+        </div>
+        
+        {% if user.emailaccount %}
+        <div class="telebird-email-account">
+            <div class="email-account-info">
+                <i class="fas fa-envelope"></i> 
+                <span>{{ user.emailaccount.email }}</span>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% comment %}
+        Folders are now hidden and will be dynamically loaded based on email account
+        {% endcomment %}
+        <ul class="telebird-folder-list d-none">
+            <li data-folder-type="inbox" class="{% if active_tab == 'inbox' %}active{% endif %}">
+                <i class="fas fa-inbox"></i> Inbox 
+                {% if unread_count > 0 %}
+                    <span class="badge bg-primary ms-2">{{ unread_count }}</span>
+                {% endif %}
+            </li>
+            <li data-folder-type="sent" class="{% if active_tab == 'sent' %}active{% endif %}">
+                <i class="fas fa-paper-plane"></i> Sent
+            </li>
+            <li data-folder-type="drafts" class="{% if active_tab == 'drafts' %}active{% endif %}">
+                <i class="fas fa-file-alt"></i> Drafts
+            </li>
+            <li data-folder-type="trash">
+                <i class="fas fa-trash"></i> Trash
+            </li>
+        </ul>
+    </div>
+
+    <!-- Email List -->
+    <div class="telebird-email-list">
+        <div class="telebird-email-list-header">
+            <h4>{{ active_tab|title }} Emails</h4>
+            <div class="email-list-actions">
+                <button class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-sync"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="telebird-email-items">
+            {% for email in emails %}
+                <div class="telebird-email-item {% if not email.is_read %}unread{% endif %}" 
+                     data-email-id="{{ email.id }}">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="email-{{ email.id }}">
+                    </div>
+                    <div class="telebird-email-item-content">
+                        <span class="telebird-email-sender">{{ email.sender_name }}</span>
+                        <span class="telebird-email-subject">{{ email.subject }}</span>
+                        <span class="telebird-email-date">{{ email.sent_at|date:"M d" }}</span>
+                        <span class="telebird-email-preview">{{ email.body|truncatechars:100 }}</span>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="text-center p-3 text-muted">
+                    No emails in {{ active_tab }} folder
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Email Preview Pane -->
+    <div class="telebird-email-preview-pane">
+        {% if current_email %}
+            <div class="email-preview-header">
+                <h4>{{ current_email.subject }}</h4>
+                <div class="email-preview-actions">
+                    <div class="btn-group" role="group" aria-label="Email Actions">
+                        <button class="btn btn-outline-secondary" title="Reply">
+                            <i class="fas fa-reply"></i> Reply
+                        </button>
+                        <button class="btn btn-outline-secondary" title="Reply All">
+                            <i class="fas fa-reply-all"></i> Reply All
+                        </button>
+                        <button class="btn btn-outline-secondary" title="Forward">
+                            <i class="fas fa-share"></i> Forward
+                        </button>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">
+                                    <i class="fas fa-archive"></i> Archive
+                                </a></li>
+                                <li><a class="dropdown-item" href="#">
+                                    <i class="fas fa-tag"></i> Add Label
+                                </a></li>
+                                <li><a class="dropdown-item" href="#">
+                                    <i class="fas fa-print"></i> Print
+                                </a></li>
+                                <li><a class="dropdown-item text-danger" href="#">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="email-preview-meta">
+                <div class="sender-info">
+                    <img src="{{ current_email.sender.profile.avatar.url|default:'/static/communication/images/default-avatar.png' }}" 
+                         alt="{{ current_email.sender.username }}" 
+                         class="sender-avatar">
+                    <div class="sender-details">
+                        <strong>{{ current_email.sender.get_full_name }}</strong>
+                        <span class="text-muted">&lt;{{ current_email.sender.email }}&gt;</span>
+                    </div>
+                </div>
+                <div class="email-meta-details">
+                    <span class="text-muted">
+                        To: 
+                        {% for recipient in current_email.recipients.all %}
+                            {{ recipient.get_full_name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </span>
+                    <span class="text-muted">
+                        {{ current_email.sent_at|date:"F d, Y H:i" }}
+                    </span>
+                </div>
+            </div>
+            <div class="email-preview-body">
+                {{ current_email.body|safe }}
+            </div>
+            {% if current_email.attachments.exists %}
+                <div class="email-attachments">
+                    <h5>Attachments</h5>
+                    <div class="attachment-list">
+                        {% for attachment in current_email.attachments.all %}
+                            <div class="attachment-item">
+                                <i class="fas fa-file"></i>
+                                <span>{{ attachment.filename }}</span>
+                                <a href="{{ attachment.file.url }}" download class="btn btn-sm btn-outline-secondary ms-2">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center p-3 text-muted">
+                Select an email to view its contents
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <!-- Telebird Email Specific Scripts -->
+    <script src="{% static 'communication/js/telebird_email.js' %}?v={% now "U" %}"></script>
+{% endblock %}

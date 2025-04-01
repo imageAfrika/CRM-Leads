@@ -99,6 +99,7 @@
             <a href="{% url 'documents:document_list' %}" class="action-button">
                 <i class="fas fa-file-invoice"></i> Documents
             </a>
+            
         </div>
     </div>
 
@@ -130,6 +131,9 @@
                     data-invoices="{{ stats.total_invoices|default:0 }}"
                     data-quotes-amount="{{ stats.quotes_amount|default:0 }}"
                     data-invoices-amount="{{ stats.invoices_amount|default:0 }}"></canvas>
+                <div id="quotesVsInvoicesChartOverlay" class="diagnostic-overlay" style="display: none;">
+                    No data available for this chart.
+                </div>
             </div>
         </div>
         
@@ -362,6 +366,7 @@
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <!-- Dashboard Charts -->
+<script src="{% static 'js/dashboard/charts.js' %}"></script>
 <script src="{% static 'js/dashboard/statistics.js' %}"></script>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
 <script src="{% static 'js/dashboard/dashboard.js' %}"></script>

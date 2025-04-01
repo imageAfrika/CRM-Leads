@@ -1,0 +1,150 @@
+{% extends 'communication/email/outlook_base.html' %}
+{% load static %}
+
+{% block email_content %}
+<!-- Email list panel -->
+<div class="outlook-list">
+    <div class="outlook-list-header">
+        <div class="outlook-list-title">{{ active_tab|title }}</div>
+        <div class="outlook-filter">
+            All <i class="fas fa-chevron-down"></i>
+        </div>
+    </div>
+    
+    <ul class="outlook-messages">
+        {% for email in emails %}
+        <li class="outlook-message {% if email.is_read %}read{% endif %} {% if email.id == current_email.id %}selected{% endif %}" 
+            onclick="window.location.href='{% url 'communication:email_view_outlook' email.id %}'">
+            <div class="outlook-time">{{ email.sent_at|date:"g:i A" }}</div>
+            <div class="outlook-sender">{{ email.sender_name }}</div>
+            <div class="outlook-subject">{{ email.subject }}</div>
+            <div class="outlook-preview">{{ email.body|striptags|truncatechars:100 }}</div>
+        </li>
+        {% empty %}
+        <li class="outlook-message">
+            <div class="outlook-preview" style="text-align: center; padding: 20px 0;">No messages in your {{ active_tab }}</div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- Email view panel -->
+<div class="outlook-view">
+    {% if current_email %}
+    <div class="outlook-view-header">
+        <h2 class="outlook-view-subject">{{ current_email.subject }}</h2>
+        <div class="outlook-view-details">
+            <div class="outlook-sender-avatar">
+                {{ current_email.sender_name|slice:":1" }}
+            </div>
+            <div>
+                <div class="outlook-view-sender">{{ current_email.sender_name }} &lt;{{ current_email.sender_email }}&gt;</div>
+                <div class="outlook-view-recipients">To: 
+                    {% for recipient in current_email.recipients.all %}
+                    {{ recipient.email }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="outlook-view-datetime">{{ current_email.sent_at|date:"D, M j, Y g:i A" }}</div>
+        </div>
+    </div>
+    
+    <div class="outlook-view-body">
+        {{ current_email.body|safe }}
+    </div>
+    
+    <div class="outlook-view-actions">
+        <a href="{% url 'communication:email_compose_outlook' %}?reply_to={{ current_email.id }}" class="outlook-btn">
+            <i class="fas fa-reply"></i> Reply
+        </a>
+        
+        <a href="{% url 'communication:email_compose_outlook' %}?forward={{ current_email.id }}" class="outlook-btn">
+            <i class="fas fa-share"></i> Forward
+        </a>
+        
+        <form method="post" action="{% url 'communication:email_delete_outlook' current_email.id %}" style="display: inline-block;">
+            {% csrf_token %}
+            <input type="hidden" name="redirect_to" value="{{ active_tab }}">
+            <button type="submit" class="outlook-btn">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+        </form>
+    </div>
+    
+    {% if current_email.attachments.all %}
+    <div class="outlook-attachments">
+        <h3 class="outlook-attachments-title">Attachments</h3>
+        <div class="outlook-attachments-list">
+            {% for attachment in current_email.attachments.all %}
+            <a href="{{ attachment.file.url }}" class="outlook-attachment" download>
+                <i class="fas fa-file"></i>
+                <span>{{ attachment.filename }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--outlook-text-light);">
+        <div style="text-align: center;">
+            <i class="fas fa-envelope-open" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;"></i>
+            <p>Select an email to view</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .outlook-view-actions {
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid var(--outlook-border);
+        display: flex;
+        gap: 8px;
+    }
+    
+    .outlook-attachments {
+        margin-top: 24px;
+        padding: 16px;
+        background-color: var(--outlook-light);
+        border-radius: 4px;
+    }
+    
+    .outlook-attachments-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: var(--outlook-text);
+    }
+    
+    .outlook-attachments-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .outlook-attachment {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background-color: white;
+        border: 1px solid var(--outlook-border);
+        border-radius: 4px;
+        text-decoration: none;
+        color: var(--outlook-text);
+        font-size: 13px;
+        transition: all 0.15s ease;
+    }
+    
+    .outlook-attachment:hover {
+        background-color: var(--outlook-hover);
+        border-color: var(--outlook-text-light);
+    }
+    
+    .outlook-attachment i {
+        color: var(--outlook-primary);
+    }
+</style>
+{% endblock %} 

@@ -16,7 +16,7 @@ def document_create(request, project_pk):
             document.uploaded_by = request.user
             document.save()
             messages.success(request, 'Document uploaded successfully.')
-            return redirect('project_management:detail', pk=project_pk)
+            return redirect('project_management:project_detail', pk=project_pk)
     else:
         form = ProjectDocumentForm()
     
@@ -34,7 +34,7 @@ def document_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Document updated successfully.')
-            return redirect('project_management:detail', pk=document.project.pk)
+            return redirect('project_management:project_detail', pk=document.project.pk)
     else:
         form = ProjectDocumentForm(instance=document)
     
@@ -46,13 +46,12 @@ def document_update(request, pk):
     })
 
 @login_required
-def document_delete(request, pk):
-    document = get_object_or_404(ProjectDocument, pk=pk)
-    project_pk = document.project.pk
+def document_delete(request, project_pk, pk):
+    document = get_object_or_404(ProjectDocument, pk=pk, project_id=project_pk)
     if request.method == 'POST':
         document.delete()
         messages.success(request, 'Document deleted successfully.')
-        return redirect('project_management:detail', pk=project_pk)
+        return redirect('project_management:project_detail', pk=project_pk)
     return JsonResponse({'status': 'error'}, status=405)
 
 @login_required

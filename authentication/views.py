@@ -15,6 +15,9 @@ from documents.models import Document
 from sales.models import Sale
 from communication.models import Event
 from django.db.models import Sum, Q, Count
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+import json
 
 @login_required
 def profile_selection(request):
@@ -211,3 +214,19 @@ def index_view(request):
             return redirect('dashboard:dashboard')
         return redirect('authentication:profile_selection')
     return redirect('authentication:login') 
+
+@login_required
+@require_POST
+def update_theme(request):
+    try:
+        data = json.loads(request.body)
+        theme = data.get('theme', 'light')
+        
+        # Update user's profile theme preference
+        profile = request.user.profile
+        profile.theme = theme
+        profile.save()
+        
+        return JsonResponse({'status': 'success', 'theme': theme})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)

@@ -16,7 +16,7 @@
         <div class="form-group">
             <label for="account_type" class="form-label">Account Type</label>
             <select name="account_type" id="account_type" class="form-control" required>
-                <option value="">-- Select Project --</option>
+                <option value="">-- Select a Project --</option>
                 {% for project in projects %}
                     <option value="{{ project.id }}">{{ project.name }}</option>
                 {% endfor %}

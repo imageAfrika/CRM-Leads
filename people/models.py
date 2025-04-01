@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 
@@ -28,7 +29,7 @@ class Person(models.Model):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
-    
+
 class ContactHistory(models.Model):
     CONTACT_TYPES = [
         ('email', 'Email'),

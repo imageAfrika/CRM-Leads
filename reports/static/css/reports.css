@@ -232,6 +232,11 @@
     cursor: pointer;
 }
 
+/* Global font family */
+body {
+    font-family: 'Nunito', sans-serif;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .chart-container {

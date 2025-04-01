@@ -19,7 +19,7 @@ urlpatterns = [
     # Document URLs
     path('<int:project_pk>/documents/create/', views.document_create, name='document_create'),
     path('documents/<int:pk>/edit/', views.document_update, name='document_update'),
-    path('documents/<int:pk>/delete/', views.document_delete, name='document_delete'),
+    path('<int:project_pk>/documents/<int:pk>/delete/', views.document_delete, name='document_delete'),
     path('documents/<int:pk>/download/', views.document_download, name='document_download'),
     
     # Milestone URLs
@@ -34,4 +34,10 @@ urlpatterns = [
     path('notes/<int:pk>/edit/', views.note_update, name='note_update'),
     path('notes/<int:pk>/delete/', views.note_delete, name='note_delete'),
     path('notes/<int:pk>/toggle-pin/', views.note_toggle_pin, name='note_toggle_pin'),
+    
+    # Finance URLs
+    path('finances/create/<int:project_pk>/', views.finance_create, name='finance_create'),
+    path('finances/update/<int:pk>/', views.finance_update, name='finance_update'),
+    path('finances/delete/<int:pk>/', views.finance_delete, name='finance_delete'),
+    path('finances/get/<int:pk>/', views.finance_get, name='finance_get'),
 ] 

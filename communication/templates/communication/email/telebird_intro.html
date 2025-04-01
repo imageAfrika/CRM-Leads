@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Telebird Communication | Choose Your Client{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --telebird-primary: #0078d4;
+        --telebird-secondary: #6264a7;
+        --telebird-background: #f3f2f1;
+        --telebird-text-dark: #323130;
+        --telebird-text-light: #605e5c;
+    }
+
+    body {
+        background-color: var(--telebird-background);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .telebird-intro-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .telebird-intro-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .telebird-client-selection {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+    }
+
+    .client-option {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        text-align: center;
+        width: 350px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .client-option:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .client-icon {
+        font-size: 4rem;
+        color: var(--telebird-primary);
+        margin-bottom: 1.5rem;
+    }
+
+    .client-title {
+        color: var(--telebird-text-dark);
+        margin-bottom: 1rem;
+    }
+
+    .client-description {
+        color: var(--telebird-text-light);
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .telebird-client-selection {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="telebird-intro-container">
+    <div class="telebird-intro-header">
+        <h1 class="telebird-intro-title">Welcome to Telebird Communication</h1>
+        <p class="telebird-intro-subtitle">
+            Choose your preferred communication channel to connect and collaborate seamlessly.
+        </p>
+    </div>
+
+    <div class="telebird-client-selection">
+        <div class="client-option email-client">
+            <div class="client-icon">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <h3 class="client-title">Email Client</h3>
+            <p class="client-description">
+                Manage your professional emails, track conversations, 
+                and stay organized with our advanced email interface.
+            </p>
+            <a href="{% url 'communication:telebird_email_inbox' %}" class="btn btn-primary btn-lg">
+                Launch Email Client
+            </a>
+        </div>
+
+        <div class="client-option telegram-client">
+            <div class="client-icon">
+                <i class="fab fa-telegram-plane"></i>
+            </div>
+            <h3 class="client-title">Telegram Client</h3>
+            <p class="client-description">
+                Communicate instantly, share files, and collaborate 
+                with secure and fast messaging across devices.
+            </p>
+            <a href="{% url 'communication:telebird_telegram_client' %}" class="btn btn-primary btn-lg">
+                Launch Telegram Client
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+{% endblock %}

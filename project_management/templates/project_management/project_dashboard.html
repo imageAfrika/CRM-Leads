@@ -11,145 +11,383 @@
 {% endblock %}
 
 {% block content %}
-<div class="content-container">
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
     <div class="dashboard-header">
-        <h1 class="dashboard-title">Project Overview</h1>
-        <div class="dashboard-actions">
-            <a href="{% url 'project_management:project_analytics' %}" class="button button-primary">
-                <i class="fas fa-chart-line"></i> Financial Analytics
-            </a>
-            <a href="{% url 'project_management:project_create' %}" class="button button-outline">
+        <div class="header-left">
+            <h1 class="dashboard-title">Project Command Center</h1>
+            <p class="dashboard-subtitle">Manage and monitor all projects from a single view</p>
+        </div>
+        <div class="header-right">
+            <div class="view-switcher">
+                <button class="view-option active" data-view="dashboard">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </button>
+                <button class="view-option" data-view="list">
+                    <i class="fas fa-list"></i> List View
+                </button>
+            </div>
+            <a href="{% url 'project_management:project_create' %}" class="button button-primary">
                 <i class="fas fa-plus"></i> New Project
             </a>
         </div>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="quick-stats">
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-clipboard-list"></i>
+    <!-- Dashboard Overview -->
+    <div class="dashboard-overview compact">
+        <div class="overview-cards">
+            <div class="overview-card total">
+                <div class="overview-card-icon">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <div class="overview-card-content">
+                    <h3 class="overview-card-value">{{ total_projects|default:"18" }}</h3>
+                    <p class="overview-card-label">Total Projects</p>
+                </div>
+                <div class="overview-card-trend up">
+                    <span>+15%</span>
+                </div>
             </div>
-            <h2 class="stat-value">{{ total_projects|default:"12" }}</h2>
-            <p class="stat-label">Total Projects</p>
-            <div class="stat-change change-up">
-                <i class="fas fa-arrow-up"></i> 8% from last month
+            
+            <div class="overview-card active">
+                <div class="overview-card-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <div class="overview-card-content">
+                    <h3 class="overview-card-value">{{ active_projects|default:"12" }}</h3>
+                    <p class="overview-card-label">Active</p>
+                </div>
+                <div class="overview-card-trend up">
+                    <span>+15%</span>
+                </div>
+            </div>
+            
+            <div class="overview-card completion">
+                <div class="overview-card-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="overview-card-content">
+                    <h3 class="overview-card-value">{{ avg_completion|default:"62" }}%</h3>
+                    <p class="overview-card-label">Completion</p>
+                </div>
+                <div class="overview-card-trend up">
+                    <span>+3%</span>
             </div>
         </div>
         
-        <div class="stat-card active">
-            <div class="stat-icon">
-                <i class="fas fa-tasks"></i>
+            <div class="overview-card budget">
+                <div class="overview-card-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="overview-card-content">
+                    <h3 class="overview-card-value">${{ total_budget|default:"840K"|intcomma }}</h3>
+                    <p class="overview-card-label">Budget</p>
+                </div>
+                <div class="overview-card-trend down">
+                    <span>-2%</span>
+                </div>
             </div>
-            <h2 class="stat-value">{{ active_projects|default:"8" }}</h2>
-            <p class="stat-label">Active Projects</p>
-            <div class="stat-change change-up">
-                <i class="fas fa-arrow-up"></i> 12% from last month
+            
+            <div class="overview-card critical">
+                <div class="overview-card-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="overview-card-content">
+                    <h3 class="overview-card-value">{{ critical_issues|default:"7" }}</h3>
+                    <p class="overview-card-label">Critical</p>
+                </div>
+                <div class="overview-card-trend up critical">
+                    <span>+2</span>
+                </div>
+            </div>
             </div>
         </div>
         
-        <div class="stat-card pending">
-            <div class="stat-icon">
-                <i class="fas fa-hourglass-half"></i>
+    <!-- Dashboard Main Content -->
+    <div class="dashboard-grid">
+        <!-- Real-Time Project Updates -->
+        <div class="dashboard-card realtime-card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-bolt"></i> Real-Time Project Updates</h2>
+                <div class="card-filter">
+                    <button class="button button-sm" id="realtime-refresh">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
             </div>
-            <h2 class="stat-value">{{ pending_approvals|default:"3" }}</h2>
-            <p class="stat-label">Pending Approvals</p>
-            <div class="stat-change change-down">
-                <i class="fas fa-arrow-down"></i> 5% from last month
+            <div class="card-content">
+                <div class="realtime-tabs">
+                    <div class="tab-header">
+                        <button class="tab-btn active" data-tab="recent-updates">Recent Updates</button>
+                        <button class="tab-btn" data-tab="recent-milestones">Milestones</button>
+                        <button class="tab-btn" data-tab="recent-transactions">Transactions</button>
+                    </div>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="recent-updates">
+                            <div class="realtime-list">
+                                {% if realtime_projects %}
+                                    {% for project in realtime_projects %}
+                                    <div class="realtime-item">
+                                        <div class="realtime-icon">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="realtime-content">
+                                            <h3 class="realtime-title">{{ project.name }}</h3>
+                                            <div class="realtime-meta">
+                                                <span class="realtime-time">Updated {{ project.updated_at|timesince }} ago</span>
+                                                <span class="realtime-status status-{{ project.status }}">{{ project.get_status_display }}</span>
+                                            </div>
+                                            <div class="realtime-progress">
+                                                <div class="progress-bar" style="width: {{ project.completion_percentage }}%"></div>
+                                            </div>
+                                        </div>
+                                        <div class="realtime-action">
+                                            <a href="{% url 'project_management:detail' pk=project.pk %}" class="button button-sm">View</a>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="empty-state">
+                                        <p>No recent project updates in the last 24 hours.</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="recent-milestones">
+                            <div class="realtime-list">
+                                {% if recent_milestone_projects %}
+                                    {% for project in recent_milestone_projects %}
+                                    <div class="realtime-item">
+                                        <div class="realtime-icon milestone">
+                                            <i class="fas fa-flag"></i>
+                                        </div>
+                                        <div class="realtime-content">
+                                            <h3 class="realtime-title">{{ project.name }}</h3>
+                                            <div class="realtime-meta">
+                                                <span class="realtime-badge">Milestone Completed</span>
+                                                <span class="realtime-time">Within last 7 days</span>
+                                            </div>
+                                            <div class="realtime-progress">
+                                                <div class="progress-bar" style="width: {{ project.completion_percentage }}%"></div>
+                                            </div>
+                                        </div>
+                                        <div class="realtime-action">
+                                            <a href="{% url 'project_management:detail' pk=project.pk %}" class="button button-sm">View</a>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="empty-state">
+                                        <p>No milestones completed in the last 7 days.</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="recent-transactions">
+                            <div class="realtime-list">
+                                {% if recent_transaction_projects %}
+                                    {% for project in recent_transaction_projects %}
+                                    <div class="realtime-item">
+                                        <div class="realtime-icon transaction">
+                                            <i class="fas fa-exchange-alt"></i>
+                                        </div>
+                                        <div class="realtime-content">
+                                            <h3 class="realtime-title">{{ project.name }}</h3>
+                                            <div class="realtime-meta">
+                                                <span class="realtime-count">{{ project.recent_transaction_count }} recent transactions</span>
+                                                <span class="realtime-time">Latest on {{ project.latest_transaction|date:"M d, Y" }}</span>
+                                            </div>
+                                            <div class="realtime-details">
+                                                Budget: ${{ project.budget|default:"0"|intcomma }} | 
+                                                Utilized: {{ project.budget_utilization }}%
+                                            </div>
+                                        </div>
+                                        <div class="realtime-action">
+                                            <a href="{% url 'project_management:finances' pk=project.pk %}" class="button button-sm">View</a>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="empty-state">
+                                        <p>No financial transactions in the last 7 days.</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <div class="stat-card overdue">
-            <div class="stat-icon">
-                <i class="fas fa-exclamation-triangle"></i>
+        <!-- Project Status -->
+        <div class="dashboard-card status-card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-chart-pie"></i> Status Overview</h2>
+                <div class="card-filter">
+                    <select id="status-period">
+                        <option value="month">Last 30 Days</option>
+                        <option value="quarter">Last Quarter</option>
+                        <option value="year">Year to Date</option>
+                    </select>
+                </div>
             </div>
-            <h2 class="stat-value">{{ overdue_projects|default:"2" }}</h2>
-            <p class="stat-label">Overdue Projects</p>
-            <div class="stat-change change-up">
-                <i class="fas fa-arrow-up"></i> 2% from last month
+            <div class="card-content">
+                <div class="status-chart">
+                    <canvas id="status-distribution"></canvas>
+                </div>
+                <div class="status-legend">
+                    <div class="status-item">
+                        <div class="status-indicator not-started"></div>
+                        <div class="status-details">
+                            <span class="status-label">Not Started</span>
+                            <span class="status-count">{{ not_started|default:"3" }}</span>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-indicator in-progress"></div>
+                        <div class="status-details">
+                            <span class="status-label">In Progress</span>
+                            <span class="status-count">{{ in_progress|default:"8" }}</span>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-indicator on-hold"></div>
+                        <div class="status-details">
+                            <span class="status-label">On Hold</span>
+                            <span class="status-count">{{ on_hold|default:"2" }}</span>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-indicator completed"></div>
+                        <div class="status-details">
+                            <span class="status-label">Completed</span>
+                            <span class="status-count">{{ completed|default:"4" }}</span>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-indicator cancelled"></div>
+                        <div class="status-details">
+                            <span class="status-label">Cancelled</span>
+                            <span class="status-count">{{ cancelled|default:"1" }}</span>
+                        </div>
+                    </div>
             </div>
         </div>
     </div>
 
-    <div class="dashboard-grid">
         <!-- Project Timeline -->
         <div class="dashboard-card timeline-card">
             <div class="card-header">
-                <h2 class="card-title">Project Timeline</h2>
-                <div class="card-actions">
-                    <button class="button button-sm button-outline" id="timeline-refresh">
-                        <i class="fas fa-sync-alt"></i> Refresh
+                <h2 class="card-title"><i class="fas fa-calendar-alt"></i> Upcoming Milestones</h2>
+                <div class="card-filter">
+                    <button class="button button-sm" id="timeline-refresh">
+                        <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
             </div>
-            <div class="card-body">
+            <div class="card-content">
                 <div class="timeline">
                     <div class="timeline-item">
-                        <div class="timeline-point completed"></div>
+                        <div class="timeline-date">
+                            <span class="day">25</span>
+                            <span class="month">Jun</span>
+                        </div>
+                        <div class="timeline-marker pending"></div>
                         <div class="timeline-content">
-                            <div class="timeline-date">Today</div>
-                            <h3 class="timeline-title">Website Redesign - Phase 1 Complete</h3>
-                            <p class="timeline-description">Successfully completed the first phase of the website redesign project, delivered on time and within budget.</p>
-                            <div class="timeline-meta">
-                                <div class="timeline-meta-item">
-                                    <i class="fas fa-user"></i> John Smith
-                                </div>
-                                <div class="timeline-meta-item">
-                                    <i class="fas fa-check-circle"></i> Milestone Achieved
+                            <h3 class="timeline-title">Website Redesign - Beta Launch</h3>
+                            <div class="timeline-details">
+                                <div class="timeline-tag pending">Upcoming</div>
+                                <div class="timeline-info">
+                                    <span><i class="fas fa-user"></i> John Smith</span>
+                                    <span><i class="fas fa-clock"></i> 3 days left</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <div class="timeline-item">
-                        <div class="timeline-point"></div>
+                        <div class="timeline-date">
+                            <span class="day">02</span>
+                            <span class="month">Jul</span>
+                        </div>
+                        <div class="timeline-marker"></div>
                         <div class="timeline-content">
-                            <div class="timeline-date">Tomorrow</div>
-                            <h3 class="timeline-title">Marketing Campaign Planning Meeting</h3>
-                            <p class="timeline-description">Strategy meeting to discuss the upcoming Q3 marketing campaign objectives and tactics.</p>
-                            <div class="timeline-meta">
-                                <div class="timeline-meta-item">
-                                    <i class="fas fa-users"></i> Marketing Team
-                                </div>
-                                <div class="timeline-meta-item">
-                                    <i class="fas fa-calendar"></i> 10:00 AM
+                            <h3 class="timeline-title">Marketing Campaign - Q3 Kickoff</h3>
+                            <div class="timeline-details">
+                                <div class="timeline-tag">Scheduled</div>
+                                <div class="timeline-info">
+                                    <span><i class="fas fa-users"></i> Marketing Team</span>
+                                    <span><i class="fas fa-clock"></i> 10 days left</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <div class="timeline-item">
-                        <div class="timeline-point overdue"></div>
+                        <div class="timeline-date">
+                            <span class="day">15</span>
+                            <span class="month">Jul</span>
+                        </div>
+                        <div class="timeline-marker"></div>
                         <div class="timeline-content">
-                            <div class="timeline-date">Jun 15, 2023</div>
-                            <h3 class="timeline-title">Mobile App Development - Milestone 2</h3>
-                            <p class="timeline-description">Integration of authentication system and user profile functionality needs urgent attention.</p>
-                            <div class="timeline-meta">
-                                <div class="timeline-meta-item">
-                                    <i class="fas fa-exclamation-circle"></i> 2 days overdue
-                                </div>
-                                <div class="timeline-meta-item">
-                                    <i class="fas fa-flag"></i> High Priority
+                            <h3 class="timeline-title">Mobile App - User Authentication Update</h3>
+                            <div class="timeline-details">
+                                <div class="timeline-tag">Scheduled</div>
+                                <div class="timeline-info">
+                                    <span><i class="fas fa-user"></i> Amy Kim</span>
+                                    <span><i class="fas fa-clock"></i> 23 days left</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <div class="timeline-item">
-                        <div class="timeline-point pending"></div>
+                        <div class="timeline-date overdue">
+                            <span class="day">18</span>
+                            <span class="month">Jun</span>
+                        </div>
+                        <div class="timeline-marker overdue"></div>
                         <div class="timeline-content">
-                            <div class="timeline-date">Jun 20, 2023</div>
-                            <h3 class="timeline-title">Office Renovation Project - Review</h3>
-                            <p class="timeline-description">Final review of the office renovation plans before construction begins.</p>
-                            <div class="timeline-meta">
-                                <div class="timeline-meta-item">
-                                    <i class="fas fa-clock"></i> Upcoming
-                                </div>
-                                <div class="timeline-meta-item">
-                                    <i class="fas fa-building"></i> Facilities Management
+                            <h3 class="timeline-title">Office Renovation - Final Plan Approval</h3>
+                            <div class="timeline-details">
+                                <div class="timeline-tag overdue">Overdue</div>
+                                <div class="timeline-info">
+                                    <span><i class="fas fa-user"></i> Robert Lee</span>
+                                    <span><i class="fas fa-exclamation-circle"></i> 7 days overdue</span>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Performance -->
+        <div class="dashboard-card performance-card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-tachometer-alt"></i> Project Performance</h2>
+                <div class="card-filter">
+                    <button id="performance-view-toggle" class="button button-sm">
+                        <i class="fas fa-chart-bar"></i> Change View
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="performance-chart-container">
+                    <canvas id="performance-chart"></canvas>
+                </div>
+                <div class="performance-metrics">
+                    <div class="metric">
+                        <div class="metric-value">84%</div>
+                        <div class="metric-label">On-Time Completion</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">92%</div>
+                        <div class="metric-label">Budget Adherence</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">76%</div>
+                        <div class="metric-label">Resource Utilization</div>
                     </div>
                 </div>
             </div>
@@ -158,200 +396,265 @@
         <!-- Team Activity -->
         <div class="dashboard-card activity-card">
             <div class="card-header">
-                <h2 class="card-title">Team Activity</h2>
-                <div class="card-actions">
-                    <button class="button button-sm button-outline" id="activity-filter">
-                        <i class="fas fa-filter"></i> Filter
+                <h2 class="card-title"><i class="fas fa-users"></i> Team Activity</h2>
+                <div class="card-filter">
+                    <select id="activity-filter-select">
+                        <option value="all">All Activities</option>
+                        <option value="comments">Comments</option>
+                        <option value="updates">Updates</option>
+                        <option value="milestones">Milestones</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="activity-stream">
+                    <div class="activity-item">
+                        <div class="activity-user">
+                        <div class="activity-avatar">JS</div>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-header">
+                                <span class="activity-username">John Smith</span>
+                                <span class="activity-time">10 min ago</span>
+                            </div>
+                            <div class="activity-body">
+                                <p>Completed milestone <strong>Homepage Redesign</strong> for the Website Redesign project.</p>
+                            </div>
+                            <div class="activity-meta milestone">
+                                <i class="fas fa-flag"></i> Milestone Completed
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-user">
+                        <div class="activity-avatar">AK</div>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-header">
+                                <span class="activity-username">Amy Kim</span>
+                                <span class="activity-time">45 min ago</span>
+                            </div>
+                            <div class="activity-body">
+                                <p>Uploaded <strong>Q3 Marketing Strategy.pdf</strong> to Marketing Campaign project.</p>
+                        </div>
+                            <div class="activity-meta document">
+                                <i class="fas fa-file-alt"></i> Document Upload
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-user">
+                        <div class="activity-avatar">MP</div>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-header">
+                                <span class="activity-username">Maria Perez</span>
+                                <span class="activity-time">2 hours ago</span>
+                            </div>
+                            <div class="activity-body">
+                                <p>Created new task <strong>API Integration Testing</strong> in Mobile App Development project.</p>
+                            </div>
+                            <div class="activity-meta task">
+                                <i class="fas fa-tasks"></i> Task Created
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-user">
+                            <div class="activity-avatar">RL</div>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-header">
+                                <span class="activity-username">Robert Lee</span>
+                                <span class="activity-time">Yesterday</span>
+                            </div>
+                            <div class="activity-body">
+                                <p>Updated budget allocation for <strong>Office Renovation Project</strong>. Budget increased by $45,000.</p>
+                            </div>
+                            <div class="activity-meta budget">
+                                <i class="fas fa-dollar-sign"></i> Budget Update
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Project Priorities -->
+        <div class="dashboard-card priorities-card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-star"></i> Priority Projects</h2>
+                <div class="card-filter">
+                    <button class="button button-sm">
+                        <i class="fas fa-ellipsis-v"></i>
                     </button>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="activity-list">
-                    <div class="activity-item">
-                        <div class="activity-avatar">JS</div>
-                        <div class="activity-content">
-                            <div class="activity-header">
-                                <h3 class="activity-user">John Smith</h3>
-                                <span class="activity-time">10 min ago</span>
+            <div class="card-content">
+                <div class="priority-projects">
+                    <div class="priority-project">
+                        <div class="priority-project-info">
+                            <h3 class="priority-project-title">Website Redesign</h3>
+                            <div class="priority-project-meta">
+                                <span class="priority-badge high">High Priority</span>
+                                <span class="priority-status">70% Complete</span>
                             </div>
-                            <p class="activity-action">Completed milestone: Homepage redesign</p>
-                            <p class="activity-project">Website Redesign Project</p>
+                            <div class="priority-progress">
+                                <div class="progress-bar" data-progress="70"></div>
+                            </div>
+                        </div>
+                        <div class="priority-project-metrics">
+                            <div class="priority-metric">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>15 Days Left</span>
+                            </div>
+                            <div class="priority-metric">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span>$24,000 / $35,000</span>
+                </div>
+            </div>
+        </div>
+        
+                    <div class="priority-project">
+                        <div class="priority-project-info">
+                            <h3 class="priority-project-title">Mobile App Development</h3>
+                            <div class="priority-project-meta">
+                                <span class="priority-badge critical">Critical</span>
+                                <span class="priority-status">45% Complete</span>
+                </div>
+                            <div class="priority-progress">
+                                <div class="progress-bar critical" data-progress="45"></div>
+            </div>
+                        </div>
+                        <div class="priority-project-metrics">
+                            <div class="priority-metric warning">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>5 Days Left</span>
+                            </div>
+                            <div class="priority-metric">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span>$68,000 / $120,000</span>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="activity-item">
-                        <div class="activity-avatar">AK</div>
-                        <div class="activity-content">
-                            <div class="activity-header">
-                                <h3 class="activity-user">Amy Kim</h3>
-                                <span class="activity-time">1 hour ago</span>
+                    <div class="priority-project">
+                        <div class="priority-project-info">
+                            <h3 class="priority-project-title">Marketing Campaign</h3>
+                            <div class="priority-project-meta">
+                                <span class="priority-badge medium">Medium Priority</span>
+                                <span class="priority-status">85% Complete</span>
                             </div>
-                            <p class="activity-action">Added new document: Q3 Marketing Plan</p>
-                            <p class="activity-project">Marketing Campaign</p>
+                            <div class="priority-progress">
+                                <div class="progress-bar success" data-progress="85"></div>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-avatar">RL</div>
-                        <div class="activity-content">
-                            <div class="activity-header">
-                                <h3 class="activity-user">Robert Lee</h3>
-                                <span class="activity-time">3 hours ago</span>
+                        <div class="priority-project-metrics">
+                            <div class="priority-metric">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>28 Days Left</span>
                             </div>
-                            <p class="activity-action">Updated budget allocation</p>
-                            <p class="activity-project">Office Renovation Project</p>
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-avatar">MP</div>
-                        <div class="activity-content">
-                            <div class="activity-header">
-                                <h3 class="activity-user">Maria Perez</h3>
-                                <span class="activity-time">Yesterday</span>
+                            <div class="priority-metric success">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span>$42,000 / $50,000</span>
                             </div>
-                            <p class="activity-action">Created new project: Mobile App Phase 2</p>
-                            <p class="activity-project">Mobile App Development</p>
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-avatar">DJ</div>
-                        <div class="activity-content">
-                            <div class="activity-header">
-                                <h3 class="activity-user">David Johnson</h3>
-                                <span class="activity-time">Yesterday</span>
-                            </div>
-                            <p class="activity-action">Commented on task: API Integration</p>
-                            <p class="activity-project">Mobile App Development</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Project Status Distribution -->
-        <div class="dashboard-card distribution-card">
+        <!-- Resource Allocation -->
+        <div class="dashboard-card resource-card">
             <div class="card-header">
-                <h2 class="card-title">Project Status Distribution</h2>
-            </div>
-            <div class="card-body">
-                <div class="distribution-chart">
-                    <canvas id="status-chart"></canvas>
+                <h2 class="card-title"><i class="fas fa-sitemap"></i> Resource Allocation</h2>
+                <div class="card-filter">
+                    <select id="resource-filter">
+                        <option value="department">By Department</option>
+                        <option value="project">By Project</option>
+                        <option value="role">By Role</option>
+                    </select>
                 </div>
             </div>
-        </div>
-        
-        <!-- Recent Projects -->
-        <div class="dashboard-card recent-projects-card">
-            <div class="card-header">
-                <h2 class="card-title">Recent Projects</h2>
-                <div class="card-actions">
-                    <a href="{% url 'project_management:project_list' %}" class="button button-sm button-outline">
-                        <i class="fas fa-eye"></i> View All
-                    </a>
+            <div class="card-content">
+                <div class="resource-allocation-chart">
+                    <canvas id="resource-chart"></canvas>
                 </div>
-            </div>
-            <div class="card-body">
-                <ul class="project-list">
-                    {% for project in recent_projects|slice:":5" %}
-                    <li class="project-item">
-                        <div class="project-top">
-                            <h3 class="project-title">{{ project.name }}</h3>
-                            <span class="status-badge status-{{ project.status|lower }}">{{ project.get_status_display }}</span>
+                <div class="resource-summary">
+                    <div class="resource-item">
+                        <div class="resource-icon">
+                            <i class="fas fa-laptop-code"></i>
                         </div>
-                        <div class="project-meta">
-                            <div class="project-meta-item">
-                                <i class="fas fa-calendar"></i> {{ project.end_date|date:"M d, Y" }}
-                            </div>
-                            <div class="project-meta-item">
-                                <i class="fas fa-user"></i> {{ project.manager }}
-                            </div>
-                        </div>
-                        <div class="project-progress">
-                            <div class="progress-container">
-                                <div class="progress-bar" style="width: {{ project.completion_percentage }}%;"></div>
-                            </div>
-                            <div class="progress-stats">
-                                <span>Progress: {{ project.completion_percentage }}%</span>
-                                <span>Budget: ${{ project.budget|default:0|floatformat:0|intcomma }}</span>
-                            </div>
-                        </div>
-                    </li>
-                    {% empty %}
-                    <li class="project-item">
-                        <div class="empty-state">
-                            <p>No recent projects found.</p>
-                            <a href="{% url 'project_management:project_create' %}" class="button button-sm button-primary">
-                                <i class="fas fa-plus"></i> Create Project
-                            </a>
-                        </div>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-        
-        <!-- Budget Overview -->
-        <div class="dashboard-card budget-card">
-            <div class="card-header">
-                <h2 class="card-title">Budget Overview</h2>
-                <div class="card-actions">
-                    <a href="{% url 'project_management:project_analytics' %}" class="button button-sm button-outline">
-                        <i class="fas fa-chart-pie"></i> View Analytics
-                    </a>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="budget-grid">
-                    <div class="budget-item">
-                        <div class="budget-header">
-                            <h3 class="budget-title">Total Budget</h3>
-                            <i class="fas fa-wallet"></i>
-                        </div>
-                        <div class="budget-value">${{ total_budget|default:"650,000"|intcomma }}</div>
-                        <div class="budget-progress">
-                            <div class="progress-container">
-                                <div class="progress-bar" style="width: 100%;"></div>
+                        <div class="resource-details">
+                            <span class="resource-name">Development</span>
+                            <div class="resource-data">
+                                <span class="resource-value">42%</span>
+                                <div class="resource-bar">
+                                    <div class="resource-fill" style="width: 42%"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="budget-item">
-                        <div class="budget-header">
-                            <h3 class="budget-title">Allocated</h3>
-                            <i class="fas fa-money-bill-wave"></i>
+                    <div class="resource-item">
+                        <div class="resource-icon">
+                            <i class="fas fa-paint-brush"></i>
                         </div>
-                        <div class="budget-value">${{ project.budget|intcomma }}</div>
-                        <div class="budget-progress">
-                            <div class="progress-container">
-                                <div class="progress-bar" style="width: 80%;"></div>
+                        <div class="resource-details">
+                            <span class="resource-name">Design</span>
+                            <div class="resource-data">
+                                <span class="resource-value">28%</span>
+                                <div class="resource-bar">
+                                    <div class="resource-fill" style="width: 28%"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="budget-item">
-                        <div class="budget-header">
-                            <h3 class="budget-title">Spent</h3>
-                            <i class="fas fa-hand-holding-usd"></i>
+                    <div class="resource-item">
+                        <div class="resource-icon">
+                            <i class="fas fa-bullhorn"></i>
                         </div>
-                        <div class="budget-value">${{ project.actual_cost|intcomma }}</div>
-                        <div class="budget-progress">
-                            <div class="progress-container">
-                                <div class="progress-bar" style="width: 60%;"></div>
+                        <div class="resource-details">
+                            <span class="resource-name">Marketing</span>
+                            <div class="resource-data">
+                                <span class="resource-value">15%</span>
+                                <div class="resource-bar">
+                                    <div class="resource-fill" style="width: 15%"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="budget-item">
-                        <div class="budget-header">
-                            <h3 class="budget-title">Remaining</h3>
-                            <i class="fas fa-piggy-bank"></i>
+                    <div class="resource-item">
+                        <div class="resource-icon">
+                            <i class="fas fa-headset"></i>
                         </div>
-                        <div class="budget-value positive">${{ remaining_budget|default:"260,000"|intcomma }}</div>
-                        <div class="budget-progress">
-                            <div class="progress-container">
-                                <div class="progress-bar" style="width: 40%;"></div>
+                        <div class="resource-details">
+                            <span class="resource-name">Support</span>
+                            <div class="resource-data">
+                                <span class="resource-value">10%</span>
+                                <div class="resource-bar">
+                                    <div class="resource-fill" style="width: 10%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="resource-item">
+                        <div class="resource-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div class="resource-details">
+                            <span class="resource-name">Operations</span>
+                            <div class="resource-data">
+                                <span class="resource-value">5%</span>
+                                <div class="resource-bar">
+                                    <div class="resource-fill" style="width: 5%"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -366,25 +669,93 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Status Distribution Chart
-    const statusCtx = document.getElementById('status-chart').getContext('2d');
-    new Chart(statusCtx, {
+        // Initialize charts and dashboard functionality
+        initStatusChart();
+        initPerformanceChart();
+        animateProgressBars();
+        
+        // Tab functionality for real-time updates
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+        
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                
+                // Remove active class from all buttons and panes
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabPanes.forEach(p => p.classList.remove('active'));
+                
+                // Add active class to current button and pane
+                this.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Refresh real-time data
+        const refreshBtn = document.getElementById('realtime-refresh');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function() {
+                // Show loading spinner
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                // Simulate refresh delay
+                setTimeout(() => {
+                    // Restore button
+                    this.innerHTML = '<i class="fas fa-sync-alt"></i>';
+                    
+                    // Show notification
+                    showNotification('Data refreshed successfully', 'success');
+                }, 1000);
+                
+                // In a real implementation, you would fetch new data via AJAX here
+                // And update the DOM with the new data
+            });
+        }
+        
+        // View switcher
+        const viewOptions = document.querySelectorAll('.view-option');
+        viewOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                viewOptions.forEach(o => o.classList.remove('active'));
+                this.classList.add('active');
+                
+                const view = this.getAttribute('data-view');
+                if (view === 'list') {
+                    window.location.href = "{% url 'project_management:project_list' %}";
+                }
+            });
+        });
+        
+        // Initialize status distribution chart
+        function initStatusChart() {
+            const ctx = document.getElementById('status-distribution');
+            if (!ctx) return;
+            
+            const statusChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['In Progress', 'Completed', 'Not Started', 'On Hold', 'Cancelled'],
+                    labels: ['Not Started', 'In Progress', 'On Hold', 'Completed', 'Cancelled'],
             datasets: [{
-                data: [8, 4, 3, 2, 1],
+                        data: [
+                            {{ not_started|default:"3" }}, 
+                            {{ in_progress|default:"8" }}, 
+                            {{ on_hold|default:"2" }}, 
+                            {{ completed|default:"4" }}, 
+                            {{ cancelled|default:"1" }}
+                        ],
                 backgroundColor: [
-                    getComputedStyle(document.documentElement).getPropertyValue('--primary-color'),
-                    getComputedStyle(document.documentElement).getPropertyValue('--success-color'),
-                    getComputedStyle(document.documentElement).getPropertyValue('--secondary-color'),
-                    getComputedStyle(document.documentElement).getPropertyValue('--warning-color'),
-                    getComputedStyle(document.documentElement).getPropertyValue('--danger-color')
-                ],
-                borderWidth: 0
+                            '#6c757d', // Not Started
+                            '#4361ee', // In Progress
+                            '#f39c12', // On Hold
+                            '#2ecc71', // Completed
+                            '#e74c3c'  // Cancelled
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
             }]
         },
         options: {
@@ -393,39 +764,120 @@ document.addEventListener('DOMContentLoaded', function() {
             cutout: '70%',
             plugins: {
                 legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 12,
-                        padding: 15
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.formattedValue || '';
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((context.raw / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
                     }
                 }
             }
         }
     });
     
-    // Refresh button functionality
-    document.getElementById('timeline-refresh').addEventListener('click', function() {
-        showNotification('Timeline refreshed successfully', 'success');
-    });
-    
-    // Filter button functionality
-    document.getElementById('activity-filter').addEventListener('click', function() {
-        showNotification('Activity filters applied', 'info');
-    });
-    
-    // Function to show notifications
-    function showNotification(message, type = 'info') {
-        const container = document.getElementById('notification-container');
+            // Handle period change
+            const periodSelect = document.getElementById('status-period');
+            if (periodSelect) {
+                periodSelect.addEventListener('change', function() {
+                    // In a real implementation, you would fetch new data based on the selected period
+                    // For demo, we'll just show a notification
+                    showNotification('Period changed to ' + this.options[this.selectedIndex].text, 'info');
+                });
+            }
+        }
         
+        // Initialize performance chart
+        function initPerformanceChart() {
+            const ctx = document.getElementById('performance-chart');
+            if (!ctx) return;
+            
+            const performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Actual Progress',
+                        data: [30, 45, 57, 60, 75, 82],
+                        borderColor: '#4361ee',
+                        backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Planned Progress',
+                        data: [33, 50, 66, 75, 83, 90],
+                        borderColor: '#6c757d',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        tension: 0.3,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 6
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Animate all progress bars on page load
+        function animateProgressBars() {
+            const progressBars = document.querySelectorAll('.progress-bar');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const container = document.querySelector('.notification-container');
+            if (!container) {
+                const newContainer = document.createElement('div');
+                newContainer.className = 'notification-container';
+                document.body.appendChild(newContainer);
+            }
+            
+            const notificationContainer = document.querySelector('.notification-container');
         const notification = document.createElement('div');
         notification.className = 'notification';
         
-        const iconClass = type === 'success' ? 'fa-check-circle' :
-                          type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            const iconClass = type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'info-circle';
         
         notification.innerHTML = `
             <div class="notification-icon ${type}">
-                <i class="fas ${iconClass}"></i>
+                    <i class="fas fa-${iconClass}"></i>
             </div>
             <div class="notification-content">
                 <p class="notification-message">${message}</p>
@@ -435,28 +887,33 @@ document.addEventListener('DOMContentLoaded', function() {
             </button>
         `;
         
-        container.appendChild(notification);
+            notificationContainer.appendChild(notification);
         
-        // Add active class to trigger animation
+            // Show notification with animation
         setTimeout(() => {
             notification.classList.add('active');
         }, 10);
         
-        // Auto remove after 3 seconds
-        setTimeout(() => {
+            // Add close button functionality
+            const closeBtn = notification.querySelector('.notification-close');
+            closeBtn.addEventListener('click', function() {
             notification.classList.remove('active');
             setTimeout(() => {
-                container.removeChild(notification);
+                    notification.remove();
             }, 300);
-        }, 3000);
+            });
         
-        // Close button functionality
-        notification.querySelector('.notification-close').addEventListener('click', function() {
-            notification.classList.remove('active');
+            // Auto-close after 5 seconds
             setTimeout(() => {
-                container.removeChild(notification);
+                if (notification.parentNode) {
+                    notification.classList.remove('active');
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.remove();
+                        }
             }, 300);
-        });
+                }
+            }, 5000);
     }
 });
 </script>

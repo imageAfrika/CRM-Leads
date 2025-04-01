@@ -11,7 +11,7 @@ urlpatterns = [
     path('<int:pk>/custom/', views.lead_detail_custom, name='lead_detail_custom'),
     path('<int:pk>/update/', views.LeadUpdateView.as_view(), name='lead_update'),
     path('<int:pk>/delete/', views.LeadDeleteView.as_view(), name='lead_delete'),
-    path('<int:pk>/convert/', views.LeadConvertView.as_view(), name='lead_convert'),
+    path('<int:pk>/convert/', views.lead_convert, name='lead_convert'),
     
     # Dashboard URL
     path('dashboard/', views.LeadDashboardView.as_view(), name='lead_dashboard'),

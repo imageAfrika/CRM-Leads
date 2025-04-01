@@ -16,7 +16,7 @@ def note_create(request, project_pk):
             note.created_by = request.user
             note.save()
             messages.success(request, 'Note added successfully.')
-            return redirect('project_management:detail', pk=project_pk)
+            return redirect('project_management:project_detail', pk=project_pk)
     else:
         form = ProjectNoteForm()
     
@@ -34,7 +34,7 @@ def note_update(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Note updated successfully.')
-            return redirect('project_management:detail', pk=note.project.pk)
+            return redirect('project_management:project_detail', pk=note.project.pk)
     else:
         form = ProjectNoteForm(instance=note)
     
@@ -52,7 +52,7 @@ def note_delete(request, pk):
     if request.method == 'POST':
         note.delete()
         messages.success(request, 'Note deleted successfully.')
-        return redirect('project_management:detail', pk=project_pk)
+        return redirect('project_management:project_detail', pk=project_pk)
     return JsonResponse({'status': 'error'}, status=405)
 
 @login_required

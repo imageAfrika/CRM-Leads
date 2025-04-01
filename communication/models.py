@@ -40,7 +40,7 @@ class EmailAccount(models.Model):
     """Email account configuration model"""
     PROVIDER_CHOICES = [
         ('gmail', 'Gmail'),
-        ('outlook', 'Outlook'),
+        ('telebird', 'Telebird'),
         ('yahoo', 'Yahoo'),
         ('custom', 'Custom SMTP'),
     ]
@@ -108,6 +108,10 @@ class Email(models.Model):
         related_name='sent_emails'
     )
     
+    # For compatibility with the Telebird views, add these fields
+    sender_name = models.CharField(max_length=255, blank=True)
+    sender_email = models.EmailField(blank=True)
+    
     # Replace single recipient with ManyToMany relationship
     recipients = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
@@ -129,6 +133,8 @@ class Email(models.Model):
     
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     is_read = models.BooleanField(default=False)
+    is_draft = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
     
     attachments = models.ManyToManyField(
         EmailAttachment, 
@@ -338,3 +344,18 @@ class TelegramMessage(models.Model):
     
     def __str__(self):
         return f"Telegram Message to {self.contact.first_name} - {self.sent_at}"
+
+class UserPreference(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='preferences')
+    
+    # Email preferences
+    EMAIL_INTERFACE_CHOICES = [
+        ('basic', 'Basic'),
+        ('telebird', 'Telebird'),
+    ]
+    
+    default_email_interface = models.CharField(
+        max_length=20,
+        choices=EMAIL_INTERFACE_CHOICES,
+        default='basic'
+    )

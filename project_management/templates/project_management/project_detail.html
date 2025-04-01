@@ -245,22 +245,36 @@
                 {% for milestone in project.milestones.all %}
                 <div class="milestone-item">
                     <div class="milestone-marker">
-                        <div class="milestone-indicator bg-{% if milestone.status == 'COMPLETED' %}success{% elif milestone.status == 'IN_PROGRESS' %}primary{% elif milestone.status == 'OVERDUE' %}danger{% else %}secondary{% endif %}"></div>
+                        <div class="milestone-indicator bg-{% if milestone.is_completed %}success{% elif milestone.is_overdue %}danger{% else %}primary{% endif %}"></div>
                         <div class="milestone-line"></div>
                     </div>
                     <div class="milestone-details">
                         <div class="milestone-title">{{ milestone.title }}</div>
-                        <div class="milestone-date">Due: {{ milestone.due_date|date:"M d, Y" }}</div>
-                        <div class="milestone-status status-{{ milestone.status|lower }}">
-                            {{ milestone.get_status_display }}
+                        <div class="milestone-date">
+                            <i class="fas fa-calendar"></i> Due: {{ milestone.due_date|date:"M d, Y" }}
+                        </div>
+                        {% if milestone.description %}
+                        <div class="milestone-description">{{ milestone.description|linebreaks }}</div>
+                        {% endif %}
+                        <div class="milestone-status {% if milestone.is_completed %}status-completed{% elif milestone.is_overdue %}status-overdue{% else %}status-in-progress{% endif %}">
+                            {% if milestone.is_completed %}
+                                <i class="fas fa-check-circle"></i> Completed
+                            {% elif milestone.is_overdue %}
+                                <i class="fas fa-exclamation-circle"></i> Overdue
+                            {% else %}
+                                <i class="fas fa-clock"></i> In Progress
+                            {% endif %}
                         </div>
                         <div class="milestone-actions">
-                            <a href="{% url 'project_management:milestone_update' project.pk milestone.pk %}" class="button button-sm button-icon">
+                            <a href="{% url 'project_management:milestone_update' milestone.pk %}" class="button button-sm button-icon">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="{% url 'project_management:milestone_delete' project.pk milestone.pk %}" class="button button-sm button-icon danger">
-                                <i class="fas fa-trash"></i>
-                            </a>
+                            <form method="post" action="{% url 'project_management:milestone_delete' milestone.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="button button-sm button-icon danger" onclick="return confirm('Are you sure you want to delete this milestone?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -268,6 +282,7 @@
             </div>
             {% else %}
             <div class="empty-state">
+                <i class="fas fa-flag fa-2x mb-3"></i>
                 <p>No milestones have been added to this project yet.</p>
             </div>
             {% endif %}
@@ -282,9 +297,9 @@
                 </a>
             </div>
             
-            {% if project.notes.all %}
+            {% if project.project_notes.all %}
             <div class="note-list">
-                {% for note in project.notes.all %}
+                {% for note in project.project_notes.all %}
                 <div class="note-item">
                     <div class="note-header">
                         <div class="note-title">{{ note.title }}</div>
@@ -296,12 +311,15 @@
                     <div class="note-footer">
                         <div>By: {{ note.created_by }}</div>
                         <div class="note-actions">
-                            <a href="{% url 'project_management:note_update' project.pk note.pk %}" class="button button-sm button-icon">
+                            <a href="{% url 'project_management:note_update' note.pk %}" class="button button-sm button-icon">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="{% url 'project_management:note_delete' project.pk note.pk %}" class="button button-sm button-icon danger">
-                                <i class="fas fa-trash"></i>
-                            </a>
+                            <form method="post" action="{% url 'project_management:note_delete' note.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="button button-sm button-icon danger" onclick="return confirm('Are you sure you want to delete this note?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -346,9 +364,12 @@
                         <a href="{{ document.file.url }}" class="button button-sm button-icon" target="_blank">
                             <i class="fas fa-download"></i>
                         </a>
-                        <a href="{% url 'project_management:document_delete' project.pk document.pk %}" class="button button-sm button-icon danger">
-                            <i class="fas fa-trash"></i>
-                        </a>
+                        <form method="post" action="{% url 'project_management:document_delete' project.pk document.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="button button-sm button-icon danger" onclick="return confirm('Are you sure you want to delete this document?')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
                     </div>
                 </div>
                 {% endfor %}

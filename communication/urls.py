@@ -40,9 +40,19 @@ from .views import (
     NotificationMarkAllReadView,
 )
 
+from . import views_telebird
+
 app_name = 'communication'
 
 urlpatterns = [
+    # Telebird Communication URLs
+    path('telebird/', views_telebird.TelebirdIntroView.as_view(), name='telebird_intro'),
+    path('telebird/email/', login_required(views_telebird.TelebirdEmailInboxView.as_view()), name='telebird_email_inbox'),
+    path('telebird/telegram/', login_required(views_telebird.TelebirdTelegramClientView.as_view()), name='telebird_telegram_client'),
+    
+    # Email Settings URL
+    path('email/settings/', login_required(views_telebird.EmailSettingsView.as_view()), name='email_settings'),
+
     # Email URLs
     path('email/', login_required(EmailListView.as_view()), name='email_inbox'),
     path('email/compose/', login_required(EmailComposeView.as_view()), name='email_compose'),
@@ -50,6 +60,14 @@ urlpatterns = [
     path('email/drafts/', login_required(EmailDraftView.as_view()), name='email_drafts'),
     path('email/<uuid:pk>/', login_required(EmailDetailView.as_view()), name='email_detail'),
     path('email/delete/<uuid:pk>/', login_required(EmailDeleteView.as_view()), name='email_delete'),
+
+    # Telebird email interface URLs
+    path('telebird/inbox/', login_required(views_telebird.TelebirdEmailInboxView.as_view()), name='email_inbox_telebird'),
+    path('telebird/sent/', login_required(views_telebird.TelebirdEmailSentView.as_view()), name='email_sent_telebird'),
+    path('telebird/drafts/', login_required(views_telebird.TelebirdEmailDraftsView.as_view()), name='email_drafts_telebird'),
+    path('telebird/compose/', login_required(views_telebird.TelebirdEmailComposeView.as_view()), name='email_compose_telebird'),
+    path('telebird/<int:pk>/', login_required(views_telebird.TelebirdEmailViewView.as_view()), name='email_view_telebird'),
+    path('telebird/<int:pk>/delete/', login_required(views_telebird.TelebirdEmailDeleteView.as_view()), name='email_delete_telebird'),
 
     # Contact URLs
     path('contacts/', login_required(ContactListView.as_view()), name='contact_list'),

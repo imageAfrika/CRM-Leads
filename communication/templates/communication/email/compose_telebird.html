@@ -1,0 +1,97 @@
+{% extends "communication/email/telebird_base.html" %}
+{% load static %}
+
+{% block telebird_content %}
+<div class="telebird-compose">
+    <div class="telebird-compose-header">
+        <h3>Compose New Email</h3>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data" class="telebird-compose-body">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="telebird-compose-field">
+            <label for="{{ form.recipients.id_for_label }}">To:</label>
+            {{ form.recipients }}
+            {% if form.recipients.errors %}
+            <div class="text-danger">
+                {% for error in form.recipients.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="telebird-compose-field">
+            <label for="{{ form.subject.id_for_label }}">Subject:</label>
+            {{ form.subject }}
+            {% if form.subject.errors %}
+            <div class="text-danger">
+                {% for error in form.subject.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="telebird-compose-field">
+            <label for="{{ form.body.id_for_label }}">Message:</label>
+            {{ form.body }}
+            {% if form.body.errors %}
+            <div class="text-danger">
+                {% for error in form.body.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="telebird-compose-field">
+            <label for="{{ form.attachments.id_for_label }}">Attachments:</label>
+            {{ form.attachments }}
+            {% if form.attachments.errors %}
+            <div class="text-danger">
+                {% for error in form.attachments.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="telebird-compose-actions">
+            <div class="telebird-btn-group">
+                <button type="submit" class="telebird-btn telebird-btn-primary">
+                    <i class="fas fa-paper-plane"></i> Send
+                </button>
+                <button type="submit" name="save_draft" class="telebird-btn">
+                    <i class="fas fa-save"></i> Save as Draft
+                </button>
+            </div>
+            
+            <a href="{% url 'communication:email_inbox_telebird' %}" class="telebird-btn">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize any rich text editors or form enhancements here
+        const bodyField = document.getElementById('{{ form.body.id_for_label }}');
+        if (bodyField) {
+            // You can add a rich text editor here if needed
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %} 

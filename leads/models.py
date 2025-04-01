@@ -85,13 +85,13 @@ class Lead(models.Model):
         return reverse('leads:detail', args=[str(self.id)])
 
     def get_status_color(self):
-        """Return Bootstrap color class based on status."""
+        """Return color class based on status for consistent styling."""
         color_map = {
-            'new': 'info',
-            'contacted': 'primary',
-            'qualified': 'warning',
-            'proposal': 'secondary',
-            'negotiation': 'info',
+            'new': 'primary',
+            'contacted': 'info',
+            'qualified': 'success',
+            'proposal': 'warning',
+            'negotiation': 'danger',
             'won': 'success',
             'lost': 'danger',
         }

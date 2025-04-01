@@ -1,21 +1,74 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Sales</h1>
-<div class="sale-list">
-    {% if sales %}
-        <ul>
-        {% for sale in sales %}
-            <li>
-                <h2><a href="{% url 'sales:sale_detail' sale.pk %}">{{ sale.client.name }} - {{ sale.sale_date }}</a></h2>
-                <p>Amount: ${{ sale.amount }}</p>
-                <p>{{ sale.description }}</p>
-            </li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>No sales found.</p>
-    {% endif %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Sales</h1>
+        <a href="{% url 'sales:sale_create' %}" class="btn btn-primary">
+            Add New Sale
+        </a>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        {% if sales %}
+            <table class="w-full">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-4 py-3 text-left">Client</th>
+                        <th class="px-4 py-3 text-left">Sale Date</th>
+                        <th class="px-4 py-3 text-right">Total Amount</th>
+                        <th class="px-4 py-3 text-left">Payment Status</th>
+                        <th class="px-4 py-3 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="px-4 py-3">
+                                <a href="{% url 'sales:sale_detail' sale.pk %}" class="text-blue-600 hover:underline">
+                                    {{ sale.client.name }}
+                                </a>
+                            </td>
+                            <td class="px-4 py-3">{{ sale.sale_date|date:"M d, Y" }}</td>
+                            <td class="px-4 py-3 text-right">${{ sale.total_amount|floatformat:2 }}</td>
+                            <td class="px-4 py-3">
+                                <span class="
+                                    {% if sale.payment_status == 'PAID' %}
+                                        text-green-600
+                                    {% elif sale.payment_status == 'PENDING' %}
+                                        text-yellow-600
+                                    {% else %}
+                                        text-red-600
+                                    {% endif %}
+                                ">
+                                    {{ sale.get_payment_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <div class="flex justify-center space-x-2">
+                                    <a href="{% url 'sales:sale_detail' sale.pk %}" class="text-blue-500 hover:text-blue-700">
+                                        View
+                                    </a>
+                                    <a href="{% url 'sales:sale_update' sale.pk %}" class="text-green-500 hover:text-green-700">
+                                        Edit
+                                    </a>
+                                    <a href="{% url 'sales:sale_delete' sale.pk %}" class="text-red-500 hover:text-red-700">
+                                        Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="p-4 text-center text-gray-500">
+                No sales found. 
+                <a href="{% url 'sales:sale_create' %}" class="text-blue-600 hover:underline">
+                    Create your first sale
+                </a>
+            </div>
+        {% endif %}
+    </div>
 </div>
-<a href="{% url 'sales:sale_create' %}" class="btn">Add New Sale</a>
-{% endblock %} 
+{% endblock %}

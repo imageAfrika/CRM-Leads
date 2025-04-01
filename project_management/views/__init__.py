@@ -32,4 +32,11 @@ from .note_views import (
     note_update,
     note_delete,
     note_toggle_pin,
+)
+
+from .finance_views import (
+    finance_create,
+    finance_update,
+    finance_delete,
+    finance_get,
 ) 

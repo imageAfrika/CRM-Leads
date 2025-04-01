@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Project, ProjectDocument, ProjectNote, ProjectMilestone
+from .models import Project, ProjectDocument, ProjectNote, ProjectMilestone, Transaction
+from django.utils import timezone
 
 class ProjectForm(forms.ModelForm):
     team_members = forms.ModelMultipleChoiceField(
@@ -93,11 +94,12 @@ class ProjectMilestoneForm(forms.ModelForm):
         completion_percentage = cleaned_data.get('completion_percentage')
         completed_date = cleaned_data.get('completed_date')
 
-        if is_completed and completion_percentage != 100:
+        if is_completed:
             cleaned_data['completion_percentage'] = 100
-
-        if is_completed and not completed_date:
-            cleaned_data['completed_date'] = forms.DateField().clean(forms.DateField().to_python(None))
+            if not completed_date:
+                cleaned_data['completed_date'] = timezone.now().date()
+        elif not is_completed:
+            cleaned_data['completed_date'] = None
 
         return cleaned_data
 
@@ -144,4 +146,20 @@ class ProjectFilterForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         from clients.models import Client
-        self.fields['client'].queryset = Client.objects.all() 
+        self.fields['client'].queryset = Client.objects.all()
+
+class TransactionForm(forms.ModelForm):
+    class Meta:
+        model = Transaction
+        fields = ['date', 'description', 'transaction_type', 'amount']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'description': forms.TextInput(attrs={'placeholder': 'Enter transaction description'}),
+            'amount': forms.NumberInput(attrs={'step': '0.01', 'min': '0'}),
+        }
+    
+    def clean_amount(self):
+        amount = self.cleaned_data['amount']
+        if amount <= 0:
+            raise forms.ValidationError('Amount must be greater than zero.')
+        return amount 

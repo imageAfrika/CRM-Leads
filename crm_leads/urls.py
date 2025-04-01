@@ -22,6 +22,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import render
+from authentication.views import update_theme  # Add this import
 
 def landing_page(request):
     return render(request, 'landing.html')
@@ -52,6 +53,7 @@ urlpatterns = [
     # Registration URLs
     path('registration/', include('registration.urls', namespace='registration')),
     path('communication/', include('communication.urls')),  # Add communication app URLs
+    path('update-theme/', update_theme, name='update_theme'),  # Add URL for theme update view
 ]
 
 if settings.DEBUG:

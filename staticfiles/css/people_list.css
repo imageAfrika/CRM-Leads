@@ -261,6 +261,38 @@
     gap: 0.75rem;
   }
   
+  /* Action Icons */
+  .person-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    padding: 0.5rem 1rem;
+    border-top: 1px solid var(--border-color);
+  }
+  
+  .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: transparent;
+    color: var(--text-light);
+    transition: var(--transition);
+    border: 1px solid transparent;
+  }
+  
+  .btn-icon:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: var(--primary-color);
+    border-color: rgba(52, 152, 219, 0.2);
+  }
+  
+  .btn-icon i {
+    font-size: 1rem;
+  }
+  
   /* Pagination */
   .pagination {
     display: flex;

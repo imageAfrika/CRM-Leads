@@ -1,0 +1,434 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Email - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        /* Telebird color palette */
+        --telebird-primary: #0078d4;
+        --telebird-secondary: #106ebe;
+        --telebird-light: #f3f2f1;
+        --telebird-dark: #323130;
+        --telebird-accent: #2b88d8;
+        --telebird-border: #edebe9;
+        --telebird-hover: #f5f5f5;
+        --telebird-active: #e1e1e1;
+        --telebird-text: #252423;
+        --telebird-text-light: #605e5c;
+        --telebird-unread: #fff;
+        --telebird-read: #faf9f8;
+        --telebird-selected: #c7e0f4;
+    }
+
+    /* Layout structure */
+    .telebird-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 70px);
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    /* Header section with app brand and search */
+    .telebird-header {
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        height: 48px;
+        background-color: var(--telebird-primary);
+        color: white;
+    }
+
+    .telebird-brand {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-right: 24px;
+    }
+
+    .telebird-search {
+        flex: 1;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: 16px;
+        position: relative;
+    }
+
+    .telebird-search input {
+        width: 100%;
+        padding: 6px 12px 6px 36px;
+        border-radius: 4px;
+        border: none;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        font-size: 14px;
+    }
+
+    .telebird-search i {
+        position: absolute;
+        left: 12px;
+        top: 9px;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .telebird-search input::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Top navigation */
+    .telebird-nav {
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        height: 44px;
+        background-color: var(--telebird-light);
+        border-bottom: 1px solid var(--telebird-border);
+    }
+
+    .telebird-nav-item {
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        height: 100%;
+        color: var(--telebird-text);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 14px;
+        position: relative;
+    }
+
+    .telebird-nav-item i {
+        margin-right: 8px;
+        font-size: 16px;
+    }
+
+    .telebird-nav-item:hover {
+        background-color: var(--telebird-hover);
+    }
+
+    .telebird-nav-item.active {
+        color: var(--telebird-primary);
+        border-bottom: 2px solid var(--telebird-primary);
+    }
+
+    .telebird-nav-item.active i {
+        color: var(--telebird-primary);
+    }
+
+    .telebird-nav-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+        margin-left: 8px;
+        background-color: var(--telebird-primary);
+        color: white;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    /* Action toolbar */
+    .telebird-toolbar {
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        height: 40px;
+        background-color: white;
+        border-bottom: 1px solid var(--telebird-border);
+    }
+
+    .telebird-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 12px;
+        border-radius: 2px;
+        background-color: transparent;
+        color: var(--telebird-text);
+        border: none;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        margin-right: 2px;
+    }
+
+    .telebird-btn i {
+        margin-right: 6px;
+        font-size: 14px;
+    }
+
+    .telebird-btn:hover {
+        background-color: var(--telebird-hover);
+    }
+
+    .telebird-btn-primary {
+        background-color: var(--telebird-primary);
+        color: white;
+    }
+
+    .telebird-btn-primary:hover {
+        background-color: var(--telebird-secondary);
+    }
+
+    .telebird-divider {
+        width: 1px;
+        height: 24px;
+        background-color: var(--telebird-border);
+        margin: 0 8px;
+    }
+
+    /* Content area */
+    .telebird-content {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+    }
+
+    /* Email list panel */
+    .telebird-list {
+        width: 350px;
+        border-right: 1px solid var(--telebird-border);
+        overflow-y: auto;
+    }
+
+    .telebird-list-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--telebird-border);
+    }
+
+    .telebird-list-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--telebird-text);
+    }
+
+    .telebird-filter {
+        display: flex;
+        align-items: center;
+        font-size: 13px;
+        color: var(--telebird-text-light);
+        cursor: pointer;
+    }
+
+    .telebird-filter i {
+        margin-left: 4px;
+    }
+
+    /* Message list */
+    .telebird-messages {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .telebird-message {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--telebird-border);
+        background-color: var(--telebird-unread);
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+
+    .telebird-message.read {
+        background-color: var(--telebird-read);
+    }
+
+    .telebird-message.selected {
+        background-color: var(--telebird-selected);
+    }
+
+    .telebird-message:hover {
+        background-color: var(--telebird-hover);
+    }
+
+    .telebird-sender {
+        font-weight: 600;
+        color: var(--telebird-text);
+        margin-bottom: 4px;
+    }
+
+    .telebird-subject {
+        font-weight: 600;
+        color: var(--telebird-text);
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .telebird-message.read .telebird-subject {
+        font-weight: 400;
+    }
+
+    .telebird-preview {
+        font-size: 13px;
+        color: var(--telebird-text-light);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .telebird-time {
+        float: right;
+        font-size: 12px;
+        color: var(--telebird-text-light);
+        margin-left: 8px;
+    }
+
+    /* Email view panel */
+    .telebird-view {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+    }
+
+    .telebird-view-header {
+        margin-bottom: 24px;
+    }
+
+    .telebird-view-subject {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--telebird-text);
+        margin-bottom: 16px;
+    }
+
+    .telebird-view-details {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .telebird-sender-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--telebird-primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-right: 12px;
+    }
+
+    .telebird-view-sender {
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--telebird-text);
+    }
+
+    .telebird-view-recipients {
+        font-size: 13px;
+        color: var(--telebird-text-light);
+        margin-top: 4px;
+    }
+
+    .telebird-view-datetime {
+        margin-left: auto;
+        font-size: 13px;
+        color: var(--telebird-text-light);
+    }
+
+    .telebird-view-body {
+        padding: 16px 0;
+        border-top: 1px solid var(--telebird-border);
+        line-height: 1.6;
+        color: var(--telebird-text);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+        .telebird-list {
+            width: 300px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .telebird-content {
+            flex-direction: column;
+        }
+        
+        .telebird-list {
+            width: 100%;
+            height: 300px;
+            border-right: none;
+            border-bottom: 1px solid var(--telebird-border);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="telebird-container">
+    <!-- Header with search -->
+    <div class="telebird-header">
+        <div class="telebird-brand">Telebird</div>
+        <div class="telebird-search">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search emails..." />
+        </div>
+    </div>
+    
+    <!-- Top navigation -->
+    <div class="telebird-nav">
+        <a href="{% url 'communication:email_inbox' %}" class="telebird-nav-item {% if active_tab == 'inbox' %}active{% endif %}">
+            <i class="fas fa-inbox"></i>
+            Inbox
+            {% if unread_count %}<span class="telebird-nav-count">{{ unread_count }}</span>{% endif %}
+        </a>
+        <a href="{% url 'communication:email_drafts' %}" class="telebird-nav-item {% if active_tab == 'drafts' %}active{% endif %}">
+            <i class="fas fa-file-alt"></i>
+            Drafts
+        </a>
+        <a href="{% url 'communication:email_sent' %}" class="telebird-nav-item {% if active_tab == 'sent' %}active{% endif %}">
+            <i class="fas fa-paper-plane"></i>
+            Sent
+        </a>
+        <a href="#" class="telebird-nav-item">
+            <i class="fas fa-trash"></i>
+            Deleted
+        </a>
+    </div>
+    
+    <!-- Toolbar with actions -->
+    <div class="telebird-toolbar">
+        <a href="{% url 'communication:email_compose' %}" class="telebird-btn telebird-btn-primary">
+            <i class="fas fa-plus"></i>
+            New Email
+        </a>
+        <div class="telebird-divider"></div>
+        <button class="telebird-btn">
+            <i class="fas fa-reply"></i>
+            Reply
+        </button>
+        <button class="telebird-btn">
+            <i class="fas fa-reply-all"></i>
+            Reply All
+        </button>
+        <button class="telebird-btn">
+            <i class="fas fa-share"></i>
+            Forward
+        </button>
+        <div class="telebird-divider"></div>
+        <button class="telebird-btn">
+            <i class="fas fa-trash"></i>
+            Delete
+        </button>
+    </div>
+    
+    <!-- Main content area -->
+    <div class="telebird-content">
+        {% block email_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %} 

@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from .models import Quote, Document, QuoteItem, Client, Expenditure, InvoiceItem
 from .forms import QuoteForm
-from django.http import JsonResponse, FileResponse, HttpResponse
+from django.http import JsonResponse, FileResponse, HttpResponse, HttpResponseNotAllowed
 from django.views.decorators.http import require_POST
 from decimal import Decimal
 from clients.models import Client
@@ -19,6 +19,9 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from io import BytesIO
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+import requests
 
 def generate_quote_number():
     # Get today's date in YYYYMMDD format
@@ -280,12 +283,193 @@ class DocumentListView(ListView):
         context['document_types'] = Document.DOCUMENT_TYPES
         context['status_choices'] = Document.STATUS_CHOICES
         
+        # Add document type counts
+        context['quote_count'] = Document.objects.filter(document_type='QUOTE').count()
+        context['invoice_count'] = Document.objects.filter(document_type='INVOICE').count()
+        context['expense_count'] = Document.objects.filter(document_type='EXPENSE').count()
+        context['purchase_count'] = Document.objects.filter(document_type='PURCHASE').count()
+        
         return context
 
 class DocumentDetailView(DetailView):
     model = Document
     template_name = 'documents/document_detail.html'
     context_object_name = 'document'
+
+@login_required
+def delete_document(request, pk):
+    if request.method == 'POST':
+        try:
+            document = get_object_or_404(Document, pk=pk)
+            
+            # Check if the document is associated with a quote or invoice
+            if hasattr(document, 'quote'):
+                document.quote.delete()
+            elif hasattr(document, 'invoice'):
+                document.invoice.delete()
+            
+            # Delete the document
+            document.delete()
+            
+            messages.success(request, f'Document #{pk} deleted successfully.')
+            return redirect('documents:document_list')
+        
+        except Exception as e:
+            messages.error(request, f'Error deleting document: {str(e)}')
+            return redirect('documents:document_list')
+    else:
+        # If it's not a POST request, return a method not allowed response
+        return HttpResponseNotAllowed(['POST'])
+
+@login_required
+@require_POST
+def share_document(request):
+    """
+    Share a document via Telegram or Email
+    """
+    from .models import Document
+    
+    # Get form data
+    document_id = request.POST.get('document_id')
+    share_method = request.POST.get('share_method')
+    
+    try:
+        document = Document.objects.get(pk=document_id)
+        
+        # Generate document PDF
+        pdf_file = generate_document_pdf(request, document.pk)
+        
+        if share_method == 'telegram':
+            telegram_username = request.POST.get('telegram_username')
+            
+            # Validate Telegram username
+            if not telegram_username:
+                return JsonResponse({
+                    'success': False, 
+                    'error': 'Telegram username is required.'
+                }, status=400)
+            
+            # Remove @ if present at the beginning
+            if telegram_username.startswith('@'):
+                telegram_username = telegram_username[1:]
+            
+            # Get Telegram Bot Token from settings
+            telegram_token = getattr(settings, 'TELEGRAM_BOT_TOKEN', None)
+            
+            if not telegram_token:
+                return JsonResponse({
+                    'success': False, 
+                    'error': 'Telegram Bot Token not configured. Please contact administrator.'
+                }, status=500)
+            
+            try:
+                # First, get the chat_id for the username
+                api_url = f'https://api.telegram.org/bot{telegram_token}/getChat'
+                response = requests.get(api_url, params={'chat_id': '@' + telegram_username})
+                chat_data = response.json()
+                
+                if not chat_data.get('ok'):
+                    return JsonResponse({
+                        'success': False, 
+                        'error': f'Could not find Telegram user: {chat_data.get("description", "Unknown error")}'
+                    }, status=400)
+                
+                chat_id = chat_data['result']['id']
+                
+                # Create a message with document information
+                message = f"Document: {document.get_document_type_display()} #{document.pk}\n"
+                message += f"Client: {document.client.name}\n"
+                message += f"Amount: {document.total_amount}\n"
+                message += f"Date: {document.document_date}\n"
+                
+                # Send message with file
+                api_url = f'https://api.telegram.org/bot{telegram_token}/sendDocument'
+                
+                # Get the file path for the generated PDF
+                file_path = os.path.join(settings.MEDIA_ROOT, f'documents/document_{document.pk}.pdf')
+                
+                with open(file_path, 'rb') as pdf:
+                    files = {'document': pdf}
+                    data = {
+                        'chat_id': chat_id,
+                        'caption': message
+                    }
+                    response = requests.post(api_url, data=data, files=files)
+                
+                result = response.json()
+                
+                if result.get('ok'):
+                    # Mark document as sent
+                    document.status = 'SENT'
+                    document.save(update_fields=['status'])
+                    
+                    return JsonResponse({
+                        'success': True, 
+                        'message': 'Document shared via Telegram successfully.'
+                    })
+                else:
+                    return JsonResponse({
+                        'success': False, 
+                        'error': f'Failed to send via Telegram: {result.get("description", "Unknown error")}'
+                    }, status=500)
+                
+            except Exception as e:
+                return JsonResponse({
+                    'success': False, 
+                    'error': f'Error sending via Telegram: {str(e)}'
+                }, status=500)
+        
+        elif share_method == 'email':
+            recipient_email = request.POST.get('recipient_email')
+            
+            # Validate email
+            if not recipient_email:
+                return JsonResponse({
+                    'success': False, 
+                    'error': 'Recipient email is required.'
+                }, status=400)
+            
+            # Send email with PDF attachment
+            try:
+                send_mail(
+                    f'Document {document.get_document_type_display()} #{document.pk}',
+                    f'Please find attached the document {document.get_document_type_display()} #{document.pk}',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [recipient_email],
+                    fail_silently=False,
+                )
+                
+                # Mark document as sent
+                document.status = 'SENT'
+                document.save(update_fields=['status'])
+                
+                return JsonResponse({
+                    'success': True, 
+                    'message': 'Document shared via email successfully.'
+                })
+            
+            except Exception as e:
+                return JsonResponse({
+                    'success': False, 
+                    'error': f'Failed to send email: {str(e)}'
+                }, status=500)
+        
+        else:
+            return JsonResponse({
+                'success': False, 
+                'error': 'Invalid sharing method.'
+            }, status=400)
+    
+    except Document.DoesNotExist:
+        return JsonResponse({
+            'success': False, 
+            'error': 'Document not found.'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False, 
+            'error': str(e)
+        }, status=500)
 
 @require_POST
 def generate_quote_pdf(request, quote_id):

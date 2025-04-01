@@ -1,173 +1,382 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}People Directory | {{ block.super }}{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/people_styles.css' %}">
+<link href="{% static 'css/people_list_minimal.css' %}" rel="stylesheet">
+<style>
+    /* Telebird-inspired People Navbar */
+    :root {
+        --telebird-primary: #0078d4;
+        --telebird-border: #e0e4e8;
+        --navbar-height: 40px;
+    }
+
+    .people-navbar {
+        display: flex;
+        align-items: center;
+        background-color: white;
+        border-bottom: 1px solid var(--telebird-border);
+        height: var(--navbar-height);
+        padding: 0 10px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        position: fixed;
+        top: 0;
+        left: 180px;
+        right: 120px;
+        z-index: 1000;
+    }
+
+    .people-navbar-group {
+        display: flex;
+        align-items: center;
+    }
+
+    .people-navbar-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 10px;
+        margin: 0 2px;
+        border: none;
+        background-color: transparent;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        color: #333;
+        font-size: 0.85rem;
+    }
+
+    .people-navbar-button:hover {
+        background-color: rgba(0,0,0,0.05);
+    }
+
+    .people-navbar-button.active {
+        background-color: rgba(0,120,212,0.1);
+        color: var(--telebird-primary);
+    }
+
+    .people-navbar-button i {
+        margin-right: 4px;
+        font-size: 14px;
+    }
+
+    .people-navbar-divider {
+        width: 1px;
+        height: 25px;
+        background-color: var(--telebird-border);
+        margin: 0 10px;
+    }
+
+    .people-search-container {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        margin: 0 15px;
+    }
+
+    .people-search-input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid var(--telebird-border);
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    /* Adjust people container for fixed navbar */
+    .people-container {
+        margin-top: var(--navbar-height);
+        padding-top: 10px;
+    }
+</style>
 {% endblock %}
 
-{% block title %}People Directory{% endblock %}
-{% block header_title %}People Directory{% endblock %}
-
 {% block content %}
-<!-- People List Header -->
-<div class="people-header">
-    <h1 class="people-title">
-        <i class="fas fa-users"></i> People Directory
-    </h1>
-    <div class="people-actions">
-        <a href="{% url 'people:register_person' %}" class="button button-primary">
-            <i class="fas fa-user-plus"></i> Register New Person
-        </a>
-        <a href="{% url 'people:contact_people' %}" class="button button-secondary">
-            <i class="fas fa-envelope"></i> Contact
-        </a>
+<div class="people-navbar">
+    <div class="people-navbar-group">
+        <button class="people-navbar-button active">
+            <i class="bi bi-people"></i>People
+        </button>
+        <div class="people-navbar-divider"></div>
+        <button class="people-navbar-button">
+            <i class="bi bi-person-plus"></i>Register
+        </button>
+        <button class="people-navbar-button">
+            <i class="bi bi-filter"></i>Advanced Filters
+        </button>
+    </div>
+
+    <div class="people-search-container">
+        <input type="text" id="global-search" class="people-search-input" placeholder="Search people...">
+    </div>
+
+    <div class="people-navbar-group">
+        <button class="people-navbar-button">
+            <i class="bi bi-download"></i>Export
+        </button>
+        <div class="people-navbar-divider"></div>
+        <button class="people-navbar-button">
+            <i class="bi bi-sliders"></i>Columns
+        </button>
+        <button class="people-navbar-button">
+            <i class="bi bi-gear"></i>Settings
+        </button>
     </div>
 </div>
 
-<!-- Filters Section -->
-<div class="filter-section">
-    <h2 class="filter-title">
-        <i class="fas fa-filter"></i> Filter People
-    </h2>
-    <form method="get" class="filter-form">
-        <div class="form-group">
-            <label for="name" class="form-label">Name</label>
-            <input type="text" id="name" name="name" class="form-input" placeholder="Search by name" value="{{ request.GET.name }}">
+<div class="people-container">
+    <div class="people-header-wrapper">
+        <div class="people-header">
+            <h1 class="people-title">People Directory</h1>
+            <div class="people-actions">
+                <div class="search-bar">
+                    <form method="get" class="search-form">
+                        <div class="search-input-wrapper">
+                            <input type="text" id="name" name="name" placeholder="Search by name..." value="{{ request.GET.name }}">
+                            <button type="submit" class="search-btn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <button type="button" id="toggle-filters" class="btn-filter" title="Advanced filters">
+                            <i class="fas fa-sliders-h"></i>
+                        </button>
+                    </form>
+                </div>
+                <a href="{% url 'people:register_person' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Person
+                </a>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="email" class="form-label">Email</label>
-            <input type="text" id="email" name="email" class="form-input" placeholder="Search by email" value="{{ request.GET.email }}">
+        
+        <div id="filter-container" class="filter-container">
+            <form method="get" class="filter-form">
+                <div class="filter-grid">
+                    {% if request.GET.name %}
+                    <input type="hidden" name="name" value="{{ request.GET.name }}">
+                    {% endif %}
+                    <div class="filter-item">
+                        <label for="email">Email</label>
+                        <input type="text" id="email" name="email" placeholder="Filter by email" value="{{ request.GET.email }}">
+                    </div>
+                    <div class="filter-item">
+                        <label for="role">Role</label>
+                        <select id="role" name="role">
+                            <option value="">All Roles</option>
+                            {% for role in roles %}
+                            <option value="{{ role.id }}" {% if request.GET.role == role.id|stringformat:"i" %}selected{% endif %}>{{ role.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-actions">
+                        <button type="submit" class="btn btn-apply">Apply Filters</button>
+                        <a href="{% url 'people:people_list' %}" class="btn btn-clear">Clear</a>
+                    </div>
+                </div>
+            </form>
         </div>
-        <div class="form-group">
-            <label for="role" class="form-label">Role</label>
-            <select id="role" name="role" class="form-input">
-                <option value="">All Roles</option>
-                {% for role in roles %}
-                <option value="{{ role.id }}" {% if request.GET.role == role.id|stringformat:"i" %}selected{% endif %}>{{ role.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="filter-submit">
-            <button type="submit" class="button button-primary">
-                <i class="fas fa-search"></i> Search
-            </button>
-            <a href="{% url 'people:people_list' %}" class="button button-outline">
-                <i class="fas fa-times"></i> Clear
-            </a>
-        </div>
-    </form>
-</div>
+    </div>
 
-<!-- People Grid -->
-{% if people %}
-<div class="people-grid">
-    {% for person in people %}
-    <div class="person-card">
-        <div class="person-header">
-            {% if person.profile_picture %}
-            <img src="{{ person.profile_picture.url }}" alt="{{ person.full_name }}" class="person-avatar">
-            {% else %}
-            <img src="{% static 'images/default-avatar.png' %}" alt="{{ person.full_name }}" class="person-avatar">
-            {% endif %}
-            <h3 class="person-name">{{ person.full_name }}</h3>
-            <p class="person-role">
-                {% for role in person.role.all %}
-                <span class="badge badge-primary">{{ role.name }}</span>
-                {% empty %}
-                <span class="badge badge-secondary">No Role</span>
-                {% endfor %}
-            </p>
-        </div>
-        <div class="person-body">
-            <div class="person-info">
-                {% if person.email %}
-                <div class="info-item">
-                    <i class="fas fa-envelope info-icon"></i>
-                    <span class="info-text">{{ person.email }}</span>
-                </div>
+    {% if people %}
+    <div class="person-grid">
+        {% for person in people %}
+        <div class="person-card">
+            <div class="person-card-status 
+                {% if person.role.all %}
+                    {% with role=person.role.all.0 %}
+                        {{ role.name|lower }}
+                    {% endwith %}
+                {% else %}
+                    default
                 {% endif %}
-                {% if person.phone %}
-                <div class="info-item">
-                    <i class="fas fa-phone info-icon"></i>
-                    <span class="info-text">{{ person.phone }}</span>
+            "></div>
+            <div class="person-card-content">
+                <div class="person-card-header">
+                    <h3 class="person-title">{{ person.full_name }}</h3>
+                    <div class="person-card-actions">
+                        <a href="{% url 'people:person_detail' pk=person.id %}" class="btn-icon" title="View">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'people:update_person' pk=person.id %}" class="btn-icon" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button data-person-id="{{ person.id }}" data-person-name="{{ person.full_name }}" class="btn-icon btn-delete delete-person-btn" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
-                {% endif %}
+                
+                <div class="person-meta">
+                    {% if person.email %}
+                    <div class="person-meta-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>{{ person.email }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if person.phone %}
+                    <div class="person-meta-item">
+                        <i class="fas fa-phone"></i>
+                        <span>{{ person.phone }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% for role in person.role.all %}
+                    <div class="person-meta-item">
+                        <i class="fas fa-user-tag"></i>
+                        <span>{{ role.name }}</span>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if person.address %}
+                    <div class="person-meta-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>{{ person.address|truncatechars:40 }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
                 {% if person.telegram_username %}
-                <div class="info-item">
-                    <i class="fab fa-telegram info-icon"></i>
-                    <span class="info-text">{{ person.telegram_username }}</span>
-                </div>
-                {% endif %}
-                {% if person.address %}
-                <div class="info-item">
-                    <i class="fas fa-map-marker-alt info-icon"></i>
-                    <span class="info-text">{{ person.address|truncatechars:50 }}</span>
+                <div class="person-additional">
+                    <i class="fab fa-telegram"></i> {{ person.telegram_username }}
                 </div>
                 {% endif %}
             </div>
         </div>
-        <div class="person-footer">
-            <a href="{% url 'people:person_detail' pk=person.id %}" class="button button-outline">
-                <i class="fas fa-eye"></i> View
-            </a>
-        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
-</div>
 
-<!-- Pagination -->
-{% if is_paginated %}
-<div class="pagination">
-    {% if page_obj.has_previous %}
-    <span class="page-item">
-        <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-item">
             <i class="fas fa-angle-double-left"></i>
         </a>
-    </span>
-    <span class="page-item">
-        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+        <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-item">
             <i class="fas fa-angle-left"></i>
         </a>
-    </span>
-    {% endif %}
+        {% endif %}
 
-    {% for num in page_obj.paginator.page_range %}
-    {% if page_obj.number == num %}
-    <span class="page-item">
-        <a class="page-link active" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
-    </span>
-    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-    <span class="page-item">
-        <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
-    </span>
-    {% endif %}
-    {% endfor %}
+        {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-item active">{{ num }}</a>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-item">{{ num }}</a>
+        {% endif %}
+        {% endfor %}
 
-    {% if page_obj.has_next %}
-    <span class="page-item">
-        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-item">
             <i class="fas fa-angle-right"></i>
         </a>
-    </span>
-    <span class="page-item">
-        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+        <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="page-item">
             <i class="fas fa-angle-double-right"></i>
         </a>
-    </span>
+        {% endif %}
+    </div>
     {% endif %}
-</div>
-{% endif %}
 
-{% else %}
-<div class="card">
-    <div class="card-body" style="text-align: center;">
-        <i class="fas fa-users" style="font-size: 48px; color: #ccc; margin-bottom: 20px;"></i>
-        <h3>No people found</h3>
-        <p>Try adjusting your search criteria or add new people.</p>
-        <a href="{% url 'people:register_person' %}" class="button button-primary">
-            <i class="fas fa-user-plus"></i> Register New Person
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <h2 class="empty-state-title">No people found</h2>
+        <p class="empty-state-message">Try adjusting your search criteria or add new people to your directory.</p>
+        <a href="{% url 'people:register_person' %}" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Add New Person
         </a>
     </div>
+    {% endif %}
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-backdrop" id="delete-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirm Delete</h3>
+                <button class="modal-close" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <span id="person-to-delete"></span>? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <form id="delete-form" method="post">
+                    {% csrf_token %}
+                    <button type="button" class="btn-secondary" id="cancel-delete">Cancel</button>
+                    <button type="submit" class="btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
-{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle filter visibility
+        const toggleFiltersBtn = document.getElementById('toggle-filters');
+        const filterContainer = document.getElementById('filter-container');
+        
+        toggleFiltersBtn.addEventListener('click', function() {
+            filterContainer.classList.toggle('active');
+            toggleFiltersBtn.classList.toggle('active');
+        });
+        
+        // Apply random happy colors to person cards
+        const personCards = document.querySelectorAll('.person-card-status');
+        const happyColors = [
+            '#FF6B6B', // Coral Red
+            '#4ECDC4', // Turquoise
+            '#FFD166', // Mustard Yellow
+            '#06D6A0', // Caribbean Green
+            '#118AB2', // Blue Sapphire
+            '#FF9F1C', // Orange Yellow
+            '#9381FF', // Purple Lavender
+            '#FF80AB', // Flamingo Pink
+            '#64B6AC', // Teal Green
+            '#FFC857'  // Maize Yellow
+        ];
+        
+        personCards.forEach(card => {
+            const randomColorIndex = Math.floor(Math.random() * happyColors.length);
+            card.style.backgroundColor = happyColors[randomColorIndex];
+        });
+        
+        // Delete confirmation modal
+        const deleteButtons = document.querySelectorAll('.delete-person-btn');
+        const deleteModal = document.getElementById('delete-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const cancelDeleteBtn = document.getElementById('cancel-delete');
+        const deleteForm = document.getElementById('delete-form');
+        const personToDeleteSpan = document.getElementById('person-to-delete');
+        
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const personId = this.getAttribute('data-person-id');
+                const personName = this.getAttribute('data-person-name');
+                
+                deleteForm.action = `/people/${personId}/delete/`;
+                personToDeleteSpan.textContent = personName;
+                deleteModal.classList.add('show');
+            });
+        });
+        
+        closeModalBtn.addEventListener('click', function() {
+            deleteModal.classList.remove('show');
+        });
+        
+        cancelDeleteBtn.addEventListener('click', function() {
+            deleteModal.classList.remove('show');
+        });
+        
+        deleteModal.addEventListener('click', function(e) {
+            if (e.target === deleteModal) {
+                deleteModal.classList.remove('show');
+            }
+        });
+    });
+</script>
 {% endblock %}

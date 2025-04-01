@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        Update Sale
+    {% else %}
+        Create New Sale
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
+        <h1 class="text-2xl font-bold mb-6">
+            {% if form.instance.pk %}
+                Update Sale
+            {% else %}
+                Create New Sale
+            {% endif %}
+        </h1>
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {{ form|crispy }}
+            </div>
+
+            <div class="flex justify-between items-center mt-6">
+                <a href="{% url 'sales:sale_list' %}" class="btn btn-secondary">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    {% if form.instance.pk %}
+                        Update Sale
+                    {% else %}
+                        Create Sale
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Optional: Add any client-side validation or dynamic form behavior
+        const form = document.querySelector('form');
+        
+        form.addEventListener('submit', function(event) {
+            // Example: Basic validation
+            const client = document.getElementById('id_client');
+            const saleDate = document.getElementById('id_sale_date');
+            
+            if (!client.value) {
+                event.preventDefault();
+                alert('Please select a client.');
+                return;
+            }
+            
+            if (!saleDate.value) {
+                event.preventDefault();
+                alert('Please enter a sale date.');
+                return;
+            }
+        });
+    });
+</script>
+{% endblock %}

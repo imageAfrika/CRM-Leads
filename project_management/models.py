@@ -6,6 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 import string
 import random
+from decimal import Decimal
 
 class Project(models.Model):
     STATUS_CHOICES = [
@@ -68,6 +69,32 @@ class Project(models.Model):
 
     def get_absolute_url(self):
         return reverse('project_management:project_detail', args=[str(self.id)])
+
+    @property
+    def total_income(self):
+        """Calculate total income from income transactions"""
+        income = sum(t.amount for t in self.transactions.filter(transaction_type='income'))
+        return income or Decimal('0.00')
+
+    @property
+    def total_budget(self):
+        return self.budget or 0
+        
+    @property
+    def total_expenses(self):
+        """Calculate total expenses from expense transactions and actual_cost"""
+        expenses = sum(t.amount for t in self.transactions.filter(transaction_type='expense'))
+        return expenses or self.actual_cost or Decimal('0.00')
+        
+    @property
+    def remaining_budget(self):
+        return (self.budget or 0) - (self.actual_cost or 0)
+        
+    @property
+    def budget_utilization(self):
+        if not self.budget or self.budget == 0:
+            return 0
+        return min(100, int((self.actual_cost or 0) / self.budget * 100))
 
     def get_budget_utilization(self):
         if not self.budget or not self.actual_cost:
@@ -209,3 +236,23 @@ def create_project_account(sender, instance, created, **kwargs):
             pin='1234',  # Default PIN, should be changed
             project=instance
         )
+
+class Transaction(models.Model):
+    TRANSACTION_TYPES = [
+        ('income', 'Income'),
+        ('expense', 'Expense'),
+    ]
+    
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='transactions')
+    date = models.DateField()
+    description = models.CharField(max_length=255)
+    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-date', '-created_at']
+    
+    def __str__(self):
+        return f"{self.get_transaction_type_display()} - {self.description}"

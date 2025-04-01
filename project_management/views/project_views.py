@@ -155,12 +155,16 @@ def project_finances(request, pk):
     budget_utilization = project.get_budget_utilization()
     profit_margin = project.get_profit_margin()
     
+    # Get project transactions
+    transactions = project.transactions.all()
+    
     context = {
         'project': project,
         'total_expenses': total_expenses,
         'total_invoices': total_invoices,
         'budget_utilization': budget_utilization,
         'profit_margin': profit_margin,
+        'transactions': transactions,
         'title': f'Financial Overview: {project.name}'
     }
     return render(request, 'project_management/project_finances.html', context) 

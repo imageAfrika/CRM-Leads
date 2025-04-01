@@ -268,24 +268,118 @@
 
 /* Lead Notes Styles */
 .lead-note {
-  background-color: var(--lead-grey-100);
-  border-radius: var(--lead-border-radius);
+  background-color: #ffffff;
+  border-radius: 8px;
   padding: 1rem;
+  margin-bottom: 1rem;
   border-left: 3px solid var(--lead-primary);
+  border-top: 1px solid var(--lead-grey-200);
+  border-right: 1px solid var(--lead-grey-200);
+  border-bottom: 1px solid var(--lead-grey-200);
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.lead-note:hover {
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
 
 .lead-note-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  color: var(--lead-grey-600);
+  font-size: 0.875rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--lead-grey-200);
+}
+
+.lead-note-actions, .lead-document-actions {
+  display: flex;
+  gap: 5px;
+  margin-left: auto;
+}
+
+.lead-note-actions .btn, .lead-document-actions .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
 }
 
 .lead-note-body {
+  padding-top: 0.5rem;
   font-size: 0.95rem;
+  line-height: 1.5;
   color: var(--lead-grey-800);
 }
 
 /* Lead Documents Styles */
+.lead-document {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--lead-grey-200);
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.lead-document:hover {
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.lead-document-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  color: var(--lead-grey-600);
+  font-size: 0.875rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--lead-grey-200);
+}
+
+.lead-document-actions {
+  display: flex;
+  gap: 5px;
+  margin-left: auto;
+}
+
+.lead-document-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.lead-document-file {
+  display: flex;
+  align-items: center;
+  background-color: var(--lead-grey-100);
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.lead-document-file .file-icon {
+  font-size: 1.5rem;
+  margin-right: 0.75rem;
+  color: var(--lead-primary);
+}
+
+.lead-document-file .file-name {
+  font-weight: 500;
+  flex-grow: 1;
+  word-break: break-word;
+}
+
+.lead-document-description {
+  color: var(--lead-grey-600);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
 .lead-document-item {
   padding: 0.75rem 0;
   border-bottom: 1px solid var(--lead-grey-200);
@@ -815,16 +909,4 @@ form label {
 .lead-timeline-description {
   font-size: 0.9rem;
   color: #495057;
-}
-
-/* Lead Documents */
-.lead-document-item {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.lead-document-item:last-child {
-  border-bottom: none;
 } 

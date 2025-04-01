@@ -618,4 +618,8 @@ form label {
     .card-body {
         padding: 1rem;
     }
-} 
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+}

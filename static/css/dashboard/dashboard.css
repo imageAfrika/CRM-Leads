@@ -441,7 +441,99 @@
     }
 }
 
+body {
+    font-family: 'Nunito', sans-serif;
+}
 
+/* Compact Dashboard Metrics */
+.dashboard-metrics {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.15rem;
+    margin-bottom: 0.25rem;
+}
 
+.dashboard-metric-card {
+    background: white;
+    border-left: 3px solid transparent;
+    padding: 0.1rem;
+    text-align: center;
+    font-size: 0.3rem;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    position: relative;
+    overflow: hidden;
+    transition: border-left-color 0.3s ease;
+    height: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
 
+.dashboard-metric-card[data-color="quotes"] {
+    border-left-color: rgba(59, 130, 246, 0.8);
+}
 
+.dashboard-metric-card[data-color="invoices"] {
+    border-left-color: rgba(16, 185, 129, 0.8);
+}
+
+.dashboard-metric-card[data-color="expense"] {
+    border-left-color: rgba(239, 68, 68, 0.8);
+}
+
+.dashboard-metric-card[data-color="revenue"] {
+    border-left-color: rgba(139, 92, 246, 0.8);
+}
+
+.dashboard-metric-card[data-color="pnl"] {
+    border-left-color: rgba(245, 158, 11, 0.8);
+}
+
+.dashboard-metric-card[data-color="conversion"] {
+    border-left-color: rgba(99, 102, 241, 0.8);
+}
+
+.dashboard-metric-label {
+    font-size: 0.3rem;
+    text-transform: uppercase;
+    margin-bottom: 0.05rem;
+    font-weight: 600;
+}
+
+.dashboard-metric-value {
+    font-size: 0.4rem;
+    font-weight: bold;
+    margin-bottom: 0.05rem;
+}
+
+.dashboard-metric-trend {
+    font-size: 0.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dashboard-metric-trend.positive {
+    color: #16a34a;
+}
+
+.dashboard-metric-trend.negative {
+    color: #dc2626;
+}
+
+.dashboard-metric-trend i {
+    margin-right: 0.05rem;
+    font-size: 0.2rem;
+}
+
+@media (max-width: 768px) {
+    .dashboard-metrics {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

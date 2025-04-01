@@ -13,9 +13,9 @@ urlpatterns = [
     
     # Report types
     path('banking/', views.banking_reports, name='banking_reports'),
-    path('sales/', views.sales_reports, name='sales'),
+    path('sales/', views.sales_reports, name='sales_reports'),
     path('clients/', views.client_reports, name='clients_reports'),
-    path('expenses/', views.expenses_reports, name='expenses'),
+    path('expenses/', views.expenses_reports, name='expenses_reports'),
     path('purchases/', views.purchases_reports, name='purchases_reports'),
     path('leads/', views.leads_reports, name='leads'),
     path('projects/', views.projects_reports, name='projects'),
@@ -23,6 +23,7 @@ urlpatterns = [
     # Report management
     path('view/<int:report_id>/', views.view_report, name='view_report'),
     path('create/', views.create_report, name='create_report'),
+    path('create_report_config/', views.create_report_config, name='create_report_config'),
     path('update/<int:report_id>/', views.update_report, name='update_report'),
     path('delete/<int:report_id>/', views.delete_report, name='delete_report'),
     path('toggle-favorite/<int:report_id>/', views.toggle_favorite, name='toggle_favorite'),
@@ -47,4 +48,10 @@ urlpatterns = [
     path('api/reports/', views.api_get_reports, name='api_get_reports'),
     path('api/reports/<int:report_id>/', views.api_get_report, name='api_get_report'),
     path('api/reports/<int:report_id>/data/', views.api_get_report_data, name='api_get_report_data'),
+    
+    # Chart data endpoints
+    path('api/quotes-invoices-chart/', views.get_quotes_invoices_chart, name='quotes_invoices_chart'),
+    
+    # Diagnostic endpoints
+    path('api/diagnose-documents-chart/', views.diagnose_documents_chart_data, name='diagnose_documents_chart'),
 ]

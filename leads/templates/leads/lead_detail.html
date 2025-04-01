@@ -7,6 +7,101 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="{% static 'leads/css/lead_detail.css' %}">
+<style>
+    /* Bright Status Colors */
+    .lead-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: capitalize;
+        color: white;
+    }
+
+    .lead-status.new {
+        background-color: #4F46E5; /* Bright Indigo */
+    }
+
+    .lead-status.contacted {
+        background-color: #0EA5E9; /* Bright Sky Blue */
+    }
+
+    .lead-status.qualified {
+        background-color: #10B981; /* Bright Emerald */
+    }
+
+    .lead-status.proposal {
+        background-color: #6366F1; /* Bright Purple */
+    }
+
+    .lead-status.negotiation {
+        background-color: #F59E0B; /* Bright Amber */
+    }
+
+    .lead-status.won {
+        background-color: #22C55E; /* Bright Green */
+    }
+
+    .lead-status.lost {
+        background-color: #EF4444; /* Bright Red */
+    }
+
+    .lead-status.converted {
+        background-color: #8B5CF6; /* Bright Violet */
+    }
+
+    /* Status hover effects */
+    .lead-status:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+
+    /* Card status indicators */
+    .lead-card-status {
+        width: 4px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        border-top-left-radius: 0.5rem;
+        border-bottom-left-radius: 0.5rem;
+    }
+
+    .lead-card-status.new {
+        background-color: #4F46E5;
+    }
+
+    .lead-card-status.contacted {
+        background-color: #0EA5E9;
+    }
+
+    .lead-card-status.qualified {
+        background-color: #10B981;
+    }
+
+    .lead-card-status.proposal {
+        background-color: #6366F1;
+    }
+
+    .lead-card-status.negotiation {
+        background-color: #F59E0B;
+    }
+
+    .lead-card-status.won {
+        background-color: #22C55E;
+    }
+
+    .lead-card-status.lost {
+        background-color: #EF4444;
+    }
+
+    .lead-card-status.converted {
+        background-color: #8B5CF6;
+    }
+</style>
 {% endblock %}
 
 {% block extra_js %}
@@ -34,6 +129,11 @@
                     <button type="button" class="btn btn-secondary" data-modal-target="addDocumentModal">
                         <i class="fas fa-file-upload"></i> Add Document
                     </button>
+                    {% if lead.status == 'won' %}
+                    <a href="{% url 'leads:lead_convert' lead.id %}" class="btn btn-success">
+                        <i class="fas fa-exchange-alt"></i> Convert to Client
+                    </a>
+                    {% endif %}
                 </div>
             </div>
             
@@ -289,9 +389,10 @@
             <h5 class="modal-title">Add New Note</h5>
             <button type="button" class="modal-close" data-modal-close>×</button>
         </div>
-        <form method="post" action="{% url 'leads:add_note' lead.id %}">
+        <form id="add-note-form" method="post">
             {% csrf_token %}
             <div class="modal-body">
+                <div id="note-form-error" class="alert alert-danger d-none"></div>
                 <div class="form-group">
                     <label for="noteContent" class="form-label">Note</label>
                     <textarea id="noteContent" name="content" class="form-control" rows="5" placeholder="Enter your note here..." required></textarea>
@@ -312,9 +413,10 @@
             <h5 class="modal-title">Add New Document</h5>
             <button type="button" class="modal-close" data-modal-close>×</button>
         </div>
-        <form method="post" action="{% url 'leads:add_document' lead.id %}" enctype="multipart/form-data">
+        <form id="add-document-form" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="modal-body">
+                <div id="document-form-error" class="alert alert-danger d-none"></div>
                 <div class="form-group">
                     <label for="documentFile" class="form-label">File</label>
                     <input type="file" id="documentFile" name="file" class="form-control" required>

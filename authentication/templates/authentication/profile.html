@@ -3,200 +3,208 @@
 
 {% block extra_css %}
 <style>
-    /* Profile page styling with light and dark mode support */
-    .profile-container {
-        background-color: transparent;
-        border-radius: 8px;
-        color: var(--text-color);
-        transition: background-color 0.3s, color 0.3s;
-        position: relative;
+    :root {
+        --bg-primary: #f4f6f9;
+        --text-primary: #2c3e50;
+        --text-secondary: #7f8c8d;
+        --border-color: #e0e4e8;
+        --card-bg: white;
+        --accent-color: #3498db;
     }
 
-    .profile-header {
+    body {
+        background-color: var(--bg-primary);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        color: var(--text-primary);
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+
+    .profile-container {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        min-height: 100vh;
+        width: 100%;
+    }
+
+    .profile-sidebar {
+        background-color: var(--bg-primary);
+        padding: 40px 20px;
         display: flex;
+        flex-direction: column;
         align-items: center;
-        padding: 20px;
-        border-bottom: 1px solid var(--border-color);
-        background-color: transparent;
+        border-right: 1px solid var(--border-color);
     }
 
     .profile-avatar {
-        width: 120px;
-        height: 120px;
+        width: 150px;
+        height: 150px;
         border-radius: 50%;
         object-fit: cover;
-        margin-right: 20px;
-        border: 3px solid var(--primary-color);
-    }
-
-    .profile-info {
-        flex-grow: 1;
+        border: 3px solid var(--accent-color);
+        margin-bottom: 20px;
     }
 
     .profile-name {
         font-size: 1.8rem;
-        font-weight: 600;
-        color: var(--text-color);
+        font-weight: 700;
         margin-bottom: 10px;
+        text-align: center;
     }
 
     .profile-email {
-        color: var(--text-muted);
-        margin-bottom: 15px;
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+        text-align: center;
     }
 
     .profile-stats {
-        display: flex;
-        justify-content: space-between;
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
         gap: 15px;
+        margin-top: 20px;
     }
 
     .profile-stat {
-        flex-grow: 1;
         text-align: center;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
+        background-color: white;
         padding: 15px;
-        transition: all 0.3s ease;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     }
 
     .profile-stat-value {
         font-size: 1.5rem;
         font-weight: 600;
-        color: var(--primary-color);
+        color: var(--accent-color);
         margin-bottom: 5px;
     }
 
     .profile-stat-label {
+        color: var(--text-secondary);
         font-size: 0.9rem;
-        color: var(--text-muted);
     }
 
-    .profile-dashboard {
+    .profile-content {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-        padding: 20px;
+        grid-template-rows: auto 1fr;
+        padding: 40px;
+        background-color: white;
+        overflow-y: auto;
     }
 
-    .profile-card {
-        background-color: transparent;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-
-    .profile-card-header {
+    .profile-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 15px;
-        border-bottom: 1px solid var(--border-color);
-        background-color: transparent;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--border-color);
     }
 
-    .profile-card-title {
-        margin: 0;
-        font-size: 1.2rem;
-        color: var(--text-color);
+    .profile-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .profile-actions {
+        display: flex;
+        gap: 15px;
     }
 
     .profile-action-btn {
-        color: var(--primary-color);
-        font-weight: 500;
-        transition: color 0.3s;
+        text-decoration: none;
+        color: var(--accent-color);
+        font-weight: 600;
+        padding: 8px 15px;
+        border-radius: 6px;
+        transition: background-color 0.3s, color 0.3s;
     }
 
     .profile-action-btn:hover {
-        color: var(--primary-dark);
+        background-color: rgba(52, 152, 219, 0.1);
     }
 
-    .profile-card-list {
+    .profile-sections {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+
+    .profile-section {
+        background-color: var(--bg-primary);
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .profile-section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .profile-chart-container {
+        background-color: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+        margin-top: 20px;
+    }
+
+    .profile-chart {
+        width: 100%;
+        max-height: 250px;
+    }
+
+    .profile-list {
         list-style-type: none;
         padding: 0;
         margin: 0;
     }
 
-    .profile-card-item {
+    .profile-list-item {
         display: flex;
         justify-content: space-between;
-        padding: 10px 15px;
+        align-items: center;
+        padding: 8px 0;
         border-bottom: 1px solid var(--border-color);
-        color: var(--text-color);
-        background-color: transparent;
-    }
-
-    .profile-card-item:last-child {
-        border-bottom: none;
-    }
-
-    .profile-card-item-title {
-        font-weight: 500;
-    }
-
-    .profile-card-item-status {
-        color: var(--text-muted);
         font-size: 0.9rem;
     }
 
-    .status-open {
-        color: var(--success-color);
-    }
-
-    .status-overdue {
-        color: var(--danger-color);
-    }
-
-    .profile-chart {
-        max-height: 200px;
-        margin: 15px;
-    }
-
-    .profile-actions {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .profile-action-links {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
-    .profile-action-link {
-        color: var(--primary-color);
-        text-decoration: none;
+    .profile-list-item-title {
         font-weight: 500;
-        transition: color 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 60%;
     }
 
-    .profile-action-link:hover {
-        color: var(--primary-dark);
+    .profile-list-item-status {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        white-space: nowrap;
     }
 
-    .profile-action-link i {
-        margin-right: 5px;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .profile-dashboard {
+    @media (max-width: 1200px) {
+        .profile-container {
             grid-template-columns: 1fr;
         }
 
-        .profile-stats {
-            flex-direction: column;
+        .profile-sections {
+            grid-template-columns: 1fr;
         }
 
-        .profile-stat {
-            margin-bottom: 10px;
+        .profile-sidebar {
+            border-right: none;
+            border-bottom: 1px solid var(--border-color);
         }
     }
 </style>
@@ -204,121 +212,75 @@
 
 {% block content %}
 <div class="profile-container">
-    <div class="profile-actions">
-        <div class="profile-action-links">
-            <a href="{% url 'dashboard:dashboard' %}" class="profile-action-link">
-                <i class="fas fa-chart-line"></i> Dashboard
-            </a>
-            <a href="{% url 'authentication:profile_create' %}" class="profile-action-link">
-                <i class="fas fa-edit"></i> Edit Profile
-            </a>
-            <a href="{% url 'authentication:password_change' %}" class="profile-action-link">
-                <i class="fas fa-lock"></i> Change Password
-            </a>
-        </div>
-    </div>
-
-    <div class="profile-header">
+    <div class="profile-sidebar">
         {% if user.profile.avatar %}
             <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name }}" class="profile-avatar">
         {% else %}
             <img src="{% static 'images/default-avatar.png' %}" alt="{{ user.get_full_name }}" class="profile-avatar">
         {% endif %}
         
-        <div class="profile-info">
-            <h1 class="profile-name">{{ user.get_full_name }}</h1>
-            <p class="profile-email">{{ user.email }}</p>
-            
-            <div class="profile-stats">
-                <div class="profile-stat stat-card">
-                    <div class="profile-stat-value">{{ total_leads }}</div>
-                    <div class="profile-stat-label">Leads</div>
-                </div>
-                <div class="profile-stat stat-card">
-                    <div class="profile-stat-value">{{ total_projects }}</div>
-                    <div class="profile-stat-label">Projects</div>
-                </div>
-                <div class="profile-stat stat-card">
-                    <div class="profile-stat-value">${{ total_sales|floatformat:2 }}</div>
-                    <div class="profile-stat-label">Total Sales</div>
-                </div>
+        <h1 class="profile-name">{{ user.get_full_name }}</h1>
+        <p class="profile-email">{{ user.email }}</p>
+        
+        <div class="profile-stats">
+            <div class="profile-stat">
+                <div class="profile-stat-value">{{ total_leads }}</div>
+                <div class="profile-stat-label">Leads</div>
+            </div>
+            <div class="profile-stat">
+                <div class="profile-stat-value">{{ total_projects }}</div>
+                <div class="profile-stat-label">Projects</div>
+            </div>
+            <div class="profile-stat">
+                <div class="profile-stat-value">${{ total_sales|floatformat:2 }}</div>
+                <div class="profile-stat-label">Sales</div>
             </div>
         </div>
     </div>
-
-    <div class="profile-dashboard">
-        <!-- Open Leads -->
-        <div class="profile-card">
-            <div class="profile-card-header">
-                <h2 class="profile-card-title">Open Leads</h2>
-                <a href="{% url 'leads:lead_list' %}" class="profile-action-btn">View All</a>
+    
+    <div class="profile-content">
+        <div class="profile-header">
+            <h2 class="profile-title">Dashboard</h2>
+            <div class="profile-actions">
+                <a href="{% url 'authentication:profile_create' %}" class="profile-action-btn">Edit Profile</a>
+                <a href="{% url 'authentication:password_change' %}" class="profile-action-btn">Change Password</a>
             </div>
-            <ul class="profile-card-list">
-                {% for lead in open_leads %}
-                <li class="profile-card-item">
-                    <span class="profile-card-item-title">{{ lead.company_name }}</span>
-                    <span class="profile-card-item-status status-open">{{ lead.status }}</span>
-                </li>
-                {% empty %}
-                <li class="profile-card-item">No open leads</li>
-                {% endfor %}
-            </ul>
-            <canvas class="profile-chart" id="leadsChart"></canvas>
         </div>
 
-        <!-- Recent Projects -->
-        <div class="profile-card">
-            <div class="profile-card-header">
-                <h2 class="profile-card-title">Recent Projects</h2>
-                <a href="#" class="profile-action-btn">View All</a>
+        <div class="profile-sections">
+            <div class="profile-section">
+                <h3 class="profile-section-title">Open Leads</h3>
+                <ul class="profile-list">
+                    {% for lead in open_leads %}
+                    <li class="profile-list-item">
+                        <span class="profile-list-item-title">{{ lead.company_name }}</span>
+                        <span class="profile-list-item-status">{{ lead.status }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="profile-list-item">No open leads</li>
+                    {% endfor %}
+                </ul>
+                <div class="profile-chart-container">
+                    <canvas class="profile-chart" id="leadsChart"></canvas>
+                </div>
             </div>
-            <ul class="profile-card-list">
-                {% for project in open_projects %}
-                <li class="profile-card-item">
-                    <span class="profile-card-item-title">{{ project.name }}</span>
-                    <span class="profile-card-item-status">{{ project.start_date|date:"M d, Y" }}</span>
-                </li>
-                {% empty %}
-                <li class="profile-card-item">No projects found</li>
-                {% endfor %}
-            </ul>
-            <canvas class="profile-chart" id="projectsChart"></canvas>
-        </div>
 
-        <!-- Overdue Documents -->
-        <div class="profile-card">
-            <div class="profile-card-header">
-                <h2 class="profile-card-title">Overdue Documents</h2>
-                <a href="{% url 'documents:document_list' %}" class="profile-action-btn">View All</a>
+            <div class="profile-section">
+                <h3 class="profile-section-title">Recent Projects</h3>
+                <ul class="profile-list">
+                    {% for project in open_projects %}
+                    <li class="profile-list-item">
+                        <span class="profile-list-item-title">{{ project.name }}</span>
+                        <span class="profile-list-item-status">{{ project.start_date|date:"M d, Y" }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="profile-list-item">No projects found</li>
+                    {% endfor %}
+                </ul>
+                <div class="profile-chart-container">
+                    <canvas class="profile-chart" id="projectsChart"></canvas>
+                </div>
             </div>
-            <ul class="profile-card-list">
-                {% for doc in overdue_documents %}
-                <li class="profile-card-item">
-                    <span class="profile-card-item-title">{{ doc.title }}</span>
-                    <span class="profile-card-item-status status-overdue">Overdue</span>
-                </li>
-                {% empty %}
-                <li class="profile-card-item">No overdue documents</li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <!-- Upcoming Events -->
-        <div class="profile-card">
-            <div class="profile-card-header">
-                <h2 class="profile-card-title">Upcoming Events</h2>
-                <a href="{% url 'communication:calendar' %}" class="profile-action-btn">View Calendar</a>
-            </div>
-            <ul class="profile-card-list">
-                {% for event in upcoming_events %}
-                <li class="profile-card-item">
-                    <span class="profile-card-item-title">{{ event.title }}</span>
-                    <span class="profile-card-item-status">{{ event.start_time|date:"M d, H:i" }}</span>
-                </li>
-                {% empty %}
-                <li class="profile-card-item">No upcoming events</li>
-                {% endfor %}
-            </ul>
         </div>
     </div>
 </div>
@@ -336,20 +298,24 @@ document.addEventListener('DOMContentLoaded', function() {
             labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
             datasets: [{
                 label: 'Leads',
-                data: [12, 19, 3, 5, 2, 3],
-                borderColor: 'var(--primary-color)',
-                tension: 0.1
+                data: {{ leads_chart_data|safe }},
+                borderColor: 'var(--accent-color)',
+                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                tension: 0.3
             }]
         },
-        options: { 
-            responsive: true, 
-            plugins: { 
-                legend: { display: false } 
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
             },
             scales: {
                 x: {
                     grid: {
-                        color: 'var(--border-color)'
+                        display: false
                     }
                 },
                 y: {
@@ -369,19 +335,23 @@ document.addEventListener('DOMContentLoaded', function() {
             labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
             datasets: [{
                 label: 'Projects',
-                data: [5, 7, 3, 6, 2, 4],
-                backgroundColor: 'var(--primary-color)'
+                data: {{ projects_chart_data|safe }},
+                backgroundColor: 'var(--accent-color)',
+                borderRadius: 4
             }]
         },
-        options: { 
-            responsive: true, 
-            plugins: { 
-                legend: { display: false } 
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
             },
             scales: {
                 x: {
                     grid: {
-                        color: 'var(--border-color)'
+                        display: false
                     }
                 },
                 y: {

@@ -5,7 +5,8 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Sum, Count, Avg, Q
+from django.db.models import Sum, Count, Avg, Q, Min, Max, F
+from django.db.models.functions import TruncMonth, Coalesce
 from django.utils import timezone
 from django.conf import settings
 from datetime import datetime, timedelta
@@ -28,7 +29,16 @@ from products.models import Product, Category, Purchase
 from project_management.models import Project
 from leads.models import Lead
 from clients.models import Client
+from sales.models import Quote, Invoice
+from documents.models import Document
 
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.db.models import Q, Count
+from django.urls import reverse
+from django.http import JsonResponse
+from django.db.models.functions import TruncMonth
 
 @login_required
 def dashboard(request):
@@ -72,14 +82,26 @@ def dashboard(request):
         'scheduled_reports': scheduled_reports,
         'recent_purchases': Purchase.objects.order_by('-purchase_date')[:5],
         'total_products': Product.objects.count(),
-        'active_products': Product.objects.filter(is_active=True).count(),
+        'active_products': Product.objects.filter(status='active').count(),
         'total_clients': Client.objects.count(),
-        'active_clients': Client.objects.filter(is_active=True).count(),
-        'total_projects': Project.objects.count(),
-        'active_projects': Project.objects.filter(status='in_progress').count(),
         'total_leads': Lead.objects.count(),
         'converted_leads': Lead.objects.filter(status='converted').count(),
         'lead_conversion_rate': calculate_lead_conversion_rate(),
+        
+        # Add report type counts
+        'total_reports': Report.objects.count(),
+        'reports_generated': Report.objects.filter(created_at__gte=start_date).count(),
+        'favorite_reports_count': favorite_reports.count(),
+        'scheduled_reports_count': scheduled_reports.count(),
+        
+        # Report type specific counts
+        'banking_reports_count': Report.objects.filter(configuration__report_type='BANKING').count(),
+        'sales_reports_count': Report.objects.filter(configuration__report_type='SALES').count(),
+        'client_reports_count': Report.objects.filter(configuration__report_type='CLIENT').count(),
+        'expense_reports_count': Report.objects.filter(configuration__report_type='EXPENSE').count(),
+        'purchase_reports_count': Report.objects.filter(configuration__report_type='PURCHASE').count(),
+        'lead_reports_count': Report.objects.filter(configuration__report_type='LEAD').count(),
+        'project_reports_count': Report.objects.filter(configuration__report_type='PROJECT').count(),
     }
     
     return render(request, 'reports/dashboard.html', context)
@@ -185,7 +207,7 @@ def projects_reports(request):
     
     # Get project statistics
     total_projects = projects.count()
-    active_projects = projects.filter(status='in_progress').count()
+    active_projects = projects.filter(status__in=['in_progress', 'pending']).count()
     completed_projects = projects.filter(status='completed').count()
     
     # Calculate on-time and delayed projects
@@ -215,7 +237,7 @@ def projects_reports(request):
             projects_by_client[client_name] = 1
     
     # Group projects by type
-    projects_by_type = Project.objects.values('project_type').annotate(count=Count('id'))
+    projects_by_type = Project.objects.values('status').annotate(count=Count('id'))
     
     context = {
         'projects': projects,
@@ -674,6 +696,16 @@ def api_get_report_data(request, report_id):
     return JsonResponse(chart_data)
 
 
+@login_required
+def create_report_config(request):
+    if request.method == 'POST':
+        # Implement report configuration logic here
+        # For now, just return a redirect
+        messages.success(request, 'Report configuration created successfully.')
+        return redirect('reports:dashboard')
+    return redirect('reports:dashboard')
+
+
 def calculate_lead_conversion_rate():
     total_leads = Lead.objects.count()
     converted_leads = Lead.objects.filter(status='converted').count()
@@ -682,3 +714,154 @@ def calculate_lead_conversion_rate():
         return round((converted_leads / total_leads) * 100, 1)
     else:
         return 0.0
+
+
+def get_quotes_invoices_chart_data():
+    """
+    Generate chart data for quotes vs invoices over time
+    """
+    from django.db.models import F, Value
+    from django.db.models.functions import Coalesce
+    
+    # Fetch all documents with non-zero total amount
+    quotes = Document.objects.filter(
+        document_type='QUOTE', 
+        total_amount__gt=0
+    ).annotate(
+        month=TruncMonth('document_date')
+    ).values('month').annotate(
+        total_quotes=Count('id'),
+        total_quote_amount=Sum('total_amount')
+    ).order_by('month')
+    
+    invoices = Document.objects.filter(
+        document_type='INVOICE', 
+        total_amount__gt=0
+    ).annotate(
+        month=TruncMonth('document_date')
+    ).values('month').annotate(
+        total_invoices=Count('id'),
+        total_invoice_amount=Sum('total_amount')
+    ).order_by('month')
+    
+    # Prepare chart data
+    chart_data = {
+        'labels': [],
+        'quotes_count': [],
+        'invoices_count': [],
+        'quotes_amount': [],
+        'invoices_amount': []
+    }
+    
+    # Combine months from both quotes and invoices
+    all_months = set()
+    for item in list(quotes) + list(invoices):
+        if item['month']:
+            all_months.add(item['month'])
+    
+    # Sort months chronologically
+    sorted_months = sorted(all_months)
+    
+    # Populate chart data
+    for month in sorted_months:
+        chart_data['labels'].append(month.strftime('%Y-%m'))
+        
+        # Find quote data for this month
+        quote_data = next((q for q in quotes if q['month'] == month), 
+                          {'total_quotes': 0, 'total_quote_amount': 0})
+        
+        # Find invoice data for this month
+        invoice_data = next((i for i in invoices if i['month'] == month), 
+                            {'total_invoices': 0, 'total_invoice_amount': 0})
+        
+        # Append data
+        chart_data['quotes_count'].append(quote_data['total_quotes'])
+        chart_data['invoices_count'].append(invoice_data['total_invoices'])
+        chart_data['quotes_amount'].append(float(quote_data['total_quote_amount'] or 0))
+        chart_data['invoices_amount'].append(float(invoice_data['total_invoice_amount'] or 0))
+    
+    # Additional debugging
+    print("Quotes Data:")
+    for quote in quotes:
+        print(quote)
+    
+    print("\nInvoices Data:")
+    for invoice in invoices:
+        print(invoice)
+    
+    print("\nFinal Chart Data:")
+    print(chart_data)
+    
+    return chart_data
+
+
+@login_required
+def get_quotes_invoices_chart(request):
+    """
+    API endpoint to get quotes vs invoices chart data
+    """
+    chart_data = get_quotes_invoices_chart_data()
+    return JsonResponse(chart_data)
+
+
+@login_required
+def diagnose_documents_chart_data(request):
+    """
+    Diagnostic view to help understand document data for charting
+    """
+    from django.db.models import Sum, Count, Min, Max, F
+    from django.db.models.functions import TruncMonth
+    from documents.models import Document
+    
+    # Basic document counts
+    total_documents = Document.objects.count()
+    total_quotes = Document.objects.filter(document_type='QUOTE').count()
+    total_invoices = Document.objects.filter(document_type='INVOICE').count()
+    
+    # Documents with non-zero total amount
+    quotes_with_amount = Document.objects.filter(
+        document_type='QUOTE', 
+        total_amount__gt=0
+    )
+    invoices_with_amount = Document.objects.filter(
+        document_type='INVOICE', 
+        total_amount__gt=0
+    )
+    
+    # Detailed breakdown
+    quotes_breakdown = {
+        'total_count': total_quotes,
+        'total_amount': quotes_with_amount.aggregate(total=Sum('total_amount'))['total'] or 0,
+        'non_zero_count': quotes_with_amount.count(),
+        'date_range': {
+            'min_date': quotes_with_amount.aggregate(min_date=Min('document_date'))['min_date'],
+            'max_date': quotes_with_amount.aggregate(max_date=Max('document_date'))['max_date']
+        },
+        'status_breakdown': quotes_with_amount.values('status').annotate(
+            count=Count('id'), 
+            total_amount=Sum('total_amount')
+        )
+    }
+    
+    invoices_breakdown = {
+        'total_count': total_invoices,
+        'total_amount': invoices_with_amount.aggregate(total=Sum('total_amount'))['total'] or 0,
+        'non_zero_count': invoices_with_amount.count(),
+        'date_range': {
+            'min_date': invoices_with_amount.aggregate(min_date=Min('document_date'))['min_date'],
+            'max_date': invoices_with_amount.aggregate(max_date=Max('document_date'))['max_date']
+        },
+        'status_breakdown': invoices_with_amount.values('status').annotate(
+            count=Count('id'), 
+            total_amount=Sum('total_amount')
+        )
+    }
+    
+    # Prepare context for template or JSON response
+    context = {
+        'total_documents': total_documents,
+        'quotes': quotes_breakdown,
+        'invoices': invoices_breakdown
+    }
+    
+    return JsonResponse(context)

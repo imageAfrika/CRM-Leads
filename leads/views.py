@@ -5,7 +5,7 @@ from django.db.models import Q, Count
 from django.utils import timezone
 from datetime import datetime, timedelta
 from django.http import JsonResponse
-from .models import Lead, LeadActivity, LeadNote, LeadDocument
+from .models import Lead, LeadActivity, LeadNote, LeadDocument, Client
 from .forms import (
     LeadForm, 
     LeadActivityForm, 
@@ -186,20 +186,40 @@ def lead_delete(request, pk):
     })
 
 @login_required
-@permission_required('leads.view_lead', raise_exception=True)
 def lead_convert(request, pk):
     lead = get_object_or_404(Lead, pk=pk)
-    if request.method == 'POST':
-        client = lead.convert_to_client()
+    
+    if lead.status != 'won':
+        messages.error(request, 'Only won leads can be converted to clients.')
+        return redirect('leads:lead_detail', pk=pk)
+    
+    try:
+        # Create new client from lead data
+        client = Client.objects.create(
+            name=lead.company_name,  # Company name goes to name field
+            contact_person=lead.contact_person,  # Contact person field exists
+            email=lead.email,
+            phone=lead.phone
+        )
+        
+        # Update lead status
         lead.status = 'CONVERTED'
         lead.save()
-        messages.success(request, f'Lead "{lead.title or lead.company_name}" successfully converted to client.')
+        
+        # Create activity record
+        LeadActivity.objects.create(
+            lead=lead,
+            activity_type='converted',
+            description=f'Lead converted to client: {client.name}',
+            created_by=request.user
+        )
+        
+        messages.success(request, f'Lead successfully converted to client: {client.name}')
         return redirect('clients:client_detail', pk=client.pk)
-    
-    return render(request, 'leads/lead_convert.html', {
-        'lead': lead,
-        'title': f'Convert Lead: {lead.title or lead.company_name}'
-    })
+        
+    except Exception as e:
+        messages.error(request, f'Error converting lead to client: {str(e)}')
+        return redirect('leads:lead_detail', pk=pk)
 
 @login_required
 def lead_dashboard(request):
@@ -609,8 +629,8 @@ class LeadDocumentDeleteView(LoginRequiredMixin, DeleteView):
 def lead_detail_custom(request, pk):
     lead = get_object_or_404(Lead, pk=pk)
     notes = lead.notes.all().order_by('-created_at')
-    documents = lead.documents.all().order_by('-uploaded_at')
-    activities = lead.activities.all().order_by('-timestamp')
+    documents = lead.documents.all().order_by('-created_at')
+    activities = lead.activities.all().order_by('-created_at')
     
     context = {
         'lead': lead,
@@ -644,8 +664,22 @@ def add_note(request, pk):
                 created_by=request.user
             )
             
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'content': note.content,
+                    'created_by': note.created_by.username,
+                    'created_at': note.created_at.strftime('%b %d, %Y %H:%M')
+                })
+            
             messages.success(request, "Note added successfully.")
         else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'errors': {'content': 'Note content is required.'}
+                })
+            
             messages.error(request, "Note content is required.")
     
     return redirect('leads:lead_detail_custom', pk=lead.pk)
@@ -669,13 +703,29 @@ def add_document(request, pk):
             # Create activity record
             LeadActivity.objects.create(
                 lead=lead,
-                activity_type='note',
+                activity_type='document',
                 description=f"Uploaded document: {file.name}",
                 created_by=request.user
             )
             
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'file_name': document.file.name,
+                    'file_url': document.file.url,
+                    'description': document.description,
+                    'created_by': document.created_by.username,
+                    'created_at': document.created_at.strftime('%b %d, %Y')
+                })
+            
             messages.success(request, "Document uploaded successfully.")
         else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'errors': {'file': 'File is required.'}
+                })
+            
             messages.error(request, "File is required.")
     
     return redirect('leads:lead_detail_custom', pk=lead.pk)

@@ -37,7 +37,7 @@
 }
 
 body {
-    font-family: var(--font-family);
+    font-family: 'Nunito', var(--font-family);
     font-size: 14px;
     color: var(--text-color);
     background-color: #f5f7fb;

@@ -172,13 +172,17 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 
-# Email configuration
+# Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # Replace with your SMTP server
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@imageafrika.com')
+
+# For development/testing, you can uncomment this to see emails in console
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Messaging Services Configuration
 WHATSAPP_API_KEY = os.getenv('WHATSAPP_API_KEY', '')
@@ -192,5 +196,10 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
-# Email settings (for development, use console backend)
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Company Settings
+COMPANY_NAME = 'ImageAfrika CRM'
+COMPANY_LOGO = 'path/to/logo.png'  # Optional: Add your company logo path
+COMPANY_ADDRESS = '123 Business Street, City, Country'
+COMPANY_PHONE = '+1 (234) 567-8900'
+COMPANY_EMAIL = 'info@imageafrika.com'
+COMPANY_TAX_ID = 'TAX-12345'  # Optional: Add company tax identification number

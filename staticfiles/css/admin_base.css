@@ -1,3 +1,6 @@
+/* Import Nunito font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap');
+
 /* Site Admin Base CSS */
 /* Variables for the admin interface */
 
@@ -15,7 +18,7 @@
     --gray: #7f8c8d;
     --gray-light: #95a5a6;
     --gray-dark: #34495e;
-    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-family: 'Nunito', Tahoma, Geneva, Verdana, sans-serif;
     --sidebar-width: 250px;
     --sidebar-collapsed-width: 70px;
     --border-radius: 4px;

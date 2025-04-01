@@ -1,197 +1,616 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}{{ person.full_name }} | {{ block.super }}{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/people_styles.css' %}">
+<link href="{% static 'css/people_list_minimal.css' %}" rel="stylesheet">
+<style>
+  :root {
+    --accent-color: #3B82F6;
+    --accent-light: #DBEAFE;
+    --accent-dark: #1D4ED8;
+    --secondary-accent: #8B5CF6;
+    --secondary-accent-light: #EDE9FE;
+    --success-color: #10B981;
+    --success-light: #D1FAE5;
+    --warning-color: #F59E0B;
+    --warning-light: #FEF3C7;
+    --danger-color: #EF4444;
+    --danger-light: #FEE2E2;
+  }
+
+  .people-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .person-card {
+    background-color: var(--color-white);
+    border-radius: 20px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    border: 1px solid var(--color-gray-100);
+  }
+
+  .person-header {
+    position: relative;
+    min-height: 400px;
+    padding: 3rem 2.5rem;
+    background: linear-gradient(135deg, var(--accent-light) 0%, var(--secondary-accent-light) 100%);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+
+  .person-avatar {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border: 4px solid white;
+    margin-top: 3rem;
+  }
+
+  .person-info {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .person-name {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--color-gray-900);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .person-roles {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .role-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 1rem;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    background-color: var(--accent-light);
+    color: var(--accent-dark);
+  }
+
+  .person-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    margin: 0;
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    backdrop-filter: blur(4px);
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--color-gray-600);
+    background-color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+  }
+  
+  .meta-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .meta-item i {
+    font-size: 1rem;
+    color: var(--accent-dark);
+    width: 20px;
+    text-align: center;
+  }
+
+  .meta-item span {
+    font-size: 0.9375rem;
+  }
+
+  .person-content {
+    padding: 2rem 2.5rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+
+  .content-section {
+    padding: 2rem;
+    background: var(--color-white);
+    border-radius: 16px;
+    border: 1px solid var(--color-gray-100);
+    transition: all 0.3s ease;
+    height: 100%;
+  }
+
+  .content-section:hover {
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+    border-color: var(--accent-light);
+  }
+
+  .section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-gray-900);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .section-title::before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 1.25rem;
+    background: var(--accent-color);
+    border-radius: 2px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--color-gray-50);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+  }
+
+  .info-item:hover {
+    background: var(--accent-light);
+    border-left-color: var(--accent-color);
+  }
+
+  .info-item i {
+    font-size: 1rem;
+    color: var(--accent-color);
+    width: 20px;
+    text-align: center;
+  }
+
+  .info-item span {
+    color: var(--color-gray-700);
+    font-size: 0.9375rem;
+  }
+
+  .roles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .role-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    background: var(--color-gray-50);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+  }
+
+  .role-item:hover {
+    background: var(--color-gray-100);
+  }
+
+  .role-item input[type="checkbox"] {
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: 4px;
+    border: 2px solid var(--color-gray-300);
+  }
+
+  .role-item label {
+    font-size: 0.9375rem;
+    color: var(--color-gray-700);
+  }
+
+  .contact-list {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .contact-item {
+    padding: 1.25rem;
+    background: var(--color-gray-50);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+  }
+
+  .contact-item:hover {
+    background: var(--color-gray-100);
+  }
+
+  .contact-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .contact-title {
+    font-weight: 600;
+    color: var(--color-gray-900);
+    font-size: 0.9375rem;
+  }
+
+  .contact-date {
+    font-size: 0.8125rem;
+    color: var(--color-gray-500);
+    background: var(--color-white);
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--color-gray-200);
+  }
+
+  .contact-body {
+    color: var(--color-gray-600);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--color-gray-400);
+    background: var(--color-gray-50);
+    border-radius: 12px;
+    font-size: 0.9375rem;
+  }
+
+  .action-bar {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--color-gray-100);
+  }
+
+  .person-actions {
+    position: absolute;
+    top: 1rem;
+    right: 2.5rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 8px;
+    background: var(--color-white);
+    border: 1px solid var(--color-gray-200);
+    color: var(--color-gray-600);
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .btn-icon i {
+    font-size: 0.9375rem;
+  }
+
+  /* View in List button */
+  .person-actions a.btn-icon[title="View in List"] {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    border-color: var(--accent-light);
+  }
+  
+  .person-actions a.btn-icon[title="View in List"]:hover {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+  }
+
+  /* Contact button */
+  .person-actions a.btn-icon[title="Contact"] {
+    background: var(--success-light);
+    color: var(--success-color);
+    border-color: var(--success-light);
+  }
+  
+  .person-actions a.btn-icon[title="Contact"]:hover {
+    background: var(--success-color);
+    color: white;
+    border-color: var(--success-color);
+  }
+
+  /* Edit button */
+  .person-actions a.btn-icon[title="Edit"] {
+    background: var(--secondary-accent-light);
+    color: var(--secondary-accent);
+    border-color: var(--secondary-accent-light);
+  }
+  
+  .person-actions a.btn-icon[title="Edit"]:hover {
+    background: var(--secondary-accent);
+    color: white;
+    border-color: var(--secondary-accent);
+  }
+
+  /* Delete button */
+  .person-actions .btn-delete {
+    background: var(--danger-light);
+    color: var(--danger-color);
+    border-color: var(--danger-light);
+  }
+  
+  .person-actions .btn-delete:hover {
+    background: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
+  }
+
+  .btn-icon::after {
+    content: attr(title);
+    position: absolute;
+    bottom: -2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    background: var(--color-gray-900);
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 10;
+  }
+
+  .btn-icon:hover::after {
+    opacity: 1;
+    visibility: visible;
+    bottom: -2.25rem;
+  }
+
+  @media (max-width: 768px) {
+    .person-header {
+      min-height: 350px;
+      padding: 2.5rem 1.5rem;
+    }
+
+    .person-avatar {
+      width: 140px;
+      height: 140px;
+    }
+
+    .person-actions {
+      position: static;
+      margin-top: 1rem;
+      justify-content: center;
+    }
+    
+    .person-content {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Avatar placeholder with initials */
+  .avatar-placeholder {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border: 4px solid white;
+    margin-top: 3rem;
+  }
+</style>
 {% endblock %}
 
-{% block title %}{{ person.full_name }} - Detail{% endblock %}
-{% block header_title %}Person Detail{% endblock %}
-
 {% block content %}
-<!-- Person Header -->
-<div class="detail-header">
+<div class="people-container">
+  <div class="person-card">
+    <div class="person-header">
     {% if person.profile_picture %}
-    <img src="{{ person.profile_picture.url }}" alt="{{ person.full_name }}" class="detail-avatar">
+        <img src="{{ person.profile_picture.url }}" alt="{{ person.full_name }}" class="person-avatar">
     {% else %}
-    <img src="{% static 'images/default-avatar.png' %}" alt="{{ person.full_name }}" class="detail-avatar">
+        <div class="avatar-placeholder"></div>
     {% endif %}
     
-    <div class="detail-info">
-        <h1 class="detail-name">{{ person.full_name }}</h1>
+      <div class="person-info">
+        <h2 class="person-name">{{ person.full_name }}</h2>
         
-        <div class="detail-subtitle">
+        <div class="person-roles">
+            <i class="fas fa-tags"></i>
             {% for role in person.role.all %}
-            <span class="badge badge-primary">{{ role.name }}</span>
+            <span class="role-badge">{{ role.name }}</span>
             {% empty %}
-            <span class="badge badge-secondary">No Role</span>
+            <span class="role-badge">No Role</span>
             {% endfor %}
         </div>
         
-        <div class="detail-meta">
+        <div class="person-meta">
             {% if person.email %}
             <div class="meta-item">
-                <i class="fas fa-envelope meta-icon"></i>
-                <span class="meta-text">{{ person.email }}</span>
+              <i class="fas fa-envelope"></i>
+              <span>{{ person.email }}</span>
             </div>
             {% endif %}
             
             {% if person.phone %}
             <div class="meta-item">
-                <i class="fas fa-phone meta-icon"></i>
-                <span class="meta-text">{{ person.phone }}</span>
-            </div>
-            {% endif %}
-            
-            {% if person.telegram_username %}
-            <div class="meta-item">
-                <i class="fab fa-telegram meta-icon"></i>
-                <span class="meta-text">{{ person.telegram_username }}</span>
+              <i class="fas fa-phone"></i>
+              <span>{{ person.phone }}</span>
             </div>
             {% endif %}
         </div>
     </div>
     
-    <div class="detail-actions">
-        <a href="{% url 'people:contact_people' %}?person={{ person.id }}" class="button button-primary">
-            <i class="fas fa-envelope"></i> Contact
+      <div class="person-actions">
+        <a href="{% url 'people:people_list' %}?name={{ person.full_name }}" class="btn-icon" title="View in List">
+          <i class="fas fa-list"></i>
         </a>
-        <a href="{% url 'people:people_list' %}" class="button button-secondary">
-            <i class="fas fa-arrow-left"></i> Back to List
+        <a href="{% url 'people:contact_people' %}?person={{ person.id }}" class="btn-icon" title="Contact">
+          <i class="fas fa-envelope"></i>
         </a>
-    </div>
+        <a href="{% url 'people:update_person' pk=person.id %}" class="btn-icon" title="Edit">
+          <i class="fas fa-edit"></i>
+        </a>
+        <button data-person-id="{{ person.id }}" data-person-name="{{ person.full_name }}" class="btn-icon btn-delete delete-person-btn" title="Delete">
+          <i class="fas fa-trash"></i>
+        </button>
 </div>
-
-<!-- Person Tabs -->
-<div class="detail-tabs">
-    <a href="#information" class="detail-tab active">
-        <i class="fas fa-info-circle"></i> Information
-    </a>
-    <a href="#history" class="detail-tab">
-        <i class="fas fa-history"></i> Contact History
-    </a>
-    <a href="#roles" class="detail-tab">
-        <i class="fas fa-user-tag"></i> Roles
-    </a>
-</div>
-
-<!-- Information Section -->
-<div id="information" class="card">
-    <div class="card-header">
-        <h2>Personal Information</h2>
     </div>
-    <div class="card-body">
-        {% if person.address %}
-        <div class="detail-section">
-            <h3 class="section-title">Address</h3>
-            <p>{{ person.address }}</p>
+
+    <div class="person-content">
+      <div class="content-section">
+        <h3 class="section-title">Personal Information</h3>
+        <div class="info-grid">
+          {% if person.telegram_username %}
+            <div class="info-item">
+              <i class="fab fa-telegram"></i>
+              <span>{{ person.telegram_username }}</span>
         </div>
         {% endif %}
         
-        <div class="detail-section">
-            <h3 class="section-title">Registration Details</h3>
-            <div class="meta-item">
-                <i class="fas fa-user meta-icon"></i>
-                <span class="meta-text">Registered by: {{ person.registered_by|default:"Unknown" }}</span>
+          {% if person.address %}
+            <div class="info-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>{{ person.address }}</span>
             </div>
-            <div class="meta-item">
-                <i class="fas fa-calendar meta-icon"></i>
-                <span class="meta-text">Registered on: {{ person.created_at|date:"F j, Y" }}</span>
+          {% endif %}
+          
+          <div class="info-item">
+            <i class="fas fa-calendar"></i>
+            <span>Registered on: {{ person.created_at|date:"F j, Y" }}</span>
             </div>
-            <div class="meta-item">
-                <i class="fas fa-clock meta-icon"></i>
-                <span class="meta-text">Last updated: {{ person.updated_at|date:"F j, Y" }}</span>
-            </div>
+          
+          <div class="info-item">
+            <i class="fas fa-clock"></i>
+            <span>Last updated: {{ person.updated_at|date:"F j, Y" }}</span>
         </div>
     </div>
 </div>
 
-<!-- Contact History Section -->
-<div id="contact-history" class="card" style="display: none;">
-    <div class="card-header">
-        <h2>Contact History</h2>
-    </div>
-    <div class="card-body">
+      <div class="content-section">
+        <h3 class="section-title">Contact History</h3>
         {% if contact_history %}
-        <div class="contact-history-list">
+          <div class="contact-list">
             {% for contact in contact_history %}
             <div class="contact-item">
                 <div class="contact-header">
-                    <div class="contact-type badge badge-primary">{{ contact.get_contact_type_display }}</div>
-                    <div class="contact-date">{{ contact.contact_date|date:"F j, Y H:i" }}</div>
+                  <div class="contact-title">{{ contact.subject }}</div>
+                  <div class="contact-date">{{ contact.contact_date|date:"F j, Y" }}</div>
                 </div>
-                <div class="contact-subject">{{ contact.subject }}</div>
-                <div class="contact-message">{{ contact.message }}</div>
+                <div class="contact-body">
+                  {{ contact.message }}
+                </div>
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <div class="empty-contact-history">
+          <div class="empty-state">
             <p>No contact history available for this person.</p>
         </div>
         {% endif %}
     </div>
 </div>
-
-<!-- Roles Section -->
-<div id="roles" class="card" style="display: none;">
-    <div class="card-header">
-        <h2>Role Management</h2>
-    </div>
-    <div class="card-body">
-        <form method="post" class="form">
-            {% csrf_token %}
-            <div class="form-group">
-                <label class="form-label">Assigned Roles</label>
-                <div class="role-list">
-                    {% for role in available_roles %}
-                    <div class="role-item">
-                        <input type="checkbox" id="role_{{ role.id }}" name="role" value="{{ role.id }}" 
-                            {% if role in person.role.all %}checked{% endif %}>
-                        <label for="role_{{ role.id }}">{{ role.name }}</label>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="form-group" style="text-align: right;">
-                <button type="submit" class="button button-primary">
-                    <i class="fas fa-save"></i> Update Roles
-                </button>
-            </div>
-        </form>
     </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Tab navigation
-        const tabs = document.querySelectorAll('.detail-tab');
-        const sections = {
-            'information': document.getElementById('information'),
-            'history': document.getElementById('contact-history'),
-            'roles': document.getElementById('roles')
-        };
+  document.addEventListener('DOMContentLoaded', function() {
+    // Generate random background color for avatar placeholder
+    const avatarPlaceholder = document.querySelector('.avatar-placeholder');
+    if (avatarPlaceholder) {
+      // List of pleasant background colors
+      const colors = [
+        '#3B82F6', // Blue
+        '#8B5CF6', // Purple
+        '#10B981', // Green
+        '#F59E0B', // Amber
+        '#EF4444', // Red
+        '#06B6D4', // Cyan
+        '#6366F1', // Indigo
+        '#EC4899', // Pink
+        '#F97316', // Orange
+        '#14B8A6', // Teal
+      ];
+      
+      // Get random color from the list
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      avatarPlaceholder.style.backgroundColor = randomColor;
+      
+      // Extract initials from full name
+      const fullName = "{{ person.full_name }}";
+      const nameParts = fullName.split(' ');
+      let initials = '';
+      
+      if (nameParts.length >= 2) {
+        // Get first letter of first and last name
+        initials = nameParts[0].charAt(0) + nameParts[nameParts.length-1].charAt(0);
+      } else if (nameParts.length === 1) {
+        // If only one name, take first two letters
+        initials = nameParts[0].charAt(0);
+        if (nameParts[0].length > 1) {
+          initials += nameParts[0].charAt(1);
+        }
+      }
+      
+      // Update the avatar placeholder with the initials
+      avatarPlaceholder.textContent = initials;
+    }
+    
+    // Delete confirmation
+    const deleteButtons = document.querySelectorAll('.delete-person-btn');
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const personId = this.getAttribute('data-person-id');
+        const personName = this.getAttribute('data-person-name');
         
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Deactivate all tabs and hide all sections
-                tabs.forEach(t => t.classList.remove('active'));
-                Object.values(sections).forEach(section => {
-                    if (section) section.style.display = 'none';
-                });
-                
-                // Activate clicked tab and show corresponding section
-                this.classList.add('active');
-                const target = this.getAttribute('href').substring(1);
-                if (sections[target]) {
-                    sections[target].style.display = 'block';
-                }
-            });
-        });
+        if (confirm(`Are you sure you want to delete ${personName}? This action cannot be undone.`)) {
+          window.location.href = `/people/${personId}/delete/`;
+        }
+      });
     });
+  });
 </script>
-{% endblock %}
 {% endblock %}

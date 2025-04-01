@@ -1,20 +1,89 @@
+/* Import Nunito font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap');
+
 /* Modern Dashboard Variables */
 :root {
   --primary-color: #4361ee;
   --primary-light: #4895ef;
   --secondary-color: #3f37c9;
   --accent-color: #4cc9f0;
-  --success-color: #4ade80;
-  --danger-color: #f87171;
-  --warning-color: #fbbf24;
-  --info-color: #60a5fa;
+  --success-color: #16a34a;
+  --danger-color: #dc2626;
+  --warning-color: #d97706;
+  --info-color: #0284c7;
   
   --bg-color: #f8fafc;
   --card-bg: #ffffff;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
   
+  /* Lead Status Specific Colors for Light Mode - Extremely Dark */
+  --status-new-bg: #0c2d6b;
+  --status-new-text: #ffffff;
+  --status-new-icon: #ffffff;
+  
+  --status-contacted-bg: #0b4a5f;
+  --status-contacted-text: #ffffff;
+  --status-contacted-icon: #ffffff;
+  
+  --status-qualified-bg: #15803d;      /* Dark Green for Qualified */
+  --status-qualified-text: #ffffff;
+  --status-qualified-icon: #ffffff;
+  
+  --status-proposal-bg: #2563eb;       /* Blue for Sent/Proposal */
+  --status-proposal-text: #ffffff;
+  --status-proposal-icon: #ffffff;
+  
+  --status-negotiation-bg: #f59e0b;    /* Amber for Negotiation */
+  --status-negotiation-text: #ffffff;
+  --status-negotiation-icon: #ffffff;
+  
+  --status-lost-bg: #dc2626;           /* Red for Lost */
+  --status-lost-text: #ffffff;
+  --status-lost-icon: #ffffff;
+  
+  --status-closed-bg: #22c55e;         /* Light Green for Won */
+  --status-closed-text: #ffffff;
+  --status-closed-icon: #ffffff;
+  
+  /* Improving text contrast for light mode */
+  --info-label-color: #1e293b;
+  --info-value-color: #0f172a;
+  --note-text-color: #1e293b;
+  --timeline-text-color: #0f172a;
+  --meta-text-color: #334155;
+  
+  /* Timeline specific colors for light mode */
+  --timeline-line-color: rgba(67, 97, 238, 0.3);
+  --timeline-dot-color: var(--primary-color);
+  --timeline-header-color: #1a202c;
+  --timeline-title-color: #2d3748;
+  --timeline-date-color: #4a5568;
+  --timeline-content-color: #2d3748;
+  --timeline-border-color: rgba(67, 97, 238, 0.2);
+  
+  /* Lead Information specific colors for light mode */
+  --lead-info-bg: #f1f5f9;
+  --lead-info-border: rgba(67, 97, 238, 0.2);
+  --lead-info-label-color: #1e293b;
+  --lead-info-value-color: #0f172a;
+  --lead-info-hover-bg: #e2e8f0;
+  
+  /* Lead Name Specific Colors */
+  --lead-name-color: #1e293b;
+  --lead-name-accent: #1e40af;
+  --lead-name-hover-accent: #1e3a8a;
+  
+  /* Lead Company and Tags Specific Colors */
+  --lead-company-color: #2d3748;
+  --lead-company-icon-color: #4361ee;
+  --lead-tags-bg: #f1f5f9;
+  --lead-tags-border: rgba(67, 97, 238, 0.2);
+  --lead-tags-text: #2d3748;
+  --lead-tags-icon-color: #4361ee;
+  
+  /* Status and Tag colors for light mode */
   --border-radius: 12px;
   --border-radius-sm: 8px;
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -29,12 +98,29 @@
   --spacing-xl: 3rem;
   
   --transition: all 0.2s ease;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  
+  /* Contact Information Colors */
+  --contact-link-color: #1e293b;
+  --contact-link-hover-color: #0f172a;
+  --contact-icon-color: #4361ee;
+  
+  /* Download Button Colors */
+  --download-btn-bg: #1e40af;
+  --download-btn-hover-bg: #1e3a8a;
+  --download-btn-text: #ffffff;
+  --download-btn-icon: #ffffff;
+  
+  /* Lead Card Header Colors */
+  --lead-card-header-bg: #f8fafc;
+  --lead-card-header-text: #1e293b;
+  --lead-card-header-border: #e2e8f0;
+  --lead-card-header-hover-bg: #f1f5f9;
 }
 
 /* Base Styles */
 body {
-  font-family: var(--font-sans);
+  font-family: 'Nunito', sans-serif;
   line-height: 1.6;
   color: var(--text-primary);
   background-color: var(--bg-color);
@@ -76,6 +162,7 @@ body {
   align-items: center;
   transition: var(--transition);
   margin-bottom: 0.5rem;
+  font-weight: 600;
 }
 
 .lead-detail-back:hover {
@@ -96,16 +183,55 @@ body {
 }
 
 .lead-detail-name {
-  font-size: 1.75rem;
-  font-weight: 600;
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--lead-name-color);
   margin: 0;
-  color: var(--text-primary);
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  position: relative;
+  transition: var(--transition);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.lead-detail-name::after {
+  content: '';
+  position: absolute;
+  bottom: -0.375rem;
+  left: 0;
+  width: 3.5rem;
+  height: 0.25rem;
+  background-color: var(--lead-name-accent);
+  border-radius: 0.25rem;
+  transition: var(--transition);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.lead-detail-name:hover::after {
+  width: 4.5rem;
+  background-color: var(--lead-name-hover-accent);
 }
 
 .lead-detail-company {
   font-size: 1.1rem;
-  color: var(--text-secondary);
-  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+  color: var(--lead-company-color);
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.lead-detail-company::before {
+  content: '\f1ad'; /* Font Awesome building icon */
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  margin-right: 0.75rem;
+  color: var(--lead-company-icon-color);
+  font-size: 1.25rem;
+  opacity: 0.8;
 }
 
 .lead-detail-tags {
@@ -113,6 +239,40 @@ body {
   flex-wrap: wrap;
   gap: var(--spacing-xs);
   margin-bottom: 0;
+}
+
+.lead-detail-tags .lead-status,
+.lead-detail-tags .lead-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: var(--lead-tags-bg);
+  color: var(--lead-tags-text);
+  border: 1px solid var(--lead-tags-border);
+  transition: var(--transition);
+}
+
+.lead-detail-tags .lead-status i,
+.lead-detail-tags .lead-tag i {
+  margin-right: var(--spacing-xs);
+  color: var(--lead-tags-icon-color);
+  font-size: 0.875rem;
+}
+
+.lead-detail-tags .lead-status:hover,
+.lead-detail-tags .lead-tag:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+  background-color: var(--primary-light);
+  color: white;
+}
+
+.lead-detail-tags .lead-status:hover i,
+.lead-detail-tags .lead-tag:hover i {
+  color: white;
 }
 
 .lead-detail-actions {
@@ -138,19 +298,46 @@ body {
 }
 
 .lead-card-header {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--lead-card-header-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--card-bg);
+  background-color: var(--lead-card-header-bg);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.lead-card-header::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0.25rem;
+  background: linear-gradient(to right, #1e40af, #4361ee);
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.lead-card:hover .lead-card-header {
+  background-color: var(--lead-card-header-hover-bg);
+}
+
+.lead-card:hover .lead-card-header::before {
+  opacity: 1;
 }
 
 .lead-name {
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   margin: 0;
-  color: var(--text-primary);
+  color: var(--lead-card-header-text);
+  letter-spacing: -0.025em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .lead-card-body {
@@ -167,7 +354,7 @@ body {
 .section-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--lead-info-label-color);
   margin: 0 0 var(--spacing) 0;
   padding-bottom: var(--spacing-sm);
   border-bottom: 2px solid var(--primary-color);
@@ -183,78 +370,86 @@ body {
 .lead-info-item {
   display: flex;
   flex-direction: column;
-  padding: 0.5rem 0.75rem;
+  padding: 0.75rem 1rem;
   transition: var(--transition);
   border-radius: var(--border-radius-sm);
-  background-color: rgba(67, 97, 238, 0.02);
-  border: 1px solid rgba(0,0,0,0.05);
+  background-color: var(--lead-info-bg);
+  border: 1px solid var(--lead-info-border);
   height: 100%;
 }
 
 .lead-info-item:hover {
   transform: translateY(-2px);
-  background-color: rgba(67, 97, 238, 0.04);
+  background-color: var(--lead-info-hover-bg);
   box-shadow: var(--shadow-sm);
 }
 
 .lead-info-label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 0.875rem;
+  color: var(--lead-info-label-color);
+  margin-bottom: var(--spacing-xs);
   font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
 }
 
 .lead-info-value {
   font-weight: 500;
-  color: var(--text-primary);
+  color: var(--lead-info-value-color);
   font-size: 1rem;
 }
 
 /* Link styles for info values */
 .lead-info-value a {
-  color: var(--primary-color);
+  color: var(--contact-link-color);
   text-decoration: none;
+  transition: var(--transition);
   display: inline-flex;
   align-items: center;
-  transition: var(--transition);
-}
-
-.lead-info-value a:hover {
-  color: var(--secondary-color);
-  text-decoration: underline;
+  gap: 0.5rem;
 }
 
 .lead-info-value a i {
-  margin-right: var(--spacing-xs);
-  font-size: 0.875rem;
+  color: var(--contact-icon-color);
+  margin-right: 0.5rem;
+  opacity: 0.8;
 }
 
-.lead-description {
-  background-color: rgba(0,0,0,0.02);
-  border-radius: var(--border-radius-sm);
-  padding: var(--spacing-md);
-  margin-top: var(--spacing);
-  border-left: 3px solid var(--primary-light);
-  border-top: 1px solid rgba(0,0,0,0.05);
-  border-right: 1px solid rgba(0,0,0,0.05);
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+.lead-info-value a:hover {
+  color: var(--contact-link-hover-color);
 }
 
-.description-title {
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin: 0 0 var(--spacing-sm) 0;
+.lead-info-value a:hover i {
+  opacity: 1;
 }
 
-.description-content {
-  color: var(--text-primary);
+.lead-info-description p {
+  color: var(--info-value-color);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.lead-note-date {
+  font-size: 0.8rem;
+  color: var(--meta-text-color);
+}
+
+.lead-note-body {
   font-size: 0.95rem;
-  line-height: 1.6;
+  color: var(--note-text-color);
+  line-height: 1.5;
+}
+
+.lead-document-meta {
+  font-size: 0.8rem;
+  color: var(--meta-text-color);
+}
+
+.lead-document-action {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: var(--transition);
 }
 
 /* Status and Tags */
@@ -265,55 +460,86 @@ body {
   border-radius: 2rem;
   font-size: 0.75rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  color: #ffffff !important;
+}
+
+.lead-status i {
+  margin-right: 0.5rem;
+  font-size: 0.875rem;
+  position: relative;
+  z-index: 2;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .lead-status.new {
-  background-color: rgba(67, 97, 238, 0.1);
-  color: var(--primary-color);
+  background-color: var(--status-new-bg);
 }
 
 .lead-status.contacted {
-  background-color: rgba(79, 209, 197, 0.1);
-  color: #0ea5e9;
+  background-color: var(--status-contacted-bg);
 }
 
 .lead-status.qualified {
-  background-color: rgba(251, 191, 36, 0.1);
-  color: #d97706;
+  background-color: var(--status-qualified-bg);
 }
 
 .lead-status.proposal {
-  background-color: rgba(139, 92, 246, 0.1);
-  color: #8b5cf6;
+  background-color: var(--status-proposal-bg);
 }
 
 .lead-status.negotiation {
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #2563eb;
+  background-color: var(--status-negotiation-bg);
 }
 
 .lead-status.lost {
-  background-color: rgba(248, 113, 113, 0.1);
-  color: #dc2626;
+  background-color: var(--status-lost-bg);
 }
 
 .lead-status.closed {
-  background-color: rgba(52, 211, 153, 0.1);
-  color: #10b981;
+  background-color: var(--status-closed-bg);
 }
 
-.lead-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.35rem 0.75rem;
-  border-radius: 2rem;
-  font-size: 0.75rem;
-  background-color: rgba(0,0,0,0.03);
-  color: var(--text-secondary);
+/* Dark mode adjustments */
+html.dark-mode .lead-status {
+  color: #ffffff !important;
 }
 
-.lead-tag i {
-  margin-right: var(--spacing-xs);
+html.dark-mode .lead-status i {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+html.dark-mode .lead-status.new {
+  background-color: rgba(12, 45, 107, 0.4);
+}
+
+html.dark-mode .lead-status.contacted {
+  background-color: rgba(11, 74, 95, 0.4);
+}
+
+html.dark-mode .lead-status.qualified {
+  background-color: rgba(21, 128, 61, 0.4);
+}
+
+html.dark-mode .lead-status.proposal {
+  background-color: rgba(37, 99, 235, 0.4);
+}
+
+html.dark-mode .lead-status.negotiation {
+  background-color: rgba(245, 158, 11, 0.4);
+}
+
+html.dark-mode .lead-status.lost {
+  background-color: rgba(220, 38, 38, 0.4);
+}
+
+html.dark-mode .lead-status.closed {
+  background-color: rgba(34, 197, 94, 0.4);
 }
 
 /* Notes & Documents */
@@ -347,25 +573,66 @@ body {
 }
 
 .note-meta strong, .document-meta strong {
-  color: var(--text-primary);
+  color: var(--info-value-color);
   font-weight: 600;
   font-size: 0.875rem;
   margin-bottom: 0.125rem;
 }
 
 .note-meta small, .document-meta small {
-  color: var(--text-muted);
+  color: var(--meta-text-color);
   font-size: 0.75rem;
+  font-weight: 500;
 }
 
 .note-content, .document-content {
   font-size: 0.875rem;
-  color: var(--text-primary);
+  color: var(--note-text-color);
   line-height: 1.6;
 }
 
 .document-download {
-  margin-top: var(--spacing-sm);
+  background-color: var(--download-btn-bg) !important;
+  color: var(--download-btn-text) !important;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: var(--transition);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.document-download i {
+  color: var(--download-btn-icon);
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.document-download:hover {
+  background-color: var(--download-btn-hover-bg) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.document-download:hover i {
+  opacity: 1;
+}
+
+/* Dark mode adjustments */
+html.dark-mode .document-download {
+  background-color: rgba(30, 64, 175, 0.7) !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark-mode .document-download:hover {
+  background-color: rgba(30, 58, 138, 0.8) !important;
+  color: #f8fafc !important;
 }
 
 /* Timeline */
@@ -382,7 +649,7 @@ body {
   bottom: 0;
   left: 0.6875rem;
   width: 2px;
-  background-color: rgba(0,0,0,0.07);
+  background-color: var(--timeline-line-color);
 }
 
 .timeline-item {
@@ -397,48 +664,57 @@ body {
 .timeline-item:before {
   content: '';
   position: absolute;
-  left: -21px;
-  top: 4px;
+  left: -1.5rem;
+  top: 0.25rem;
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: var(--primary-color);
-  border: 2px solid var(--card-bg);
-  z-index: 1;
+  background-color: var(--timeline-dot-color);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
 }
 
 .timeline-content {
   background-color: var(--card-bg);
-  border-radius: var(--border-radius-sm);
   padding: 0.75rem;
+  border-radius: var(--border-radius-sm);
   box-shadow: var(--shadow-sm);
+  border-left: 3px solid var(--primary-light);
 }
 
 .timeline-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
   margin-bottom: var(--spacing-xs);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--timeline-border-color);
 }
 
 .timeline-title {
   font-size: 0.875rem;
+  color: var(--timeline-header-color);
   font-weight: 600;
   margin: 0;
-  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+}
+
+.timeline-title i {
+  margin-right: var(--spacing-xs);
+  color: var(--primary-color);
 }
 
 .timeline-date {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--timeline-date-color);
+  font-weight: 500;
 }
 
 .timeline-body {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
+  font-size: 0.825rem;
+  color: var(--timeline-content-color);
   margin-top: var(--spacing-xs);
   padding-top: var(--spacing-xs);
-  border-top: 1px solid rgba(0,0,0,0.05);
+  border-top: 1px solid var(--timeline-border-color);
+  line-height: 1.6;
 }
 
 .timeline-body p {
@@ -446,8 +722,11 @@ body {
 }
 
 .timeline-body small {
-  color: var(--text-muted);
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--timeline-date-color);
   font-size: 0.75rem;
+  font-weight: 500;
 }
 
 /* Buttons */
@@ -633,7 +912,7 @@ body {
 .form-label {
   display: block;
   margin-bottom: var(--spacing-xs);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-secondary);
   font-size: 0.875rem;
 }
@@ -696,7 +975,7 @@ textarea.form-control {
 .empty-state {
   text-align: center;
   padding: var(--spacing-md);
-  color: var(--text-muted);
+  color: var(--info-label-color);
   font-size: 0.875rem;
 }
 
@@ -943,11 +1222,16 @@ textarea.form-control {
   
   /* Info values */
   .lead-info-value a {
-    color: #60a5fa !important;
+    color: #e2e8f0;
+  }
+  
+  .lead-info-value a i {
+    color: var(--primary-light);
+    opacity: 0.7;
   }
   
   .lead-info-value a:hover {
-    color: #93c5fd !important;
+    color: #f8fafc;
   }
   
   /* Status adjustments for dark mode */
@@ -962,37 +1246,38 @@ textarea.form-control {
   }
   
   .lead-status.new {
-    background-color: rgba(67, 97, 238, 0.3);
+    background-color: rgba(12, 45, 107, 0.4);
   }
   
   .lead-status.contacted {
-    background-color: rgba(79, 209, 197, 0.3);
+    background-color: rgba(11, 74, 95, 0.4);
   }
   
   .lead-status.qualified {
-    background-color: rgba(251, 191, 36, 0.3);
+    background-color: rgba(21, 128, 61, 0.4);
   }
   
   .lead-status.proposal {
-    background-color: rgba(139, 92, 246, 0.3);
+    background-color: rgba(37, 99, 235, 0.4);
   }
   
   .lead-status.negotiation {
-    background-color: rgba(59, 130, 246, 0.3);
+    background-color: rgba(245, 158, 11, 0.4);
   }
   
   .lead-status.lost {
-    background-color: rgba(248, 113, 113, 0.3);
+    background-color: rgba(220, 38, 38, 0.4);
   }
   
   .lead-status.closed {
-    background-color: rgba(52, 211, 153, 0.3);
+    background-color: rgba(34, 197, 94, 0.4);
   }
   
   /* Tags */
   .lead-tag {
     background-color: rgba(255, 255, 255, 0.05);
-    color: #cbd5e1;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
   }
   
   /* Modal backdrop */
@@ -1017,4 +1302,134 @@ textarea.form-control {
   .lead-card-body::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255, 255, 255, 0.2);
   }
-} 
+}
+
+/* Add dark mode overrides to preserve dark mode appearance */
+html.dark-mode .lead-info-label,
+html.dark-mode .lead-info-value,
+html.dark-mode .lead-info-description p,
+html.dark-mode .note-meta strong,
+html.dark-mode .document-meta strong,
+html.dark-mode .note-content,
+html.dark-mode .document-content,
+html.dark-mode .timeline-header h4,
+html.dark-mode .timeline-body,
+html.dark-mode .empty-state,
+html.dark-mode .empty-state p {
+  color: var(--text-primary);
+}
+
+html.dark-mode .lead-note-date,
+html.dark-mode .lead-document-meta,
+html.dark-mode .note-meta small,
+html.dark-mode .document-meta small,
+html.dark-mode .timeline-date,
+html.dark-mode .timeline-body small {
+  color: var(--text-secondary);
+}
+
+/* Timeline dark mode overrides */
+html.dark-mode .timeline:before {
+  background-color: rgba(67, 97, 238, 0.2);
+}
+
+html.dark-mode .timeline-item:before {
+  border: 2px solid var(--card-bg);
+  box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.15);
+}
+
+html.dark-mode .timeline-title {
+  color: var(--text-primary);
+}
+
+html.dark-mode .timeline-title i {
+  color: var(--primary-light);
+}
+
+html.dark-mode .timeline-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html.dark-mode .timeline-body {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Dark mode overrides for lead name */
+html.dark-mode .lead-detail-name {
+  color: #e2e8f0;
+}
+
+html.dark-mode .lead-detail-name::after {
+  background-color: rgba(30, 64, 175, 0.7);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+html.dark-mode .lead-detail-name:hover::after {
+  background-color: rgba(30, 58, 138, 0.8);
+}
+
+/* Dark mode overrides for lead information */
+html.dark-mode .section-title,
+html.dark-mode .lead-info-label,
+html.dark-mode .lead-info-value {
+  color: var(--text-primary);
+}
+
+html.dark-mode .lead-info-item {
+  background-color: var(--card-bg);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark-mode .lead-info-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+html.dark-mode .lead-tag {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+}
+
+html.dark-mode .lead-tag i {
+  color: var(--primary-light);
+}
+
+html.dark-mode .lead-detail-company {
+  color: var(--text-secondary);
+}
+
+html.dark-mode .lead-detail-company::before {
+  color: var(--primary-light);
+}
+
+html.dark-mode .lead-detail-tags .lead-status,
+html.dark-mode .lead-detail-tags .lead-tag {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+}
+
+html.dark-mode .lead-detail-tags .lead-status i,
+html.dark-mode .lead-detail-tags .lead-tag i {
+  color: var(--primary-light);
+}
+
+html.dark-mode .lead-detail-tags .lead-status:hover,
+html.dark-mode .lead-detail-tags .lead-tag:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+/* Dark mode adjustments for lead card header */
+html.dark-mode .lead-card-header {
+  background-color: rgba(30, 41, 59, 0.5);
+  border-bottom-color: rgba(226, 232, 240, 0.1);
+}
+
+html.dark-mode .lead-name {
+  color: #e2e8f0;
+}
+
+html.dark-mode .lead-card-header::before {
+  background: linear-gradient(to right, rgba(30, 64, 175, 0.7), rgba(67, 97, 238, 0.7));
+}

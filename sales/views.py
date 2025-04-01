@@ -35,13 +35,13 @@ class SaleDetailView(DetailView):
 class SaleCreateView(CreateView):
     model = Sale
     template_name = 'sales/sale_form.html'
-    fields = ['client', 'sale_date', 'amount', 'description']
+    fields = ['client', 'sale_date', 'subtotal', 'tax_amount', 'total_amount', 'payment_method', 'payment_status', 'notes']
     success_url = reverse_lazy('sales:sale_list')
 
 class SaleUpdateView(UpdateView):
     model = Sale
     template_name = 'sales/sale_form.html'
-    fields = ['client', 'sale_date', 'amount', 'description']
+    fields = ['client', 'sale_date', 'subtotal', 'tax_amount', 'total_amount', 'payment_method', 'payment_status', 'notes']
     success_url = reverse_lazy('sales:sale_list')
 
 class SaleDeleteView(DeleteView):
@@ -203,8 +203,8 @@ def preview_receipt(request, pk):
     return render(request, 'sales/receipt_template.html', {
         'sale': sale,
         'items': sale.items.all(),
-        'company_name': settings.COMPANY_NAME,
-        'company_address': settings.COMPANY_ADDRESS,
+        'company_name': getattr(settings, 'COMPANY_NAME', 'Your Company'),
+        'company_address': getattr(settings, 'COMPANY_ADDRESS', 'Address Not Set'),
         'company_phone': getattr(settings, 'COMPANY_PHONE', ''),
         'company_email': getattr(settings, 'COMPANY_EMAIL', ''),
     })

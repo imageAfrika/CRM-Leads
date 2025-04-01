@@ -1,0 +1,129 @@
+{% extends 'project_management/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} | Project Management{% endblock %}
+
+{% block header_title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/project_detail.css' %}" rel="stylesheet">
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: var(--spacing-lg);
+        background-color: var(--color-white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .form-header {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--color-gray-900);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .form-subtitle {
+        color: var(--color-gray-500);
+        font-size: 0.875rem;
+    }
+
+    .form-group {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 500;
+        color: var(--color-gray-700);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border: 1px solid var(--color-gray-300);
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        transition: var(--transition-fast);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+
+    textarea.form-control {
+        min-height: 150px;
+        resize: vertical;
+    }
+
+    .help-text {
+        font-size: 0.75rem;
+        color: var(--color-gray-500);
+        margin-top: var(--spacing-xs);
+    }
+
+    .error-message {
+        color: var(--color-danger);
+        font-size: 0.75rem;
+        margin-top: var(--spacing-xs);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-xl);
+        padding-top: var(--spacing-lg);
+        border-top: 1px solid var(--color-gray-200);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-container">
+    <div class="form-container">
+        <div class="form-header">
+            <h1 class="form-title">{{ title }}</h1>
+            <p class="form-subtitle">Project: {{ project.name }}</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.title.id_for_label }}">Title<span class="required">*</span></label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="error-message">{{ form.title.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="{{ form.content.id_for_label }}">Content<span class="required">*</span></label>
+                {{ form.content }}
+                {% if form.content.errors %}
+                    <div class="error-message">{{ form.content.errors }}</div>
+                {% endif %}
+                <div class="help-text">Write your note here. You can use markdown for formatting.</div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'project_management:project_detail' project.pk %}" class="button button-outline">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="button button-primary">
+                    <i class="fas fa-save"></i> Save Note
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

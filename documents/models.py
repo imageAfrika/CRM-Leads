@@ -160,6 +160,23 @@ class Document(models.Model):
         else:
             raise ValueError(f"Cannot mark as paid: document is {self.status}")
 
+    def mark_overdue_documents():
+        """Mark all overdue documents as overdue"""
+        overdue_documents = Document.objects.filter(
+            status__in=['SENT', 'OVERDUE'],
+            due_date__lt=timezone.now().date()
+        )
+        
+        for doc in overdue_documents:
+            doc.status = 'OVERDUE'
+            doc.save()
+        
+        return len(overdue_documents)
+
+    def is_overdue(self):
+        """Check if the document is overdue"""
+        return self.status in ['SENT', 'OVERDUE'] and self.due_date < timezone.now().date()
+
     def generate_pdf(self):
         # Create a BytesIO buffer for the PDF
         buffer = BytesIO()
@@ -381,3 +398,4 @@ class InvoiceItem(models.Model):
 
     def __str__(self):
         return f"{self.description} - {self.quantity} x ${self.unit_price}"
+
