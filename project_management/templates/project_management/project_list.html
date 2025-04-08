@@ -6,7 +6,7 @@
 {% block header_title %}Project List{% endblock %}
 
 {% block extra_css %}
-<link href="{% static 'css/project_list.css' %}" rel="stylesheet">
+<link href="{% static 'css/project_list_modern.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -86,7 +86,7 @@
     {% if projects %}
     <section class="projects-grid">
         {% for project in projects %}
-        <article class="project-card status-{{ project.status|lower }}">
+        <article class="project-card status-{{ project.status|lower }}" data-project-id="{{ project.pk }}">
             <header class="project-card-header">
                 <h2 class="project-name">{{ project.name }}</h2>
                 <span class="project-status status-{{ project.status|lower }}">
@@ -147,14 +147,20 @@
             </div>
             
             <footer class="project-card-footer">
-                <a href="{% url 'project_management:project_detail' project.pk %}" class="button button-outline">
-                    <i class="fas fa-eye"></i> View
+                <a href="{% url 'project_management:project_detail' project.pk %}" class="button button-view" data-tooltip="View Project">
+                    <i class="fas fa-eye"></i>
                 </a>
-                <a href="{% url 'project_management:project_update' project.pk %}" class="button button-outline">
-                    <i class="fas fa-edit"></i> Edit
+                <a href="{% url 'project_management:project_update' project.pk %}" class="button button-edit" data-tooltip="Edit Project">
+                    <i class="fas fa-edit"></i>
                 </a>
-                <button class="button button-outline danger delete-project" data-project-id="{{ project.pk }}" data-project-name="{{ project.name }}">
-                    <i class="fas fa-trash"></i> Delete
+                <button class="button button-delete delete-project" 
+                        data-toggle="modal" 
+                        data-target="#delete-project-modal"
+                        data-project-id="{{ project.pk }}"
+                        data-project-name="{{ project.name }}"
+                        data-delete-url="{{ project.get_delete_url }}"
+                        data-tooltip="Delete Project">
+                    <i class="fas fa-trash"></i>
                 </button>
             </footer>
         </article>
@@ -180,145 +186,51 @@
     </section>
     {% endif %}
     
-    <!-- Delete Modal -->
-    <div class="modal-overlay" id="delete-modal">
-        <div class="modal-container">
-            <div class="modal-header">
-                <div class="modal-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <h3 class="modal-title">Confirm Delete</h3>
-            </div>
-            <div class="modal-body">
-                <p class="modal-message">Are you sure you want to delete the project "<span id="project-name-to-delete"></span>"? This action cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                <button class="button button-outline" id="cancel-delete">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
-                <form id="delete-project-form" method="post" action="">
-                    {% csrf_token %}
-                    <button type="submit" class="button button-danger">
-                        <i class="fas fa-trash"></i> Delete
+    <!-- Single Dynamic Delete Modal -->
+    <div class="modal fade delete-confirmation-modal" 
+         id="delete-project-modal" 
+         tabindex="-1" 
+         role="dialog" 
+         aria-labelledby="deleteProjectModalTitle" 
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteProjectModalTitle">Confirm Project Deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
                     </button>
-                </form>
+                </div>
+                <div class="modal-body">
+                    <div class="delete-modal-icon">
+                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                    </div>
+                    <p class="delete-modal-description">
+                        Are you sure you want to delete the project "<span id="delete-project-name"></span>"? 
+                        This action cannot be undone.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <form id="delete-project-form" method="post" action="">
+                        {% csrf_token %}
+                        <input type="hidden" name="project_id" id="delete-project-id" value="">
+                        <button type="submit" class="btn btn-danger delete-confirmation-btn">
+                            Delete Project
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Notification Container -->
     <div class="notification-container" id="notification-container"></div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Set progress bar widths based on data-width attributes
-    document.querySelectorAll('.progress-bar[data-width]').forEach(function(progressBar) {
-        const width = progressBar.getAttribute('data-width');
-        progressBar.style.width = width + '%';
-    });
-    
-    // Delete modal functionality
-    const deleteButtons = document.querySelectorAll('.delete-project');
-    const deleteModal = document.getElementById('delete-modal');
-    const cancelDelete = document.getElementById('cancel-delete');
-    const deleteForm = document.getElementById('delete-project-form');
-    const projectNameToDelete = document.getElementById('project-name-to-delete');
-    
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const projectId = this.getAttribute('data-project-id');
-            const projectName = this.getAttribute('data-project-name');
-            
-            deleteForm.action = `{% url 'project_management:project_delete' 0 %}`.replace('0', projectId);
-            projectNameToDelete.textContent = projectName;
-            
-            deleteModal.classList.add('active');
-        });
-    });
-    
-    cancelDelete.addEventListener('click', function() {
-        deleteModal.classList.remove('active');
-    });
-    
-    deleteModal.addEventListener('click', function(e) {
-        if (e.target === deleteModal) {
-            deleteModal.classList.remove('active');
-        }
-    });
-    
-    // Filter functionality
-    const clearFiltersBtn = document.getElementById('clear-filters');
-    
-    clearFiltersBtn.addEventListener('click', function() {
-        const searchInput = document.getElementById('search');
-        const statusSelect = document.getElementById('status');
-        const prioritySelect = document.getElementById('priority');
-        
-        searchInput.value = '';
-        statusSelect.value = '';
-        prioritySelect.value = '';
-        
-        document.getElementById('project-filter-form').submit();
-    });
-    
-    // Show notification if in URL params
-    const urlParams = new URLSearchParams(window.location.search);
-    const message = urlParams.get('message');
-    const messageType = urlParams.get('type');
-    
-    if (message) {
-        showNotification(decodeURIComponent(message), messageType || 'info');
-    }
-    
-    // Notification function
-    function showNotification(message, type = 'info') {
-        const container = document.getElementById('notification-container');
-        
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        
-        const iconClass = type === 'success' ? 'fa-check-circle' :
-                          type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
-        
-        notification.innerHTML = `
-            <div class="notification-icon">
-                <i class="fas ${iconClass}"></i>
-            </div>
-            <div class="notification-content">
-                <h4 class="notification-title">${type.charAt(0).toUpperCase() + type.slice(1)}</h4>
-                <p class="notification-message">${message}</p>
-            </div>
-            <button class="notification-close">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        
-        container.appendChild(notification);
-        
-        // Add active class to animate in
-        setTimeout(() => {
-            notification.classList.add('active');
-        }, 10);
-        
-        // Auto close after 3 seconds
-        setTimeout(() => {
-            notification.classList.remove('active');
-            setTimeout(() => {
-                container.removeChild(notification);
-            }, 300);
-        }, 3000);
-        
-        // Close button functionality
-        notification.querySelector('.notification-close').addEventListener('click', function() {
-            notification.classList.remove('active');
-            setTimeout(() => {
-                container.removeChild(notification);
-            }, 300);
-        });
-    }
-});
-</script>
-{% endblock %} 
+<script src="{% static 'js/project_management.js' %}"></script>
+{% endblock %}

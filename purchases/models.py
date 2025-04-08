@@ -93,3 +93,31 @@ class Purchase(models.Model):
         # Update amount based on quantity and unit price
         self.amount = self.quantity * self.unit_price
         super(Purchase, self).save(*args, **kwargs)
+
+    def create_document(self):
+        """Create a Document instance from this Purchase"""
+        from decimal import Decimal
+        from documents.models import Document
+        from clients.models import Client
+        
+        # Try to get a default client or create a generic one if not found
+        try:
+            default_client = Client.objects.first() or Client.objects.create(
+                name='Default Client', 
+                email='default@example.com'
+            )
+        except Exception:
+            default_client = None
+
+        return Document.objects.create(
+            client=default_client,
+            document_type='PURCHASE',
+            description=self.title,
+            subtotal=self.amount,
+            tax_rate=Decimal('0.00'),
+            tax_amount=Decimal('0.00'),
+            total_amount=self.amount,
+            document_date=self.date,
+            status='COMPLETED',
+            purchase=self
+        )

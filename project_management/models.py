@@ -7,6 +7,7 @@ from django.dispatch import receiver
 import string
 import random
 from decimal import Decimal
+from people.models import Person
 
 class Project(models.Model):
     STATUS_CHOICES = [
@@ -45,8 +46,8 @@ class Project(models.Model):
     actual_cost = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     
     # Team
-    manager = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='managed_projects')
-    team_members = models.ManyToManyField(User, related_name='assigned_projects', blank=True)
+    manager = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, related_name='managed_projects')
+    team_members = models.ManyToManyField(Person, related_name='assigned_projects', blank=True)
     
     # Additional Information
     tags = models.CharField(max_length=200, blank=True, help_text="Comma-separated tags")
@@ -69,6 +70,13 @@ class Project(models.Model):
 
     def get_absolute_url(self):
         return reverse('project_management:project_detail', args=[str(self.id)])
+
+    def get_delete_url(self):
+        """
+        Returns the URL for deleting this specific project.
+        Used in templates for dynamic delete modal configuration.
+        """
+        return reverse('project_management:project_delete_with_pk', kwargs={'pk': self.pk})
 
     @property
     def total_income(self):

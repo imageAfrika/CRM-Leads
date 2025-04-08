@@ -2,11 +2,12 @@ from django import forms
 from django.contrib.auth.models import User
 from .models import Project, ProjectDocument, ProjectNote, ProjectMilestone, Transaction
 from django.utils import timezone
+from people.models import Person
 
 class ProjectForm(forms.ModelForm):
     team_members = forms.ModelMultipleChoiceField(
-        queryset=User.objects.all(),
-        widget=forms.SelectMultiple(attrs={'class': 'form-control select2'}),
+        queryset=Person.objects.all(),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
         required=False
     )
     

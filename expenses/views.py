@@ -7,6 +7,13 @@ from .models import Expense, ExpenseCategory, RecurringExpense
 from .forms import ExpenseForm, ExpenseCategoryForm, RecurringExpenseForm
 from django.db.models.functions import TruncMonth
 from datetime import datetime, timedelta
+from django.contrib import messages
+from django.shortcuts import redirect
+from decimal import Decimal
+from documents.models import Document  # Corrected import
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def expense_list(request):
@@ -415,3 +422,69 @@ def expense_reports(request):
         'start_date': start_date,
         'end_date': end_date
     })
+
+@login_required
+def generate_expense_sheet(request, pk):
+    """Generate an Expense Sheet document from an Expense"""
+    try:
+        expense = get_object_or_404(Expense, pk=pk)
+        
+        # Log detailed expense information
+        logger.info(f"Attempting to generate expense sheet for Expense {pk}")
+        logger.info(f"Expense details: Title: {expense.title}, Amount: {expense.amount}, Date: {expense.date}")
+        logger.info(f"Expense Category: {expense.category}")
+        logger.info(f"Expense Profile: {expense.profile}")
+        logger.info(f"Expense Created By: {expense.created_by}")
+        
+        # Check permissions
+        if not request.user.is_superuser:
+            if hasattr(request, 'profile') and request.profile:
+                if expense.profile and expense.profile != request.profile:
+                    logger.warning(f"Permission denied: Profile mismatch for Expense {pk}")
+                    messages.error(request, "You don't have permission to generate an expense sheet.")
+                    return redirect('expenses:expense_detail', pk=pk)
+            elif expense.created_by != request.user:
+                logger.warning(f"Permission denied: User mismatch for Expense {pk}")
+                messages.error(request, "You don't have permission to generate an expense sheet.")
+                return redirect('expenses:expense_detail', pk=pk)
+        
+        # Check if document already exists
+        existing_doc = Document.objects.filter(expense=expense, document_type='EXPENSE_SHEET').first()
+        if existing_doc:
+            logger.info(f"Expense Sheet already exists for Expense {pk}")
+            messages.info(request, "An Expense Sheet document already exists for this expense.")
+            return redirect('documents:expense_sheet_detail', pk=existing_doc.pk)
+        
+        # Create the document
+        try:
+            document = Document.objects.create(
+                client=None,  # Client is not required
+                document_type='EXPENSE_SHEET',
+                description=f"Expense Sheet for {expense.title}",
+                subtotal=expense.amount,
+                tax_rate=Decimal('0.00'),
+                tax_amount=Decimal('0.00'),
+                total_amount=expense.amount,
+                document_date=expense.date or timezone.now().date(),
+                status='DRAFT',
+                expense=expense,
+                created_by=request.user
+            )
+            logger.info(f"Successfully generated Expense Sheet for Expense {pk}. Document ID: {document.pk}")
+            messages.success(request, "Expense Sheet document generated successfully.")
+            return redirect('documents:expense_sheet_detail', pk=document.pk)
+        except Exception as e:
+            logger.error(f"Failed to generate Expense Sheet for Expense {pk}: {str(e)}")
+            messages.error(request, f"Failed to generate Expense Sheet: {str(e)}")
+            return redirect('expenses:expense_detail', pk=pk)
+    
+    except Exception as e:
+        # Log the full error details
+        logger.error(f"Comprehensive error in generate_expense_sheet for Expense {pk}: {str(e)}")
+        logger.error(f"Error type: {type(e).__name__}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        # Provide a user-friendly error message
+        messages.error(request, f"Failed to generate Expense Sheet. Please contact support. Error: {str(e)}")
+        return redirect('expenses:expense_detail', pk=pk)

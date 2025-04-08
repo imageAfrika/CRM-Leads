@@ -4,6 +4,7 @@ from django.core.validators import MinValueValidator
 from django.contrib.auth.models import User
 from authentication.models import Profile
 from django.utils import timezone
+from decimal import Decimal
 
 class ExpenseCategory(models.Model):
     name = models.CharField(max_length=255)
@@ -68,6 +69,33 @@ class Expense(models.Model):
     
     def __str__(self):
         return f"{self.title} - {self.amount} ({self.date})"
+
+    def create_document(self):
+        """Create a Document instance from this Expense"""
+        from documents.models import Document
+        from clients.models import Client
+        
+        # Try to get a default client or create a generic one if not found
+        try:
+            default_client = Client.objects.first() or Client.objects.create(
+                name='Default Client', 
+                email='default@example.com'
+            )
+        except Exception:
+            default_client = None
+
+        return Document.objects.create(
+            client=default_client,
+            document_type='EXPENSE',
+            description=self.title,
+            subtotal=self.amount,
+            tax_rate=Decimal('0.00'),
+            tax_amount=Decimal('0.00'),
+            total_amount=self.amount,
+            document_date=self.date,
+            status='COMPLETED',
+            expense=self
+        )
 
 class RecurringExpense(models.Model):
     FREQUENCY_CHOICES = (

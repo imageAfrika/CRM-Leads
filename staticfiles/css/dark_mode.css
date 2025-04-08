@@ -4,6 +4,10 @@
 
 /* Additional app-specific dark mode styles */
 
+body {
+    font-family: 'Nunito', sans-serif;
+}
+
 /* Leads app dark mode */
 html.dark-mode .timeline::before {
     background-color: var(--border-color);

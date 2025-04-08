@@ -30,6 +30,10 @@
     --page-margin: 12px;
 }
 
+body {
+    font-family: 'Nunito', sans-serif;
+}
+
 .content-container {
     margin-left: var(--page-margin);
     margin-right: var(--page-margin);

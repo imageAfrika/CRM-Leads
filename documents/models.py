@@ -37,7 +37,7 @@ class Document(models.Model):
         ('COMPLETED', 'Completed'),
     )
 
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True, related_name='documents')
     document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPES)
     description = models.TextField(blank=True)
     invoice_number = models.CharField(max_length=50, null=True, blank=True)
@@ -56,8 +56,8 @@ class Document(models.Model):
     
     # Relationships
     quote = models.ForeignKey('Quote', on_delete=models.SET_NULL, null=True, blank=True, related_name='invoices')
-    purchase = models.ForeignKey('products.Purchase', on_delete=models.SET_NULL, null=True, blank=True, related_name='documents')
-    expense = models.ForeignKey('expenses.Expense', on_delete=models.SET_NULL, null=True, blank=True, related_name='documents')
+    expense = models.ForeignKey('expenses.Expense', on_delete=models.SET_NULL, null=True, blank=True, related_name='document')
+    purchase = models.ForeignKey('purchases.Purchase', on_delete=models.SET_NULL, null=True, blank=True, related_name='document')
     sale = models.ForeignKey('sales.Sale', on_delete=models.SET_NULL, null=True, blank=True, related_name='documents')
     
     # Metadata
@@ -129,7 +129,7 @@ class Document(models.Model):
         return None
 
     def __str__(self):
-        return f"{self.get_document_type_display()} - {self.client.name}"
+        return f"{self.get_document_type_display()} - {self.client.name if self.client else 'No Client'}"
 
     def get_absolute_url(self):
         return reverse('documents:document_detail', args=[str(self.id)])
@@ -398,4 +398,3 @@ class InvoiceItem(models.Model):
 
     def __str__(self):
         return f"{self.description} - {self.quantity} x ${self.unit_price}"
-

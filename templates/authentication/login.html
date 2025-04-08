@@ -1,24 +1,295 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - CRM Leads</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/authentication/login.css' %}">
+    <style>
+        :root {
+            --primary-color: #9C6AC0;  /* Soft, muted lavender */
+            --secondary-color: #7E57C2;  /* Slightly deeper lavender */
+            --accent-color: #4DB6AC;  /* Soft teal accent */
+            --button-color: #8E44AD;  /* Muted purple */
+            --button-hover-color: #6C3483;  /* Darker muted purple */
+            --background-color: #F4EDF7;  /* Very light, soft lavender background */
+            --text-color: #4A4A4A;  /* Soft dark gray */
+            --gradient-angle: 135deg;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(var(--gradient-angle), var(--primary-color), var(--secondary-color));
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-attachment: fixed;
+            color: var(--text-color);
+        }
+
+        .auth-container {
+            display: flex;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            border-radius: 20px;
+            overflow: hidden;
+            max-width: 1100px;
+            width: 90%;
+            background: white;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .auth-image {
+            flex: 1.2;
+            background: linear-gradient(var(--gradient-angle), var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-image::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            animation: pulse 5s infinite alternate;
+        }
+
+        .auth-image img {
+            max-width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+        }
+
+        .auth-form {
+            flex: 1;
+            padding: 3rem 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #f1f1f1;
+        }
+
+        .auth-tabs .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: rgba(0,0,0,0.6);
+            transition: all 0.3s ease;
+        }
+
+        .auth-tabs .auth-tab.active {
+            color: var(--button-color);
+            border-bottom: 3px solid var(--button-color);
+        }
+
+        .form-control {
+            width: 100%;
+            border-radius: 25px;
+            padding: 12px 20px;
+            background-color: var(--background-color);
+            border: 1px solid rgba(142, 68, 173, 0.2);
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .form-control:focus {
+            background-color: white;
+            border-color: var(--button-color);
+            box-shadow: 0 0 0 0.2rem rgba(142, 68, 173, 0.1);
+        }
+
+        .btn-auth {
+            width: 100%;
+            border-radius: 25px;
+            padding: 12px 20px;
+            background-color: var(--button-color);
+            border: none;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            box-shadow: 0 4px 6px rgba(142, 68, 173, 0.1);
+        }
+
+        .btn-auth:hover {
+            background-color: var(--button-hover-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(142, 68, 173, 0.15);
+        }
+
+        .social-login {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+
+        .social-btn {
+            flex: 1;
+            margin: 0 0.5rem;
+            border-radius: 25px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            background-color: var(--button-color) !important;
+            color: white;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .social-btn:hover {
+            background-color: var(--button-hover-color) !important;
+        }
+
+        .social-btn img {
+            max-width: 24px;
+            margin-right: 10px;
+        }
+
+        .messages {
+            margin-bottom: 1rem;
+        }
+
+        .alert {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .alert-error, .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .role-select-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .custom-select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 25px;
+            background-color: var(--background-color);
+            border: 1px solid rgba(142, 68, 173, 0.2);
+            color: var(--text-color);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .custom-select:focus {
+            outline: none;
+            border-color: var(--button-color);
+            box-shadow: 0 0 0 0.2rem rgba(142, 68, 173, 0.1);
+        }
+
+        .role-select-container::after {
+            content: '\f107';  /* Font Awesome chevron down */
+            font-family: 'Font Awesome 5 Free';
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            color: var(--button-color);
+            pointer-events: none;
+            font-weight: 900;
+            transition: transform 0.3s ease;
+        }
+
+        .custom-select:focus + .role-select-container::after {
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        .custom-select option {
+            background-color: white;
+            color: var(--text-color);
+            padding: 10px;
+        }
+
+        .custom-select option:checked {
+            background-color: var(--background-color);
+            color: var(--button-color);
+        }
+
+        .custom-select:hover {
+            background-color: white;
+            border-color: var(--button-color);
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                flex-direction: column;
+                max-width: 95%;
+                width: 95%;
+            }
+
+            .auth-image, .auth-form {
+                flex: 1;
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-box">
-            <div class="login-header">
-                <h1>Welcome Back</h1>
-                <p>Enter your credentials to continue</p>
+    <div class="auth-container">
+        <div class="auth-image">
+            <img src="{% static 'images/login-illustration.svg' %}" alt="Login Illustration">
+        </div>
+        <div class="auth-form">
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-form="login">Login</div>
+                <div class="auth-tab" data-form="register">Register</div>
             </div>
 
-            <form method="post" class="login-form">
+            <!-- Login Form -->
+            <form method="post" id="login-form" class="auth-form-section" style="display: block;">
                 {% csrf_token %}
-                
+                <input type="hidden" name="form_type" value="login">
+
                 {% if messages %}
                 <div class="messages">
                     {% for message in messages %}
@@ -28,28 +299,118 @@
                     {% endfor %}
                 </div>
                 {% endif %}
-
-                <div class="form-group">
-                    <input type="text" name="username" id="username" placeholder="Username" required>
-                </div>
                 
-                <div class="form-group">
-                    <input type="password" name="password" id="password" placeholder="Password" required>
-                </div>
-
-                <div class="form-group">
-                    <select id="role" name="role" required>
+                <input type="text" name="username" id="username" class="form-control" placeholder="Username" required>
+                
+                <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
+                
+                <div class="role-select-container">
+                    <select name="role" id="role" class="custom-select" required>
                         <option value="">Select Role</option>
                         <option value="admin">Administrator</option>
                         <option value="staff">Staff</option>
                     </select>
                 </div>
 
-                <button type="submit" class="login-btn">
-                    <i class="fas fa-sign-in-alt"></i> Sign In
-                </button>
+                <div class="d-flex justify-content-between mb-3">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="remember-me">
+                        <label class="form-check-label" for="remember-me">Remember Me</label>
+                    </div>
+                    <a href="{% url 'authentication:password_reset' %}" class="text-primary">Forgot Password?</a>
+                </div>
+                
+                <button type="submit" class="btn-auth">Login</button>
+                
+                <div class="text-center my-3">
+                    <span class="text-muted">or continue with</span>
+                </div>
+                
+                <div class="social-login">
+                    <button type="button" class="social-btn" style="background-color: #4285F4; color: white;">
+                        <img src="{% static 'images/google-icon.svg' %}" alt="Google">
+                        Google
+                    </button>
+                    <button type="button" class="social-btn" style="background-color: #1877F2; color: white;">
+                        <img src="{% static 'images/facebook-icon.svg' %}" alt="Facebook">
+                        Facebook
+                    </button>
+                </div>
+            </form>
+
+            <!-- Registration Form -->
+            <form method="post" id="register-form" class="auth-form-section" style="display: none;">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="register">
+                
+                <input type="text" name="first_name" class="form-control" placeholder="First Name" required>
+                
+                <input type="text" name="last_name" class="form-control" placeholder="Last Name" required>
+                
+                <input type="text" name="username" class="form-control" placeholder="Username" required>
+                
+                <input type="email" name="email" class="form-control" placeholder="Email Address" required>
+                
+                <input type="password" name="password" class="form-control" placeholder="Password" required>
+                
+                <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" required>
+                
+                <div class="role-select-container">
+                    <select name="role" class="custom-select">
+                        <option value="">Select Role</option>
+                        <option value="staff">Staff</option>
+                        <option value="administrator">Administrator</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-auth">Create Account</button>
+                
+                <div class="text-center my-3">
+                    <span class="text-muted">Already have an account? <a href="#" class="switch-form text-primary">Login</a></span>
+                </div>
             </form>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const authTabs = document.querySelectorAll('.auth-tab');
+        const authForms = document.querySelectorAll('.auth-form-section');
+        const switchFormLinks = document.querySelectorAll('.switch-form');
+
+        authTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const formType = this.dataset.form;
+
+                // Update active tab
+                authTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                // Show/hide forms
+                authForms.forEach(form => {
+                    form.style.display = form.id === `${formType}-form` ? 'block' : 'none';
+                });
+            });
+        });
+
+        // Switch form links
+        switchFormLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const loginTab = document.querySelector('.auth-tab[data-form="login"]');
+                const registerTab = document.querySelector('.auth-tab[data-form="register"]');
+                
+                loginTab.classList.toggle('active');
+                registerTab.classList.toggle('active');
+
+                const loginForm = document.getElementById('login-form');
+                const registerForm = document.getElementById('register-form');
+
+                loginForm.style.display = loginForm.style.display === 'none' ? 'block' : 'none';
+                registerForm.style.display = registerForm.style.display === 'none' ? 'block' : 'none';
+            });
+        });
+    });
+    </script>
 </body>
 </html>

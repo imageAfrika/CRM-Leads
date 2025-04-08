@@ -7,6 +7,13 @@ from .models import Purchase, PurchaseCategory
 from .forms import PurchaseForm, PurchaseCategoryForm
 from django.db.models.functions import TruncMonth
 from datetime import datetime, timedelta
+from django.contrib import messages
+from django.shortcuts import redirect
+from decimal import Decimal
+from documents.models import Document  # Corrected import
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def purchase_list(request):
@@ -308,3 +315,104 @@ def purchase_reports(request):
         'date_range': period,
         'period_label': period_label,
     })
+
+@login_required
+def generate_purchase_order(request, pk):
+    """Generate a Purchase Order document from a Purchase"""
+    try:
+        # Detailed logging of request and input
+        logger.info(f"Generating Purchase Order - Request User: {request.user}")
+        logger.info(f"Generating Purchase Order - Purchase ID: {pk}")
+        
+        # Get the purchase with more detailed logging
+        try:
+            purchase = Purchase.objects.select_related('category').get(pk=pk)
+            logger.info(f"Purchase found: {purchase}")
+            logger.info(f"Purchase Details:")
+            logger.info(f"  Title: {purchase.title}")
+            logger.info(f"  Amount: {purchase.amount}")
+            logger.info(f"  Date: {purchase.date}")
+            logger.info(f"  Category: {purchase.category}")
+            
+            # Additional logging for profile and created_by
+            if hasattr(purchase, 'profile'):
+                logger.info(f"  Profile: {purchase.profile}")
+            if hasattr(purchase, 'created_by'):
+                logger.info(f"  Created By: {purchase.created_by}")
+        except Purchase.DoesNotExist:
+            logger.error(f"Purchase with ID {pk} does not exist")
+            messages.error(request, "Purchase not found.")
+            return redirect('purchases:purchase_list')
+        except Exception as e:
+            logger.error(f"Error retrieving purchase: {str(e)}")
+            messages.error(request, f"Error retrieving purchase: {str(e)}")
+            return redirect('purchases:purchase_list')
+        
+        # Check permissions with more detailed logging
+        if not request.user.is_superuser:
+            # Check profile-based permissions
+            try:
+                if hasattr(request, 'profile') and request.profile:
+                    # Check if purchase has a profile and if it matches
+                    if hasattr(purchase, 'profile') and purchase.profile:
+                        if purchase.profile != request.profile:
+                            logger.warning(f"Permission denied: Profile mismatch. User Profile: {request.profile}, Purchase Profile: {purchase.profile}")
+                            messages.error(request, "You don't have permission to generate a purchase order.")
+                            return redirect('purchases:purchase_detail', pk=pk)
+                
+                # Check user-based permissions
+                if hasattr(purchase, 'created_by') and purchase.created_by:
+                    if purchase.created_by != request.user:
+                        logger.warning(f"Permission denied: User mismatch. Request User: {request.user}, Purchase Created By: {purchase.created_by}")
+                        messages.error(request, "You don't have permission to generate a purchase order.")
+                        return redirect('purchases:purchase_detail', pk=pk)
+            except Exception as perm_error:
+                logger.error(f"Error checking purchase permissions: {str(perm_error)}")
+                messages.error(request, "An error occurred while checking permissions.")
+                return redirect('purchases:purchase_detail', pk=pk)
+        
+        # Check if document already exists
+        logger.info(f"Checking for existing Purchase Order for Purchase {pk}")
+        existing_doc_query = Document.objects.filter(purchase=purchase, document_type='PURCHASE_ORDER')
+        logger.info(f"Existing Document Query: {existing_doc_query.query}")
+        existing_doc = existing_doc_query.first()
+        logger.info(f"Existing Document Query Result: {existing_doc}")
+        if existing_doc:
+            logger.info(f"Purchase Order already exists for Purchase {pk}. Existing Document ID: {existing_doc.pk}")
+            messages.info(request, "A Purchase Order document already exists for this purchase.")
+            return redirect('documents:purchase_order_detail', pk=existing_doc.pk)
+        
+        # Create the document with detailed logging
+        try:
+            document = Document.objects.create(
+                client=None,  # Client is not required
+                document_type='PURCHASE_ORDER',
+                description=f"Purchase Order for {purchase.title}",
+                subtotal=purchase.amount,
+                tax_rate=Decimal('0.00'),
+                tax_amount=Decimal('0.00'),
+                total_amount=purchase.amount,
+                document_date=purchase.date or timezone.now().date(),
+                status='DRAFT',
+                purchase=purchase,
+                created_by=request.user
+            )
+            logger.info(f"Successfully created Purchase Order Document. ID: {document.pk}")
+            messages.success(request, "Purchase Order document generated successfully.")
+            return redirect('documents:purchase_order_detail', pk=document.pk)
+        except Exception as doc_error:
+            logger.error(f"Failed to create Purchase Order Document: {str(doc_error)}")
+            messages.error(request, f"Failed to generate Purchase Order. Error: {str(doc_error)}")
+            return redirect('purchases:purchase_detail', pk=pk)
+    
+    except Exception as e:
+        # Comprehensive error logging
+        logger.error(f"Comprehensive error in generate_purchase_order for Purchase {pk}")
+        logger.error(f"Error type: {type(e).__name__}")
+        logger.error(f"Error details: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        # Provide a user-friendly error message
+        messages.error(request, f"Unexpected error generating Purchase Order. Please contact support.")
+        return redirect('purchases:purchase_detail', pk=pk)

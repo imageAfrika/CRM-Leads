@@ -18,6 +18,9 @@ from django.db.models import Sum, Q, Count
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def profile_selection(request):
@@ -134,13 +137,29 @@ class ProfileView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        now = timezone.now()
-
-        # Profile Statistics
+        
+        # Import Person model
+        from people.models import Person
+        
+        # Try to get or create a Person instance for the user
+        try:
+            person, created = Person.objects.get_or_create(
+                user=user,
+                defaults={
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email
+                }
+            )
+        except Exception as e:
+            logger.error(f"Error creating Person for user {user}: {str(e)}")
+            person = None
+        
+        # Update context with lead counts using Person
         context['total_leads'] = Lead.objects.filter(
-            Q(assigned_to=user) | 
-            Q(created_by=user)
-        ).count()
+            Q(assigned_to=person) |  
+            Q(created_by=user)     
+        ).count() if person else 0
         
         context['total_projects'] = Project.objects.count()
         
@@ -154,22 +173,22 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         )[:5]
         
         context['overdue_documents'] = Document.objects.filter(
-            due_date__lt=now,
+            due_date__lt=timezone.now(),
             status__in=['draft', 'in_progress']
         )[:5]
 
         # Open Leads
         context['open_leads'] = Lead.objects.filter(
-            Q(assigned_to=user) | 
+            Q(assigned_to=person) | 
             Q(created_by=user),
             status__in=['new', 'in_progress']
-        )[:5]
+        )[:5] if person else []
 
         # Upcoming Events
         context['upcoming_events'] = Event.objects.filter(
             user=user,
-            start_time__gte=now,
-            start_time__lte=now + timedelta(days=30)
+            start_time__gte=timezone.now(),
+            start_time__lte=timezone.now() + timedelta(days=30)
         )[:5]
 
         # Open Projects

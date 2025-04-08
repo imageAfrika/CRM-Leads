@@ -26,4 +26,7 @@ urlpatterns = [
     path('expenditure/<int:pk>/delete/', views.expenditure_delete, name='expenditure_delete'),
     path('invoices/', views.invoice_list, name='invoice_list'),
     path('<int:pk>/generate-pdf/', views.generate_document_pdf, name='generate_document_pdf'),
+    path('chart-data/', views.chart_data, name='chart_data'),
+    path('expense-sheet/<int:pk>/', views.expense_sheet_detail, name='expense_sheet_detail'),
+    path('purchase-order/<int:pk>/', views.purchase_order_detail, name='purchase_order_detail'),
 ]

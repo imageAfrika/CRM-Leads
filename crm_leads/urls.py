@@ -37,7 +37,7 @@ urlpatterns = [
     # Include authentication URLs
     path('auth/', include('authentication.urls')),
     # Include all app URLs used in the sidebar
-    path('dashboard/', include('dashboard.urls')),
+    path('dashboard/', include('dashboard.urls')),  # Added this line
     path('people/', include('people.urls')),
     path('clients/', include('clients.urls')),
     path('leads/', include('leads.urls')),

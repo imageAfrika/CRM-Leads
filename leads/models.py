@@ -4,6 +4,8 @@ from django.urls import reverse
 from django.utils import timezone
 from model_utils import FieldTracker
 from clients.models import Client
+from people.models import Person
+
 
 class Lead(models.Model):
     STATUS_CHOICES = [
@@ -58,7 +60,7 @@ class Lead(models.Model):
     next_follow_up = models.DateTimeField(null=True, blank=True)
     
     # Relationships
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_leads')
+    assigned_to = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_leads')
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_leads')
     modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='modified_leads')
     converted_to_client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True, related_name='converted_from_lead')

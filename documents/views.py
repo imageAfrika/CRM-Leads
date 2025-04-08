@@ -4,7 +4,7 @@ from django.urls import reverse_lazy, reverse
 from .models import Quote, Document, QuoteItem, Client, Expenditure, InvoiceItem
 from .forms import QuoteForm
 from django.http import JsonResponse, FileResponse, HttpResponse, HttpResponseNotAllowed
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from decimal import Decimal
 from clients.models import Client
 import json
@@ -69,10 +69,10 @@ def quote_create(request):
             quote_number=quote_number,
             title=request.POST['title'],
             description=request.POST.get('description', ''),
-            subtotal=Decimal(str(request.POST['subtotal'])),
-            tax_rate=Decimal(str(request.POST['tax_rate'])),
-            tax_amount=Decimal(str(request.POST['tax_amount'])),
-            total_amount=Decimal(str(request.POST['total_amount'])),
+            subtotal=Decimal(request.POST['subtotal']).quantize(Decimal('0.01')),
+            tax_rate=Decimal(request.POST['tax_rate']).quantize(Decimal('0.01')),
+            tax_amount=Decimal(request.POST['tax_amount']).quantize(Decimal('0.01')),
+            total_amount=Decimal(request.POST['total_amount']).quantize(Decimal('0.01')),
             valid_until=valid_until,
             terms=request.POST.get('terms', '')
         )
@@ -80,32 +80,21 @@ def quote_create(request):
         # Parse items from JSON
         if 'items' in request.POST:
             try:
-                print("Items JSON:", request.POST['items'])
                 items_data = json.loads(request.POST['items'])
-                print("Parsed items data:", items_data)
                 
                 for item_data in items_data:
-                    print("Creating item:", item_data)
                     QuoteItem.objects.create(
                         quote=quote,
                         description=item_data['description'],
-                        quantity=Decimal(str(item_data['quantity'])),
-                        unit_price=Decimal(str(item_data['unit_price'])),
-                        discount=Decimal(str(item_data.get('discount', 0)))
+                        quantity=Decimal(str(item_data['quantity'])).quantize(Decimal('0.01')),
+                        unit_price=Decimal(str(item_data['unit_price'])).quantize(Decimal('0.01')),
+                        discount=Decimal(str(item_data.get('discount', 0))).quantize(Decimal('0.01'))
                     )
-            except json.JSONDecodeError as e:
-                print("JSON decode error:", e)
+            except (json.JSONDecodeError, decimal.InvalidOperation) as e:
                 return JsonResponse({
                     'success': False,
-                    'error': f'Invalid JSON format for items: {str(e)}'
+                    'error': f'Invalid data format: {str(e)}'
                 }, status=400)
-            except Exception as e:
-                print("Error creating items:", e)
-                # Don't return error here, just log it
-                import traceback
-                traceback.print_exc()
-        else:
-            print("No items found in POST data")
         
         # Create a document record for this quote
         document = Document.objects.create(
@@ -679,7 +668,7 @@ def quote_preview(request, quote_id=None):
             
             # Calculate item totals for display
             for item in quote_items:
-                item.total = item.quantity * item.unit_price * (1 - item.discount / 100)
+                item.total = item.get_total()
             
             context = {
                 'quote': quote,
@@ -762,3 +751,54 @@ def quote_preview_template(request):
         # If any error occurs, redirect back to quote create page
         messages.error(request, f"Error generating preview: {str(e)}")
         return redirect('documents:quote_create')
+
+@require_GET
+def chart_data(request):
+    """
+    Provide chart data for quotes and invoices
+    """
+    quotes = Document.objects.filter(document_type='QUOTE')
+    invoices = Document.objects.filter(document_type='INVOICE')
+
+    chart_data = {
+        'quotes_count': quotes.count(),
+        'invoices_count': invoices.count(),
+        'quotes_total_value': float(quotes.aggregate(total=Sum('total_amount'))['total'] or 0),
+        'invoices_total_value': float(invoices.aggregate(total=Sum('total_amount'))['total'] or 0)
+    }
+
+    return JsonResponse(chart_data)
+
+@login_required
+def expense_sheet_detail(request, pk):
+    """View for displaying an Expense Sheet document"""
+    document = get_object_or_404(Document, pk=pk, document_type='EXPENSE_SHEET')
+    
+    # Check permissions
+    if not request.user.is_superuser:
+        if hasattr(request, 'profile') and request.profile:
+            if document.expense and document.expense.profile != request.profile:
+                messages.error(request, "You don't have permission to view this expense sheet.")
+                return redirect('expenses:expense_list')
+        elif document.created_by != request.user:
+            messages.error(request, "You don't have permission to view this expense sheet.")
+            return redirect('expenses:expense_list')
+    
+    return render(request, 'documents/expense_sheet_detail.html', {'document': document})
+
+@login_required
+def purchase_order_detail(request, pk):
+    """View for displaying a Purchase Order document"""
+    document = get_object_or_404(Document, pk=pk, document_type='PURCHASE_ORDER')
+    
+    # Check permissions
+    if not request.user.is_superuser:
+        if hasattr(request, 'profile') and request.profile:
+            if document.purchase and document.purchase.profile != request.profile:
+                messages.error(request, "You don't have permission to view this purchase order.")
+                return redirect('purchases:purchase_list')
+        elif document.created_by != request.user:
+            messages.error(request, "You don't have permission to view this purchase order.")
+            return redirect('purchases:purchase_list')
+    
+    return render(request, 'documents/purchase_order_detail.html', {'document': document})

@@ -1,0 +1,226 @@
+/* Advanced Dashboard Styles */
+:root {
+    --color-primary: #4a6cf7;
+    --color-secondary: #6a7adb;
+    --color-background: #f4f7ff;
+    --color-text-dark: #2c3e50;
+    --color-text-light: #6c757d;
+    --color-border: #e9ecef;
+    --color-white: #ffffff;
+    --color-hover: #3a55f0;
+    --transition-speed: 0.3s;
+    --border-radius: 12px;  /* Consistent border radius */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: var(--color-background);
+    color: var(--color-text-dark);
+    line-height: 1.6;
+}
+
+.dashboard-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Ultra-Compact Navbar Styles with Border Radius */
+.advanced-dashboard-navbar {
+    background-color: var(--color-white);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    position: sticky;
+    top: -10px;
+    z-index: 100;
+    padding-top: 5px;
+    border-bottom-left-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.navbar-grid {
+    display: grid;
+    grid-template-columns: 250px 1fr;  
+    align-items: center;
+    gap: 15px;  
+    max-width: 1600px;  
+    margin: 0 auto;
+    padding: 4px 20px;  
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;  
+    margin-top: -2px;
+}
+
+.logo-icon {
+    width: 26px;  
+    height: 26px;
+    stroke: var(--color-primary);
+    stroke-width: 1.5;
+    fill: none;
+    margin-top: -2px;
+}
+
+.logo-text {
+    font-size: 1.1rem;  
+    font-weight: 600;
+    color: var(--color-primary);
+    letter-spacing: -0.3px;
+    line-height: 1;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 15px;  
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    color: var(--color-text-light);
+    font-weight: 500;
+    padding: 6px 10px;  
+    border-radius: calc(var(--border-radius) * 0.75);  /* Slightly smaller radius */
+    transition: all var(--transition-speed) ease;
+    font-size: 0.9rem;
+}
+
+.nav-item i {
+    font-size: 0.9rem;
+}
+
+.nav-item.active, .nav-item:hover {
+    background-color: rgba(74, 108, 247, 0.1);
+    color: var(--color-primary);
+}
+
+.dashboard-content {
+    width: 100%;
+    max-width: 1800px;  /* Increased max-width */
+    margin: 0 auto;     /* Center the content */
+    padding: 20px;
+}
+
+.dashboard-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.dashboard-header h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-text-dark);
+    margin-bottom: 10px;
+}
+
+.header-actions {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    padding: 10px 15px;
+    border-radius: calc(var(--border-radius) * 0.75);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    transition: background-color var(--transition-speed) ease;
+    font-size: 0.9rem;
+}
+
+.btn-primary i {
+    font-size: 1rem;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-hover);
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);  /* 2 columns */
+    grid-template-rows: repeat(2, 1fr);     /* 2 rows */
+    gap: 30px;  /* Increased gap */
+    width: 100%;
+    height: calc(100vh - 100px);  /* Adjusted for navbar */
+}
+
+.widget {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    padding: 25px;  
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    border: none;
+}
+
+.widget:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
+}
+
+.widget-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.widget-header h3 {
+    margin-bottom: 0;
+    color: var(--color-text-primary);
+    font-size: 1.3rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    min-height: 300px;
+    height: 100%;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ensure charts are responsive within their grid cells */
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 300px;
+    border: none;
+    outline: none;
+    box-shadow: none;
+}

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load humanize %}
 
 {% block extra_css %}
 {{ block.super }}
@@ -40,24 +41,15 @@
         gap: 12px;
     }
 
-    .document-actions .action-button {
-        display: inline-flex;
+    .document-actions-stats {
+        display: flex;
+        gap: 12px;
         align-items: center;
-        gap: 8px;
-        padding: 8px 16px;
-        background-color: #f7fafc;
-        color: #2d3748;
-        text-decoration: none;
-        border-radius: 6px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        border: 1px solid #e2e8f0;
     }
 
-    .document-actions .action-button:hover {
-        background-color: #edf2f7;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    .document-actions-buttons {
+        display: flex;
+        gap: 12px;
     }
 
     .filters-bar {
@@ -430,6 +422,26 @@
         --text-color: #e0e0e0;
         --body-bg: #121212;
     }
+    
+    .document-actions .action-button {
+        display: inline-flex;
+        align-items: center;
+        background: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        color: currentColor;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .document-actions .action-button:hover {
+        color: #4299e1;
+    }
+
+    .document-actions .action-button i {
+        margin-right: 0.5rem;
+    }
 </style>
 {% endblock %}
 
@@ -438,23 +450,27 @@
     <div class="document-header">
         <h1><i class="fas fa-file-alt"></i> {{ title|default:"Documents" }}</h1>
         <div class="document-actions">
-            <button class="dark-mode-toggle">
-                <i class="fas fa-moon"></i>
-            </button>
-            {{ quote_count }} Quotes
-            {{ invoice_count }} Invoices
-            {{ expense_count }} Expenses
-            {{ purchase_count }} Purchases
-            <a href="{% url 'documents:quote_create' %}" class="action-button">
-                <i class="fas fa-plus"></i> New Quote
-            </a>
-            <a href="{% url 'expenses:expense_create' %}" class="action-button">
-                <i class="fas fa-plus"></i> New Expense
-            </a>
-            <a href="{% url 'products:purchase_create' %}" class="action-button">
-                <i class="fas fa-plus"></i> New Purchase
-            </a>
+            <div class="document-actions-stats">
+                {{ quote_count }} Quotes
+                {{ invoice_count }} Invoices
+                {{ expense_count }} Expenses
+                {{ purchase_count }} Purchases
+            </div>
+            <div class="document-actions-buttons">
+                <a href="{% url 'documents:quote_create' %}" class="action-button">
+                    <i class="fas fa-plus"></i> New Quote
+                </a>
+                <a href="{% url 'expenses:expense_create' %}" class="action-button">
+                    <i class="fas fa-plus"></i> New Expense
+                </a>
+                <a href="{% url 'products:purchase_create' %}" class="action-button">
+                    <i class="fas fa-plus"></i> New Purchase
+                </a>
+            </div>
         </div>
+        <button class="dark-mode-toggle">
+            <i class="fas fa-moon"></i>
+        </button>
     </div>
 
     <div class="filters-bar">
@@ -552,8 +568,8 @@
                 <td class="client-column">
                     <span class="client-name">{{ document.client.name }}</span>
                 </td>
-                <td>{{ document.document_date|date:"d M Y" }}</td>
-                <td>KES {{ document.total_amount|floatformat:2 }}</td>
+                <td>{{ document.document_date|date:"d M Y"|naturalday }}</td>
+                <td>KES {{ document.total_amount|intcomma }}</td>
                 <td>
                     <span class="status-badge status-{{ document.status|lower }}">
                         {{ document.get_status_display }}
